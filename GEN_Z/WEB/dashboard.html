@@ -1,0 +1,9 @@
+<!doctype html><html lang="th"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GEN_Z Sensor Dashboard</title><style>body{font:16px system-ui;background:#0c1322;color:#f1f5ff;padding:24px}h1{color:#8ef5df}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}.card{background:#18263b;padding:18px;border-radius:14px;border:1px solid #38506c}.value{font-size:28px;color:#8ef5df}pre{white-space:pre-wrap;background:#142036;padding:15px;border-radius:12px}</style><h1>⚡ GEN_Z Sensor Dashboard</h1><p>MQTT Topics: 68070131/# · Broker: phycom.it.kmitl.ac.th</p><p id="status">Connecting to local bridge...</p><div class="grid" id="grid"></div><h2>Messages</h2><pre id="log"></pre><script>
+const topics=['led','rgb','button','pir','pot','ldr','distance','tmp36','thermistor','dht','keypad','sevenseg','lcd','buzzer'];
+const grid=document.getElementById('grid'),log=document.getElementById('log');
+for(const name of topics){const card=document.createElement('div');card.className='card';card.innerHTML='<h3>'+name+'</h3><div class="value">--</div><small>68070131/'+name+'</small>';card.dataset.name=name;grid.append(card)}
+const es=new EventSource('/events');
+es.onopen=()=>document.getElementById('status').textContent='Connected to bridge';
+es.onerror=()=>document.getElementById('status').textContent='Bridge offline; start Node.js server';
+es.onmessage=e=>{const data=JSON.parse(e.data),name=data.topic.split('/').pop();const card=[...grid.children].find(c=>c.dataset.name===name);if(card)card.querySelector('.value').textContent=data.payload;log.textContent=data.topic+' = '+data.payload+'\n'+log.textContent.slice(0,5000)};
+</script></html>
