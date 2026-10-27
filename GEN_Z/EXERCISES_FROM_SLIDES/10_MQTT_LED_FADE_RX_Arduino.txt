@@ -4,7 +4,7 @@
 การต่อสาย: LED anode ผ่าน R → D9, cathode → GND
 WiFi SSID: EDOK | ตั้งรหัสใน WIFI_PASS ก่อนอัปโหลด
 MQTT Broker: phycom.it.kmitl.ac.th:1883
-MQTT Topic: 68070131/10_mqtt_led_fade_rx
+MQTT Topic: 68070131/09_mqtt_pot_tx
 แก้ขา: ตัวแปรส่วน LED PWM
 แก้ความถี่: INTERVAL (ms)
 Arduino UNO R4 WiFi; Serial Monitor 115200
@@ -18,15 +18,15 @@ Arduino UNO R4 WiFi; Serial Monitor 115200
 const char WIFI_SSID[]="EDOK"; // ชื่อ WiFi
 const char WIFI_PASS[]="YOUR_WIFI_PASSWORD"; // ใส่รหัสผ่านที่นี่ก่อน Upload
 const char MQTT_HOST[]="phycom.it.kmitl.ac.th"; // Broker
-const char MQTT_TOPIC[]="68070131/10_mqtt_led_fade_rx"; // Topic เฉพาะข้อนี้
+const char MQTT_TOPIC[]="68070131/09_mqtt_pot_tx"; // Topic เฉพาะข้อนี้
 WiFiClient net;
 MQTTClient mqtt(256);
 const int LED=9;
-const unsigned long INTERVAL=3000UL; // ช่วงเวลาการทำงาน
-unsigned long lastRead=0,lastRetry=0;
+// รับค่าทุกครั้งที่ MQTT ส่งเข้ามา ไม่ต้องตั้ง INTERVAL
+unsigned long lastRetry=0;
 void onMessage(String &topic,String &payload){
   // ข้อมูลมาจากเว็บผ่าน MQTT Subscribe
-  analogWrite(LED,map(constrain(payload.toInt(),0,1023),0,1023,0,255));
+  analogWrite(LED,map(constrain(payload.toInt(),0,1023),0,1023,0,255)); // ค่า 0-1023 เป็น PWM 0-255
 }
 void setup(){
  Serial.begin(115200);
@@ -49,11 +49,5 @@ void loop(){
   return;
  }
  mqtt.loop();
- if(millis()-lastRead<INTERVAL)return;
- lastRead=millis();
- // ส่วนการอ่าน Sensor / การแสดงผล แก้ได้ตรงนี้
- String payload=String(analogRead(A0));
- Serial.println(payload);
- // ตัวรับยัง Publish สถานะ READY/ค่าตรวจสอบเพื่อให้หน้าเว็บเห็นข้อมูล
- mqtt.publish(MQTT_TOPIC,payload);
+ // ตัวรับไม่ Publish กลับไป Topic เดิม เพื่อไม่ให้เกิด MQTT loop
 }
