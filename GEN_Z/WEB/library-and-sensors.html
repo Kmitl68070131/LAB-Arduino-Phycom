@@ -1,0 +1,147 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Library, สูตรเซนเซอร์ และ MQTT | Arduino PHYCOM</title><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet"><style>:root{color-scheme:light}*{box-sizing:border-box}body{font:14px/1.8 Prompt,system-ui;margin:0;background:#f8f9fa;color:#25313a}header{background:white;border-bottom:1px solid #e4e7ea;padding:18px max(20px,calc((100vw - 1120px)/2));display:flex;justify-content:space-between;gap:20px}a{color:#17665d}main{max-width:1120px;padding:38px 20px 90px;margin:auto}h1{font-size:clamp(27px,4vw,40px);margin:0 0 8px}h2{font-size:22px;margin:0 0 16px}h3{font-size:17px;margin:0 0 10px}.muted{color:#687580}.nav{display:flex;flex-wrap:wrap;gap:8px;margin:25px 0}.nav a{padding:8px 13px;background:white;border:1px solid #e1e5e7;border-radius:7px;text-decoration:none}.section{margin:30px 0 0;background:white;border:1px solid #e5e8ea;border-radius:12px;padding:26px}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:11px 10px;text-align:left;border-bottom:1px solid #e8ebed;vertical-align:top}th{color:#6c7a83}pre{background:#f3f5f6;color:#1d3038;border:1px solid #e1e6e8;padding:17px;white-space:pre;overflow:auto;border-radius:8px;font:12px/1.65 Consolas,monospace}code{background:#f1f4f4;padding:2px 5px;border-radius:4px}pre code{background:none;padding:0}.example{padding:22px 0;border-top:1px solid #e7eaec}.example:first-of-type{border:0}.hint{border-left:3px solid #4b9488;padding:12px 16px;background:#f3f8f6;color:#425c57}.steps{padding-left:24px}.steps li{margin:9px 0}button.copy{float:right;background:white;border:1px solid #c9d5d2;color:#17665d;border-radius:6px;padding:6px 12px;cursor:pointer;font:12px Prompt}small{color:#6c7981}@media(max-width:650px){.section{padding:17px}header{display:block}td,th{padding:8px 5px}}</style></head><body><header><b>PHYCOM / Arduino Handbook</b><a href="../../index.html">← กลับคู่มือหลัก</a></header><main><p class="muted">ARDUINO UNO R4 WIFI · SENSOR REFERENCE</p><h1>Library, สูตรคำนวณ และการส่งข้อมูลขึ้นเว็บ</h1><p class="muted">รวมไลบรารีที่ใช้บ่อย สูตรคำนวณของเซนเซอร์ ตัวอย่างโค้ดที่คัดลอกได้ และวิธีส่งข้อมูล MQTT ขึ้นเว็บไซต์ แยกตามหัวข้อ</p><nav class="nav"><a href="#library">Library</a><a href="#formula">สูตรเซนเซอร์</a><a href="#examples">ตัวอย่างโค้ด</a><a href="#mqtt">MQTT Website</a><a href="example-gallery.html">รูปแบบฝึกหัด</a><a href="exercises.html">หน้า MQTT</a></nav>
+<section class="section" id="library"><h2>01 / Arduino Libraries</h2><p class="muted">รายการนี้ครอบคลุมอุปกรณ์ที่ใช้ในบทเรียน ไม่จำเป็นต้องติดตั้งทุกไลบรารีในทุกโปรเจกต์</p><table><thead><tr><th>Library</th><th>ใช้ทำอะไร</th><th>ตัวอย่างคำสั่ง</th><th>การติดตั้ง</th></tr></thead><tbody>
+<tr><td><b>WiFiS3</b></td><td>เชื่อม Wi-Fi ของ UNO R4 WiFi</td><td><code>WiFi.begin(ssid,pass)</code></td><td>มากับ Arduino UNO R4 Boards</td></tr>
+<tr><td><b>MQTTClient (256dpi)</b></td><td>Publish / Subscribe MQTT TCP</td><td><code>mqtt.publish(topic,msg)</code></td><td>Library Manager → MQTT</td></tr>
+<tr><td><b>PubSubClient</b></td><td>MQTT ทางเลือก ใช้แทน MQTTClient ไม่ใช่ใช้พร้อมกัน</td><td><code>client.subscribe(topic)</code></td><td>Library Manager → PubSubClient</td></tr>
+<tr><td><b>ArduinoMqttClient</b></td><td>MQTT ทางเลือกจาก Arduino</td><td><code>mqttClient.beginMessage(topic)</code></td><td>Library Manager</td></tr>
+<tr><td><b>Wire</b></td><td>สื่อสาร I2C กับ LCD และเซนเซอร์</td><td><code>Wire.begin()</code></td><td>มากับ Arduino Core</td></tr>
+<tr><td><b>LiquidCrystal_I2C</b></td><td>จอ LCD 16×2 แบบ I2C</td><td><code>lcd.setCursor(0,0)</code></td><td>Library Manager; API อาจต่างตามผู้พัฒนา</td></tr>
+<tr><td><b>LiquidCrystal</b></td><td>LCD แบบขนาน ไม่ใช่ I2C</td><td><code>lcd.print("Hello")</code></td><td>Library Manager</td></tr>
+<tr><td><b>DHT sensor library + Adafruit Unified Sensor</b></td><td>อ่าน DHT11 / DHT22 อุณหภูมิและความชื้น</td><td><code>dht.readTemperature()</code></td><td>Library Manager ทั้งสองรายการ</td></tr>
+<tr><td><b>Keypad</b></td><td>อ่านปุ่ม Keypad แบบเมทริกซ์</td><td><code>keypad.getKey()</code></td><td>Library Manager; หรือสแกนแถว/คอลัมน์เอง</td></tr>
+<tr><td><b>Arduino_LED_Matrix</b></td><td>จอ LED Matrix ในตัว UNO R4 WiFi</td><td><code>matrix.begin()</code></td><td>Arduino UNO R4 Boards</td></tr>
+<tr><td><b>Servo</b></td><td>ควบคุม Servo</td><td><code>servo.write(90)</code></td><td>Library Manager</td></tr>
+<tr><td><b>ไม่มี Library เพิ่ม</b></td><td>TMP36, Thermistor, LDR, Potentiometer, HC-SR04, PIR, RGB, 7-Segment แบบตรง</td><td><code>analogRead()</code>, <code>pulseIn()</code>, <code>digitalWrite()</code></td><td>ใช้ Arduino Core</td></tr>
+</tbody></table><p class="hint">ใน Arduino IDE เลือก Tools → Board → Arduino UNO R4 WiFi แล้วเปิด Sketch → Include Library → Manage Libraries เพื่อค้นหาชื่อไลบรารี</p></section>
+<section class="section" id="formula"><h2>02 / สูตรคำนวณแยกตาม Sensor</h2>
+<div class="example"><h3>TMP36 — อุณหภูมิ °C</h3><p>ใช้ Analog Output: <b>V = ADC × Vref / (2ⁿ − 1)</b> และ <b>°C = (V − 0.5) × 100</b> โดย TMP36 มี Offset 500 mV และ 10 mV/°C</p><pre><code>analogReadResolution(12); // UNO R4: ADC 0–4095
+int raw = analogRead(A3);
+float voltage = raw * 5.0 / 4095.0; // 5.0 คือ Vref ที่ต้องตรวจวัดจริง
+float celsius = (voltage - 0.5) * 100.0;
+Serial.println(celsius, 2);</code></pre><small>ตรวจการจ่ายไฟ, Vref, และ Pinout ของ TMP36 ก่อนใช้งาน; ค่าจริงขึ้นกับการคาลิเบรต</small></div>
+<div class="example"><h3>LM35 — อุณหภูมิ °C</h3><p>LM35 มีอัตรา 10 mV/°C โดยไม่มี Offset 500 mV แบบ TMP36: <b>°C = V × 100</b></p><pre><code>analogReadResolution(12);
+float voltage = analogRead(A0) * 5.0 / 4095.0;
+float celsius = voltage * 100.0;</code></pre></div>
+<div class="example"><h3>NTC Thermistor — อุณหภูมิ °C</h3><p>ใช้ตัวต้านทานคงที่กับ NTC เป็น Voltage Divider จากนั้นใช้สมการ Beta: <b>1/T = 1/T₀ + ln(R/R₀)/β</b> (T เป็น Kelvin)</p><pre><code>#include &lt;math.h&gt;
+analogReadResolution(12);
+int adc = analogRead(A0);
+if (adc &gt; 0 &amp;&amp; adc &lt; 4095) {
+  // ต่อ NTC ไป 5V และ R_FIXED ลง GND; วัดตรงจุดกลาง
+  const float R_FIXED = 10000.0;
+  float rNtc = R_FIXED * (4095.0 / adc - 1.0);
+  float kelvin = 1.0 / (1.0/298.15 + log(rNtc/10000.0)/3950.0);
+  float celsius = kelvin - 273.15;
+}</code></pre><small>ตัวอย่างนี้ใช้ NTC 10kΩ ที่ 25°C, β=3950 และตัวต้านทานคงที่ 10kΩ ต้องแก้ตาม datasheet และตำแหน่งการต่อวงจรจริง</small></div>
+<div class="example"><h3>DHT11 / DHT22 — อุณหภูมิและความชื้น</h3><p>เซนเซอร์ส่งค่าที่คำนวณภายในมาแล้ว ไม่ต้องแปลงแรงดัน Analog</p><pre><code>#include &lt;DHT.h&gt;
+DHT dht(2, DHT22); // เปลี่ยน DHT22 เป็น DHT11 ตามรุ่น
+void setup() { Serial.begin(115200); dht.begin(); }
+void loop() {
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
+  if (!isnan(t) &amp;&amp; !isnan(h)) {
+    Serial.print(t); Serial.print(" C / ");
+    Serial.print(h); Serial.println(" %RH");
+  }
+  delay(2000);
+}</code></pre></div>
+<div class="example"><h3>HC-SR04 — ระยะทาง</h3><p><b>ระยะทาง (cm) = เวลา Echo (µs) × 0.0343 / 2</b> โดย 0.0343 cm/µs เป็นความเร็วเสียงประมาณที่ 20°C</p><pre><code>const int TRIG=2, ECHO=3;
+void setup(){ pinMode(TRIG,OUTPUT); pinMode(ECHO,INPUT); }
+void loop(){
+ digitalWrite(TRIG,LOW); delayMicroseconds(2);
+ digitalWrite(TRIG,HIGH); delayMicroseconds(10);
+ digitalWrite(TRIG,LOW);
+ unsigned long us=pulseIn(ECHO,HIGH,30000UL);
+ if(us) {
+   float cm=us*0.0343/2.0;
+   // ถ้ามีอุณหภูมิจริง t °C:
+   // cm = us * ((331.3 + 0.606*t)/10000.0) / 2.0;
+ }
+ delay(200);
+}</code></pre></div>
+<div class="example"><h3>Potentiometer / LDR — ระดับ Analog</h3><p>แปลง ADC เป็นเปอร์เซ็นต์หรือ PWM: <b>% = ADC × 100 / 4095</b> และ <b>PWM = ADC × 255 / 4095</b> (เมื่อ ADC 12 บิต)</p><pre><code>analogReadResolution(12);
+int raw=analogRead(A0);
+float percent=raw*100.0/4095.0;
+int pwm=map(raw,0,4095,0,255);
+analogWriteResolution(8);
+analogWrite(9,pwm); // LED ผ่าน R 220–330Ω</code></pre><small>LDR ไม่ได้วัดอุณหภูมิ; การแปลงเป็น Lux ต้องรู้วงจรแบ่งแรงดันและคาลิเบรตเซนเซอร์</small></div>
+<div class="example"><h3>PIR / Keypad / RGB / 7-Segment</h3><p>อุปกรณ์กลุ่มนี้ไม่ใช่เซนเซอร์วัดอุณหภูมิ ใช้ <code>digitalRead()</code>, <code>digitalWrite()</code> หรือ <code>analogWrite()</code> เพื่ออ่านสถานะหรือควบคุมการแสดงผล</p></div>
+</section>
+<section class="section" id="examples"><h2>03 / ตัวอย่างคำสั่งที่ใช้บ่อย</h2><table><thead><tr><th>คำสั่ง</th><th>ใช้ทำอะไร</th></tr></thead><tbody><tr><td><code>pinMode(2, INPUT_PULLUP)</code></td><td>ตั้งปุ่มกดใช้ตัวต้านทาน Pull-up ภายใน</td></tr><tr><td><code>digitalRead(2)</code></td><td>อ่านสถานะ HIGH / LOW</td></tr><tr><td><code>analogRead(A0)</code></td><td>อ่านค่า Analog</td></tr><tr><td><code>analogWrite(9,128)</code></td><td>สร้าง PWM ความสว่างประมาณครึ่งหนึ่งเมื่อใช้ 8 บิต</td></tr><tr><td><code>pulseIn(3,HIGH,30000)</code></td><td>วัดเวลาพัลส์ Echo พร้อม Timeout</td></tr><tr><td><code>lcd.setCursor(0,1)</code></td><td>ย้ายเคอร์เซอร์ไปต้นแถวที่สอง</td></tr><tr><td><code>mqtt.publish(topic,msg)</code></td><td>ส่งข้อมูลไปยัง MQTT Broker</td></tr><tr><td><code>mqtt.subscribe(topic)</code></td><td>สมัครรับข้อมูลจาก MQTT Broker</td></tr><tr><td><code>mqtt.loop()</code></td><td>ประมวลผลข้อความ MQTT และรักษาการเชื่อมต่อ</td></tr></tbody></table><p><a href="example-gallery.html">ดูโค้ดแบบฝึกหัด 12 ข้อและรูปวงจรเพิ่มเติม →</a></p></section>
+<section class="section" id="mqtt"><h2>04 / วิธีส่งข้อมูล Arduino ขึ้นเว็บไซต์ผ่าน MQTT</h2><ol class="steps"><li>ต่อเซนเซอร์กับ Arduino UNO R4 WiFi และติดตั้ง WiFiS3 / MQTTClient</li><li>กำหนด Wi-Fi และ Broker <code>phycom.it.kmitl.ac.th:1883</code> ในโค้ด Arduino</li><li>Publish ค่าไปที่ Topic เช่น <code>68070131/tmp36</code></li><li>ฝั่งเว็บต้อง Subscribe Topic เดียวกันผ่าน MQTT WebSocket หรือ Node.js Bridge</li><li>เปิดหน้า <a href="exercises.html">MQTT Exercises</a> เพื่อทดสอบการรับส่งข้อมูล (ต้องมี Bridge ที่เชื่อมต่อได้)</li></ol><p class="hint">GitHub Pages เป็น Static Hosting: JavaScript บนเบราว์เซอร์เชื่อม TCP MQTT พอร์ต 1883 โดยตรงไม่ได้ ต้องมี WebSocket Endpoint หรือ Backend Bridge ที่ใช้งานจริง และควรจำกัดสิทธิ์การ Publish หากเปิดให้สาธารณะ</p>
+<h3>Arduino: ส่งอุณหภูมิ TMP36 ทุก 2 วินาที</h3><p>คัดลอก Sketch นี้ไป Arduino IDE และเปลี่ยนรหัส Wi-Fi ในเครื่องของคุณ ไม่ควรเผยแพร่รหัสผ่านจริงใน Repository สาธารณะ</p><button class="copy" data-copy="arduino">คัดลอกโค้ด</button><pre id="arduino"><code>#include &lt;WiFiS3.h&gt;
+#include &lt;MQTTClient.h&gt;
+
+const char WIFI_SSID[] = "EDOK";
+const char WIFI_PASS[] = "PUT_WIFI_PASSWORD_HERE";
+const char BROKER[] = "phycom.it.kmitl.ac.th";
+const char TOPIC[] = "68070131/tmp36";
+WiFiClient network;
+MQTTClient mqtt(256);
+unsigned long lastRead = 0;
+unsigned long lastReconnect = 0;
+byte mac[6];
+
+void setup() {
+  Serial.begin(115200);
+  analogReadResolution(12);
+  WiFi.macAddress(mac);
+  mqtt.begin(BROKER, 1883, network);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+}
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    if (millis()-lastReconnect &gt; 10000UL) {
+      lastReconnect=millis();
+      WiFi.begin(WIFI_SSID,WIFI_PASS);
+    }
+    return;
+  }
+  if (!mqtt.connected()) {
+    if (millis()-lastReconnect &gt; 5000UL) {
+      lastReconnect=millis();
+      String id="R4-TMP-"+String(mac[4],HEX)+String(mac[5],HEX);
+      mqtt.connect(id.c_str());
+    }
+    return;
+  }
+  mqtt.loop();
+  if (millis()-lastRead &gt;= 2000UL) {
+    lastRead=millis();
+    float voltage=analogRead(A3)*5.0/4095.0;
+    float celsius=(voltage-0.5)*100.0;
+    String message=String(celsius,2);
+    mqtt.publish(TOPIC,message);
+    Serial.println(message);
+  }
+}</code></pre>
+<h3>Node.js Bridge: ส่ง MQTT ไปหน้าเว็บผ่าน Server-Sent Events</h3><p>ติดตั้ง <code>npm install express mqtt</code> และใช้ Node.js ฝั่งเซิร์ฟเวอร์ที่เชื่อม Broker ได้ (ไม่ใช่ GitHub Pages)</p><button class="copy" data-copy="node">คัดลอกโค้ด</button><pre id="node"><code>const express = require('express');
+const mqtt = require('mqtt');
+const app = express();
+const client = mqtt.connect('mqtt://phycom.it.kmitl.ac.th:1883');
+const viewers = new Set();
+app.use(express.static(__dirname));
+app.get('/events', (req, res) =&gt; {
+  res.setHeader('Content-Type','text/event-stream');
+  res.setHeader('Cache-Control','no-cache');
+  res.flushHeaders();
+  viewers.add(res);
+  req.on('close', () =&gt; viewers.delete(res));
+});
+client.on('connect', () =&gt; client.subscribe('68070131/#'));
+client.on('message', (topic, value) =&gt; {
+  const data = 'data: '+JSON.stringify({topic,value:value.toString()})+'\n\n';
+  for (const res of viewers) res.write(data);
+});
+app.listen(3000, () =&gt; console.log('http://localhost:3000'));</code></pre>
+<h3>JavaScript ฝั่งเว็บ: แสดงค่าเซนเซอร์</h3><button class="copy" data-copy="browser">คัดลอกโค้ด</button><pre id="browser"><code>&lt;div id="temperature"&gt;รอข้อมูล...&lt;/div&gt;
+&lt;script&gt;
+const events = new EventSource('/events');
+events.onmessage = (event) =&gt; {
+  const msg = JSON.parse(event.data);
+  if (msg.topic === '68070131/tmp36') {
+    document.getElementById('temperature').textContent =
+      msg.value + ' °C';
+  }
+};
+&lt;/script&gt;</code></pre><p><small>เปิด HTML ผ่าน Node.js Bridge ที่รันอยู่ ไม่ใช่เปิดไฟล์ HTML ตรง ๆ หรือใช้ GitHub Pages โดยไม่มี Backend</small></p>
+</section></main><script>document.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.copy;const value=document.querySelector('#'+id+' code').textContent;navigator.clipboard.writeText(value).then(()=>{b.textContent='คัดลอกแล้ว';setTimeout(()=>b.textContent='คัดลอกโค้ด',1800)})}))</script></body></html>
