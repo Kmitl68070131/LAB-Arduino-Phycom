@@ -28,3 +28,11 @@
 [เปิดคู่มือแบบเลือกแท็บ](../index.html) · [ไฟล์ LAB เดิม](../Phycom%20lab%20EXAM/)
 
 หมายเหตุ: การเชื่อมต่อจากเว็บเบราว์เซอร์ต้องใช้ MQTT over WebSocket หรือ Bridge ที่รันบน Server เพราะ MQTT TCP 1883 ไม่สามารถต่อจาก JavaScript ในเบราว์เซอร์โดยตรงได้
+
+
+## 🖼️ ดูรูปและเปิดเว็บตัวอย่าง
+- [เว็บคู่มือหลัก](https://kmitl68070131.github.io/LAB-Arduino-Phycom/)
+- [แกลเลอรีพร้อมรูปอุปกรณ์ทั้ง 12 ข้อ](https://kmitl68070131.github.io/LAB-Arduino-Phycom/GEN_Z/WEB/example-gallery.html)
+- [เว็บ MQTT Exercises](https://kmitl68070131.github.io/LAB-Arduino-Phycom/GEN_Z/WEB/exercises.html)
+
+**หมายเหตุ:** ลิงก์ GitHub ที่ลงท้าย `.html` จะเปิดไฟล์โค้ด ไม่ใช่เว็บไซต์ ต้องเปิดผ่าน `github.io` ตามลิงก์ด้านบน
