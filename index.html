@@ -1,0 +1,108 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Arduino Phycom • Interactive Handbook</title><meta name="description" content="คู่มือ Arduino UNO R4 WiFi พร้อมเซนเซอร์ คำสั่ง การต่อสาย โค้ด และเอกสาร LAB"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"><style>:root{color-scheme:dark;--bg:#0b1020;--panel:#131d32;--line:#2b3c54;--text:#e7effd;--muted:#a6b4cf;--acc:#6ee7db}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 90% 5%,#18344b 0%,transparent 36%),var(--bg);color:var(--text);font-family:Prompt,system-ui}a{color:var(--acc)}header{padding:42px max(22px,calc((100vw - 1200px)/2));border-bottom:1px solid var(--line)}header h1{font-size:clamp(30px,4vw,52px);letter-spacing:-1px;margin:8px 0}header p{max-width:750px;color:var(--muted)}.tag{color:var(--acc);font-weight:600;letter-spacing:1px}.shell{max-width:1240px;margin:auto;display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;padding:26px 20px}.side{position:sticky;top:16px;height:calc(100vh - 32px);overflow:auto;background:#10192b;border:1px solid var(--line);border-radius:20px;padding:16px}.side h2{margin:4px 8px 12px;font-size:18px}.search{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1425;color:white;font:inherit}.nav{display:grid;gap:5px;margin-top:14px}.nav button{border:0;border-radius:11px;padding:11px 12px;background:transparent;color:var(--muted);text-align:left;font:inherit;cursor:pointer}.nav button:hover,.nav button.on{background:#1d3549;color:var(--acc)}.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.pill{border:1px solid #35576b;border-radius:50px;padding:5px 11px;color:var(--acc);font-size:12px}.main{min-width:0}.hero,.module,.index-card{background:linear-gradient(150deg,#17233b,#10192b);border:1px solid var(--line);border-radius:20px}.hero{padding:26px;margin-bottom:23px}.hero h2{margin:0 0 6px;font-size:27px}.hero p{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}.index-card{text-align:left;padding:16px;color:var(--text);font:inherit;cursor:pointer;transition:.2s}.index-card:hover{border-color:var(--acc);transform:translateY(-3px)}.index-card strong{display:block;margin-top:9px}.index-card small{display:block;color:var(--muted);margin-top:7px}.index-card .emoji{font-size:28px}.module{padding:25px;display:none}.module.show{display:block}.module h2{font-size:29px;margin:5px 0}.module h3{font-size:17px;margin:26px 0 11px}.sub{color:var(--muted)}.info{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px}.photo{display:block;width:100%;aspect-ratio:4/3;object-fit:contain;background:#f6f8fa;border-radius:14px;padding:8px}.wire{border:1px solid var(--line);border-radius:12px;overflow:hidden}.wire div{padding:10px 12px;border-bottom:1px solid var(--line);color:#cbd7e9}.wire div:last-child{border:0}pre{background:#080f1b;border:1px solid #33435a;border-radius:13px;padding:17px;overflow:auto;font:13px/1.7 'IBM Plex Mono',monospace;color:#b5eade;white-space:pre}button.copy{background:#173d48;color:#95f8e8;border:1px solid #327b80;border-radius:10px;padding:8px 12px;cursor:pointer;font:inherit}.note{border-left:3px solid var(--acc);padding:12px 15px;background:#182e40;border-radius:0 12px 12px 0;color:#c9dcec}.sources{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.sources a{border:1px solid var(--line);background:#1c2d45;border-radius:10px;padding:10px 12px;text-decoration:none;font-size:13px}.home{display:block}.hide{display:none}.foot{color:var(--muted);margin:20px 0;padding:8px}#openmenu{display:none}@media(max-width:760px){.shell{display:block;padding:16px}.side{position:static;height:auto;margin-bottom:15px}#openmenu{display:inline-block}.nav{max-height:180px;overflow:auto}.info{grid-template-columns:1fr}.photo{max-width:310px}.module{padding:18px}}</style></head><body><header><div class="tag">IT KMITL • PHYSICAL COMPUTING LAB</div><h1>Arduino <span style="color:var(--acc)">Phycom Handbook</span></h1><p>เรียนรู้คำสั่ง Arduino เซนเซอร์ วงจร และการสื่อสาร MQTT ผ่านคู่มือแบบเลือกหัวข้อได้ พร้อมลิงก์ไปยังโค้ด LAB จริงของ Repository</p></header><div class="shell"><aside class="side"><h2>📚 เลือกหัวข้อ</h2><input id="search" class="search" placeholder="ค้นหา Sensor / คำสั่ง..." aria-label="ค้นหาหัวข้อ"><nav class="nav" id="nav"><button data-id="home" class="on">🏠 ภาพรวมหัวข้อทั้งหมด</button></nav><p style="padding:9px;color:var(--muted);font-size:12px">คลิกหัวข้อเพื่อดูวิธีต่อสายและตัวอย่างโค้ด</p></aside><main class="main"><section class="home" id="home"><div class="hero"><div class="top"><h2>เลือกเรียนตามอุปกรณ์</h2><span class="pill">14 หัวข้อ</span></div><p>ทุกหัวข้อแยกอิสระ • มีแนวทางใช้งานและตัวอย่างคำสั่ง • คลิกดูไฟล์ LAB ต้นฉบับได้</p></div><div class="grid" id="cards"></div></section><section class="module" id="detail"><div class="top"><span class="pill" id="kind">SENSOR</span><button class="copy" id="back">← กลับไปหัวข้อทั้งหมด</button></div><h2 id="title"></h2><p class="sub" id="desc"></p><div class="info"><div><h3>🔌 การต่อสาย / เตรียมอุปกรณ์</h3><div class="wire" id="wires"></div><h3>🧭 วิธีการใช้งาน</h3><p id="how" class="sub"></p></div><div><img id="photo" class="photo" alt="ภาพประกอบอุปกรณ์" loading="lazy"><small style="color:var(--muted)">ภาพอุปกรณ์จาก Wikimedia Commons / ไม่รับประกันตำแหน่งขาเหมือนรุ่นที่ใช้</small></div></div><h3>⌨️ คำสั่งหลัก</h3><pre id="command"></pre><h3>🧪 ตัวอย่างโค้ดใช้งาน</h3><div class="top"><span class="sub">คัดลอกเฉพาะตัวอย่างหัวข้อนี้</span><button class="copy" id="copy">คัดลอกโค้ด</button></div><pre id="snippet"></pre><div class="note">ตัวอย่างแต่ละหัวข้ออาจเป็นเพียงโค้ดส่วนหนึ่ง หากต้องการนำไปรวมใน Sketch เดียว ให้มี setup() และ loop() อย่างละหนึ่งชุด ตรวจการต่อสาย, แรงดัน, ประเภทอุปกรณ์ และไลบรารีก่อนอัปโหลด</div><h3>📂 เอกสารและโค้ดต้นฉบับ</h3><div class="sources" id="sources"></div></section><p class="foot">เอกสารเพื่อการศึกษา • Arduino UNO R4 WiFi • เก็บไฟล์ LAB เดิมไว้ครบถ้วน</p></main></div><script>
+const root='https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/Phycom%20lab%20EXAM/';
+const entries=[["basics","พื้นฐาน Arduino","คำสั่ง setup(), loop(), GPIO, Serial และการจับเวลา","📘","9","Arduino UNO R4 WiFi development board","pinMode(9, OUTPUT);","ตั้งค่าขาและเริ่มอ่าน Serial",["D13 LED built-in","Serial USB"],"digitalWrite(9, HIGH);"],["lcd","LCD I2C 16×2","แสดงข้อความ เซนเซอร์ และสถานะ MQTT บนจอ","🖥️","7","LCD 1602 I2C blue display module","LiquidCrystal_I2C lcd(0x27,16,2);","เริ่ม LCD และอัปเดตข้อความโดยไม่ทำให้จอกะพริบ",["SDA → SDA","SCL → SCL","VCC → 5V","GND → GND"],"lcd.setCursor(0,0); lcd.print(\"Hello\");"],["keypad","Keypad 4×4","อ่านปุ่มเมทริกซ์โดยไม่ใช้ Keypad.h","⌨️","6","4x4 matrix membrane keypad","digitalRead(COL_PINS[col]);","สแกน Row ทีละแถวและตรวจปุ่มผ่าน Column",["R1–R4 → D9,D8,D7,D6","C1–C4 → D5,D4,D3,D2"],"pinMode(COL_PINS[col], INPUT_PULLUP);"],["ultrasonic","Ultrasonic HC-SR04","วัดระยะทางด้วยคลื่นเสียงสะท้อน","📏","5","HC-SR04 ultrasonic distance sensor","pulseIn(ECHO,HIGH,30000UL);","กระตุ้น TRIG 10 µs แล้ววัดช่วง ECHO",["TRIG → D2","ECHO → D3","VCC → 5V","GND → GND"],"float cm = duration*0.0343/2;"],["tmp36","TMP36","วัดอุณหภูมิด้วยแรงดันแอนะล็อก","🌡️","4","TMP36 temperature sensor TO92","analogRead(A3);","แปลงแรงดันเป็นอุณหภูมิองศาเซลเซียส",["Vout → A3","Vs → 5V","GND → GND","ตรวจขาจาก datasheet ก่อนต่อ"],"float c=(voltage-0.5)*100;"],["thermistor","Thermistor NTC","คำนวณอุณหภูมิจากความต้านทานที่เปลี่ยนไป","🔥","3","NTC 10K thermistor bead sensor","log(rNtc / R0);","ใช้ Voltage Divider และสมการ Beta",["5V → R_FIXED → A3 → NTC → GND"],"float r=10000.0*adc/(4095-adc);"],["potentiometer","Potentiometer","อ่านการหมุนเป็นค่า 0–1023 หรือ 0–4095","🎛️","5","rotary potentiometer 10k electronics","analogRead(A0);","ต่อขากลางกับ A0 และเลือกความละเอียด ADC",["ขากลาง → A0","ขานอก → 5V/GND"],"analogReadResolution(10);"],["rgb","RGB LED","ผสมสีและควบคุม Common Anode / Cathode","🌈","4","RGB LED four pin diode electronics","digitalWrite(R_PIN, LOW);","แยกควบคุมขาสีและใช้ตัวต้านทานทุกขา",["R → D9","G → D10","B → D11","COM → 5V เมื่อเป็น Common Anode"],"digitalWrite(G_PIN, HIGH);"],["segment","7-Segment","แสดงตัวเลข 0–9 ด้วย Segment A–G","🔢","4","one digit seven segment red led display","digitalWrite(SEG[i], DIGITS[n][i]);","กำหนดตาราง A–G และตรวจ Common Anode/Cathode",["A–G → D2–D8 ผ่าน R","COM → 5V หรือ GND ตามชนิด"],"const byte DIGITS[10][7] = {/* ... */};"],["button","Button / PIR","อ่านปุ่มและเซนเซอร์ตรวจจับการเคลื่อนไหว","🔘","3","Arduino tactile push button breadboard","pinMode(4,INPUT_PULLUP);","ปุ่มต่อกับ GND จะให้ LOW ตอนกด",["Button → D4 และ GND","PIR OUT → D2"],"bool pressed=digitalRead(4)==LOW;"],["wifi","Wi-Fi WiFiS3","เชื่อม Arduino UNO R4 WiFi กับเครือข่าย","📶","3","Arduino UNO R4 WiFi board","WiFi.begin(ssid,pass);","เริ่มเชื่อมต่อและตรวจ WL_CONNECTED",["ใช้ Wi-Fi 2.4 GHz"],"WiFi.status()==WL_CONNECTED"],["mqtt","MQTT Publish / Subscribe","ส่งและรับค่าระหว่าง Arduino กับเว็บ","☁️","3","MQTT publish subscribe IoT diagram","mqtt.publish(topic,payload);","ใช้ WiFiS3 + MQTTClient ต่อ Broker และ Subscribe",["Broker phycom.it.kmitl.ac.th","TCP 1883"],"mqtt.subscribe(\"68070131/venus\");"],["dht","DHT11 / DHT22","อ่านอุณหภูมิและความชื้นสัมพัทธ์","💧","3","DHT11 blue temperature humidity sensor module","dht.readHumidity();","เรียก DHT library เพื่ออ่านความชื้นและอุณหภูมิ",["DATA → D2","VCC/GND ตามสเปกโมดูล"],"float t=dht.readTemperature();"],["ldr","LDR Light Sensor","วัดแสงจากวงจรแบ่งแรงดัน","☀️","3","LDR photoresistor light sensor","analogRead(A0);","ต่อ LDR กับตัวต้านทานเพื่ออ่านแรงดัน",["5V → LDR → A0 → R → GND"],"int light=analogRead(A0);"]];
+const files={basics:['Arduino_UNO_R4_Physical_Computing_Cheatsheet_TH.txt'],lcd:['Arduino_UNO_R4_Physical_Computing_Cheatsheet_TH.txt'],keypad:['keypad go to web.txt'],ultrasonic:['Ultrasonic.txt','Ultrasonic + button.txt'],tmp36:['TMP.txt'],thermistor:['thermistor.txt'],potentiometer:['potentiometer.txt'],rgb:['RGB.txt'],segment:['7-seg.txt'],button:['Ultrasonic + button.txt'],wifi:['ALL.txt'],mqtt:['ALL.txt'],dht:['Arduino_UNO_R4_Physical_Computing_Cheatsheet_TH.txt'],ldr:['Arduino_UNO_R4_Physical_Computing_Cheatsheet_TH.txt']};
+const snippets={
+basics:`const int LED_PIN=13;
+void setup(){ Serial.begin(9600); pinMode(LED_PIN,OUTPUT); }
+void loop(){ digitalWrite(LED_PIN,HIGH); delay(500); digitalWrite(LED_PIN,LOW); delay(500); }`,
+lcd:`#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27,16,2);
+void setup(){ Wire.begin(); lcd.init(); lcd.backlight(); lcd.setCursor(0,0); lcd.print("Hello!"); }
+void loop(){}`,
+keypad:`const byte R[4]={9,8,7,6},C[4]={5,4,3,2};
+const char K[4][4]={{'1','2','3','A'},{'4','5','6','B'},{'7','8','9','C'},{'*','0','#','D'}};
+char scan(){
+  for(int r=0;r<4;r++) {
+    digitalWrite(R[r],LOW); delayMicroseconds(10);
+    for(int c=0;c<4;c++) if(digitalRead(C[c])==LOW){ digitalWrite(R[r],HIGH); return K[r][c]; }
+    digitalWrite(R[r],HIGH);
+  }
+  return 0;
+}
+void setup(){
+  Serial.begin(9600);
+  for(int r=0;r<4;r++){ pinMode(R[r],OUTPUT); digitalWrite(R[r],HIGH); }
+  for(int c=0;c<4;c++) pinMode(C[c],INPUT_PULLUP);
+}
+void loop(){ static char last=0; char k=scan(); if(k&&k!=last)Serial.println(k); last=k; delay(20); }`,
+ultrasonic:`const byte TRIG=2,ECHO=3;
+void setup(){Serial.begin(9600);pinMode(TRIG,OUTPUT);pinMode(ECHO,INPUT);}
+void loop(){
+  digitalWrite(TRIG,LOW);delayMicroseconds(2);
+  digitalWrite(TRIG,HIGH);delayMicroseconds(10);digitalWrite(TRIG,LOW);
+  unsigned long us=pulseIn(ECHO,HIGH,30000UL);
+  if(us)Serial.println(us*0.0343/2.0);
+  else Serial.println("NO ECHO");
+  delay(100);
+}`,
+tmp36:`void setup(){Serial.begin(9600);analogReadResolution(12);}
+void loop(){
+  int adc=analogRead(A3);
+  float voltage=adc*5.0/4095.0; // ตรวจสอบ ADC reference จริง
+  float c=(voltage-0.5)*100.0;
+  Serial.println(c);delay(1000);
+}`,
+thermistor:`#include <math.h>
+const float RFIX=10000,R0=10000,BETA=4050;
+void setup(){Serial.begin(9600);analogReadResolution(12);}
+void loop(){
+  int adc=analogRead(A3);
+  if(adc>0&&adc<4095){
+    float r=RFIX*adc/(4095.0-adc);
+    float c=1.0/(1.0/298.15+log(r/R0)/BETA)-273.15;
+    Serial.println(c);
+  }
+  delay(1000);
+}`,
+potentiometer:`void setup(){Serial.begin(9600);analogReadResolution(10);}
+void loop(){int raw=analogRead(A0);int percent=map(raw,0,1023,0,100);Serial.println(percent);delay(200);}`,
+rgb:`const int R=9,G=10,B=11; // Common Anode
+void setup(){
+  pinMode(R,OUTPUT);pinMode(G,OUTPUT);pinMode(B,OUTPUT);
+  digitalWrite(R,HIGH);digitalWrite(G,HIGH);digitalWrite(B,HIGH);
+}
+void loop(){digitalWrite(R,LOW);digitalWrite(G,HIGH);digitalWrite(B,HIGH);}`,
+segment:`const byte SEG[7]={2,3,4,5,6,7,8};
+const byte ONE[7]={0,1,1,0,0,0,0}; // A B C D E F G
+void setup(){for(int i=0;i<7;i++){pinMode(SEG[i],OUTPUT);digitalWrite(SEG[i],ONE[i]);}}
+void loop(){} // Common Cathode แสดงเลข 1`,
+button:`const byte BUTTON=4;
+void setup(){Serial.begin(9600);pinMode(BUTTON,INPUT_PULLUP);}
+void loop(){bool pressed=digitalRead(BUTTON)==LOW;Serial.println(pressed?"PRESSED":"RELEASED");delay(200);}`,
+wifi:`#include <WiFiS3.h>
+const char SSID[]="YOUR_SSID",PASS[]="YOUR_PASSWORD";
+void setup(){Serial.begin(9600);WiFi.begin(SSID,PASS);}
+void loop(){Serial.println(WiFi.status()==WL_CONNECTED?"ONLINE":"OFFLINE");delay(1000);}`,
+mqtt:`#include <WiFiS3.h>
+#include <MQTTClient.h>
+WiFiClient net;
+MQTTClient mqtt(256);
+void onMessage(String &topic,String &payload){Serial.println(topic+" => "+payload);}
+void setup(){
+  Serial.begin(9600);
+  WiFi.begin("YOUR_SSID","YOUR_PASSWORD");
+  while(WiFi.status()!=WL_CONNECTED)delay(200);
+  mqtt.begin("phycom.it.kmitl.ac.th",1883,net);
+  mqtt.onMessage(onMessage);
+  if(mqtt.connect("demo-r4-client")) mqtt.subscribe("68070131/venus");
+}
+void loop(){mqtt.loop();}`,
+dht:`#include <DHT.h>
+DHT dht(2,DHT11);
+void setup(){Serial.begin(9600);dht.begin();}
+void loop(){float t=dht.readTemperature(),h=dht.readHumidity();if(!isnan(t)&&!isnan(h)){Serial.println(t);Serial.println(h);}delay(2000);}`,
+ldr:`void setup(){Serial.begin(9600);analogReadResolution(10);}
+void loop(){int light=analogRead(A0);Serial.println(light);delay(250);}`
+};
+const nav=document.getElementById('nav'),cards=document.getElementById('cards'),search=document.getElementById('search');
+for(const e of entries){const b=document.createElement('button');b.dataset.id=e[0];b.textContent=e[3]+' '+e[1];b.onclick=()=>show(e[0]);nav.append(b);const c=document.createElement('button');c.className='index-card';c.innerHTML='<span class="emoji">'+e[3]+'</span><strong>'+e[1]+'</strong><small>'+e[2]+'</small>';c.onclick=()=>show(e[0]);cards.append(c);}
+function show(id){
+ const e=entries.find(x=>x[0]===id);document.getElementById('home').classList.toggle('hide',!!e);document.getElementById('detail').classList.toggle('show',!!e);
+ for(const b of nav.children)b.classList.toggle('on',b.dataset.id===id);
+ if(e){document.getElementById('kind').textContent=e[3]+' Arduino / Sensor';document.getElementById('title').textContent=e[1];document.getElementById('desc').textContent=e[2];document.getElementById('how').textContent=e[7];document.getElementById('command').textContent=e[6]+'\n'+e[9];document.getElementById('snippet').textContent=snippets[id];document.getElementById('wires').replaceChildren(...e[8].map(x=>{const d=document.createElement('div');d.textContent=x;return d}));const photo=document.getElementById('photo');photo.src='https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(e[5]).replace(/%20/g,'_');photo.onerror=()=>{photo.style.display='none'};photo.style.display='block';document.getElementById('sources').replaceChildren(...(files[id]||[]).map(f=>{const a=document.createElement('a');a.href=root+encodeURIComponent(f);a.target='_blank';a.rel='noopener';a.textContent='📄 '+f;return a}));}window.location.hash=id;window.scrollTo({top:0,behavior:'smooth'});}
+document.getElementById('back').onclick=()=>show('home');document.getElementById('copy').onclick=()=>navigator.clipboard.writeText(document.getElementById('snippet').textContent).then(()=>{document.getElementById('copy').textContent='คัดลอกแล้ว ✓';setTimeout(()=>document.getElementById('copy').textContent='คัดลอกโค้ด',1500)});
+search.oninput=()=>{const q=search.value.toLowerCase();for(const b of nav.children){const e=entries.find(x=>x[0]===b.dataset.id);b.style.display=(!e||(e[1]+' '+e[2]).toLowerCase().includes(q))?'':'none'}for(let i=0;i<cards.children.length;i++){const e=entries[i];cards.children[i].style.display=(e[1]+' '+e[2]).toLowerCase().includes(q)?'':'none'}};
+if(location.hash){const id=decodeURIComponent(location.hash.slice(1));if(entries.some(e=>e[0]===id))show(id);}
+</script></body></html>
