@@ -1,0 +1,444 @@
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+
+// ======================================================
+// PART 0: กำหนดขาอุปกรณ์
+// ======================================================
+
+const int TMP_PIN = A3;
+const int POT_PIN = A0;
+
+const int FOOD_TRIG_PIN = 2;
+const int FOOD_ECHO_PIN = 3;
+
+const int DOOR_TRIG_PIN = 4;
+const int DOOR_ECHO_PIN = 5;
+
+const int BUTTON_PIN = 6;
+
+const int RGB_R_PIN = 9;
+const int RGB_G_PIN = 10;
+const int RGB_B_PIN = 11;
+
+// เรียงตาม segment a, b, c, d, e, f, g
+const int SEGMENT_PINS[7] = {7, 8, 12, 13, A1, A2, A4};
+
+// false = Common Cathode, ขารวมต่อ GND
+// true  = Common Anode, ขารวมต่อ 5V
+const bool SEGMENT_COMMON_ANODE = false;
+
+// false = RGB Common Cathode
+// true  = RGB Common Anode
+const bool RGB_COMMON_ANODE = false;
+
+
+// ======================================================
+// PART 1: ตั้งค่า Wi-Fi และ MQTT
+// แก้ชื่อ Wi-Fi และรหัสผ่านตรงนี้
+// ======================================================
+
+const char WIFI_SSID[] = "EDOK";
+const char WIFI_PASSWORD[] = "1234567890";
+
+const char MQTT_BROKER[] = "phycom.it.kmitl.ac.th";
+const int MQTT_PORT = 1883;
+
+const char MQTT_CLIENT_ID[] = "arduino-68070131";
+const char MQTT_USERNAME[] = "";
+const char MQTT_PASSWORD[] = "";
+
+
+// ======================================================
+// PART 2: MQTT Topics
+// ======================================================
+
+const char TOPIC_TEMP[] = "68070131/temp";
+const char TOPIC_LIGHT[] = "68070131/light";
+const char TOPIC_FOOD[] = "68070131/food";
+const char TOPIC_DOOR[] = "68070131/door";
+
+const char TOPIC_VENUS[] = "68070131/venus";
+const char TOPIC_PROB_STAT[] = "68070131/prob_stat";
+
+const unsigned long SENSOR_INTERVAL = 3000;
+const unsigned long DOOR_INTERVAL = 500;
+
+
+// ======================================================
+// PART 3: ตัวแปร MQTT และเวลา
+// ======================================================
+
+WiFiClient network;
+MQTTClient mqtt(256);
+
+unsigned long lastSensorTime = 0;
+unsigned long lastDoorTime = 0;
+unsigned long lastMqttAttempt = 0;
+unsigned long lastWifiAttempt = 0;
+
+bool mqttAttempted = false;
+
+
+// ======================================================
+// PART 4: ตารางเลข 7-segment
+// เรียง bit ตาม a, b, c, d, e, f, g
+// ======================================================
+
+const byte DIGITS[10][7] = {
+  {1, 1, 1, 1, 1, 1, 0},  // 0
+  {0, 1, 1, 0, 0, 0, 0},  // 1
+  {1, 1, 0, 1, 1, 0, 1},  // 2
+  {1, 1, 1, 1, 0, 0, 1},  // 3
+  {0, 1, 1, 0, 0, 1, 1},  // 4
+  {1, 0, 1, 1, 0, 1, 1},  // 5
+  {1, 0, 1, 1, 1, 1, 1},  // 6
+  {1, 1, 1, 0, 0, 0, 0},  // 7: ติดเฉพาะ a, b, c
+  {1, 1, 1, 1, 1, 1, 1},  // 8
+  {1, 1, 1, 1, 0, 1, 1}   // 9
+};
+
+
+// ======================================================
+// PART 5: แสดงเลขบน 7-segment
+// ======================================================
+
+void displayDigit(int number) {
+  if (number < 0 || number > 9) {
+    return;
+  }
+
+  for (int i = 0; i < 7; i++) {
+    bool segmentOn = DIGITS[number][i];
+
+    if (SEGMENT_COMMON_ANODE) {
+      digitalWrite(SEGMENT_PINS[i], segmentOn ? LOW : HIGH);
+    } else {
+      digitalWrite(SEGMENT_PINS[i], segmentOn ? HIGH : LOW);
+    }
+  }
+}
+
+// ทดสอบจอเมื่อเปิดเครื่อง: ต้องเห็น 0 ถึง 9
+void testSevenSegment() {
+  Serial.println("ทดสอบ 7-segment: ควรเห็นเลข 0 ถึง 9");
+
+  for (int number = 0; number <= 9; number++) {
+    displayDigit(number);
+    Serial.print("เลขทดสอบ: ");
+    Serial.println(number);
+    delay(700);
+  }
+
+  displayDigit(0);
+}
+
+
+// ======================================================
+// PART 6: ควบคุม RGB
+// อุณหภูมิสีแดงจะสั่งเปิด R อย่างเดียว
+// ======================================================
+
+void setRGB(bool redOn, bool greenOn, bool blueOn) {
+  digitalWrite(RGB_R_PIN, RGB_COMMON_ANODE ? !redOn : redOn);
+  digitalWrite(RGB_G_PIN, RGB_COMMON_ANODE ? !greenOn : greenOn);
+  digitalWrite(RGB_B_PIN, RGB_COMMON_ANODE ? !blueOn : blueOn);
+}
+
+
+// ======================================================
+// PART 7: อ่าน Ultrasonic เป็นเซนติเมตร
+// ======================================================
+
+float readDistanceCM(int trigPin, int echoPin) {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  unsigned long duration = pulseIn(echoPin, HIGH, 25000UL);
+
+  if (duration == 0) {
+    return -1;
+  }
+
+  return duration * 0.0343 / 2.0;
+}
+
+
+// ======================================================
+// PART 8: อ่าน TMP36
+// ใช้เมื่อแก้สาย TMP36 ถูกต้องแล้วเท่านั้น
+// ======================================================
+
+float readTemperatureC() {
+  int rawValue = analogRead(TMP_PIN);
+  float voltage = rawValue * (5.0 / 1023.0);
+
+  return (voltage - 0.5) * 100.0;
+}
+
+
+// ======================================================
+// PART 9: ส่งอุณหภูมิ, Potentiometer และ food
+// ======================================================
+
+void publishSensorData() {
+  float temperature = readTemperatureC();
+  String tempPayload = String(temperature, 1);
+  mqtt.publish(TOPIC_TEMP, tempPayload);
+
+  int potValue = analogRead(POT_PIN);
+  String potPayload = String(potValue);
+  mqtt.publish(TOPIC_LIGHT, potPayload);
+
+  float foodDistance = readDistanceCM(
+    FOOD_TRIG_PIN,
+    FOOD_ECHO_PIN
+  );
+
+  String foodPayload =
+    (foodDistance >= 0 && foodDistance <= 20) ? "On" : "Off";
+
+  mqtt.publish(TOPIC_FOOD, foodPayload);
+
+  Serial.print("Temp: ");
+  Serial.print(tempPayload);
+  Serial.print(" C | Pot: ");
+  Serial.print(potPayload);
+  Serial.print(" | Food distance: ");
+  Serial.print(foodDistance);
+  Serial.print(" cm | Food: ");
+  Serial.println(foodPayload);
+}
+
+
+// ======================================================
+// PART 10: ตรวจปุ่มและส่งสถานะ door
+// ต้องระยะ >= 20 cm และกดปุ่ม จึงเป็น On
+// ======================================================
+
+void publishDoorStatus() {
+  float distance = readDistanceCM(
+    DOOR_TRIG_PIN,
+    DOOR_ECHO_PIN
+  );
+
+  // ปุ่มต่อระหว่าง D6 กับ GND
+  // กดแล้วอ่านได้ LOW
+  bool buttonPressed = (digitalRead(BUTTON_PIN) == LOW);
+
+  bool doorOn = (distance >= 20.0) && buttonPressed;
+  String payload = doorOn ? "On" : "Off";
+
+  Serial.print("Door distance: ");
+  Serial.print(distance);
+  Serial.print(" cm | Button: ");
+  Serial.print(buttonPressed ? "PRESSED" : "RELEASED");
+  Serial.print(" | ส่ง: ");
+  Serial.println(payload);
+
+  if (mqtt.connected()) {
+    mqtt.publish(TOPIC_DOOR, payload);
+  }
+}
+
+
+// ======================================================
+// PART 11: รับ MQTT เพื่อสั่ง RGB และ 7-segment
+// ======================================================
+
+void messageReceived(String &topic, String &payload) {
+  topic.trim();
+  payload.trim();
+
+  Serial.print("ได้รับ Topic: ");
+  Serial.println(topic);
+
+  Serial.print("ได้รับ Payload: ");
+  Serial.println(payload);
+
+  if (topic == TOPIC_VENUS) {
+    float temperature = payload.toFloat();
+
+    if (temperature >= 10 && temperature <= 25) {
+      setRGB(false, true, false);    // เขียว
+      Serial.println("RGB: เขียว");
+    } else if (temperature >= 26 && temperature <= 35) {
+      setRGB(false, false, true);    // ฟ้า/น้ำเงิน
+      Serial.println("RGB: ฟ้า");
+    } else if (temperature >= 36 && temperature <= 50) {
+      setRGB(true, false, false);    // แดงเท่านั้น
+      Serial.println("RGB: แดง เปิดเฉพาะ R");
+    } else {
+      setRGB(false, false, false);   // นอกช่วง ดับ
+      Serial.println("RGB: ดับ");
+    }
+  }
+
+  if (topic == TOPIC_PROB_STAT) {
+    if (payload.length() == 1 &&
+        payload[0] >= '0' &&
+        payload[0] <= '9') {
+
+      int number = payload[0] - '0';
+      displayDigit(number);
+
+      Serial.print("7-segment แสดงเลข: ");
+      Serial.println(number);
+    } else {
+      Serial.println("ส่งเลข 0–9 หนึ่งหลัก เช่น 7");
+    }
+  }
+}
+
+
+// ======================================================
+// PART 12: เชื่อม Wi-Fi
+// ======================================================
+
+bool connectToWiFi() {
+  Serial.print("กำลังเชื่อม Wi-Fi: ");
+  Serial.println(WIFI_SSID);
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  unsigned long startTime = millis();
+
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - startTime < 30000UL) {
+    Serial.print(".");
+    delay(500);
+  }
+
+  Serial.println();
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("เชื่อม Wi-Fi ไม่สำเร็จ");
+    return false;
+  }
+
+  Serial.println("เชื่อม Wi-Fi สำเร็จ");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  return true;
+}
+
+
+// ======================================================
+// PART 13: เชื่อม MQTT และ Subscribe Topic
+// ======================================================
+
+bool connectToMQTT() {
+  Serial.println("กำลังเชื่อม MQTT...");
+
+  bool connected;
+
+  if (MQTT_USERNAME[0] == '\0') {
+    connected = mqtt.connect(MQTT_CLIENT_ID);
+  } else {
+    connected = mqtt.connect(
+      MQTT_CLIENT_ID,
+      MQTT_USERNAME,
+      MQTT_PASSWORD
+    );
+  }
+
+  if (!connected) {
+    Serial.println("เชื่อม MQTT ไม่สำเร็จ");
+    return false;
+  }
+
+  Serial.println("เชื่อม MQTT สำเร็จ");
+
+  Serial.print("Subscribe venus: ");
+  Serial.println(mqtt.subscribe(TOPIC_VENUS) ? "สำเร็จ" : "ไม่สำเร็จ");
+
+  Serial.print("Subscribe prob_stat: ");
+  Serial.println(mqtt.subscribe(TOPIC_PROB_STAT) ? "สำเร็จ" : "ไม่สำเร็จ");
+
+  return true;
+}
+
+
+// ======================================================
+// PART 14: เริ่มต้นระบบ
+// ======================================================
+
+void setup() {
+  Serial.begin(115200);
+  analogReadResolution(10);
+
+  pinMode(TMP_PIN, INPUT);
+  pinMode(POT_PIN, INPUT);
+
+  pinMode(FOOD_TRIG_PIN, OUTPUT);
+  pinMode(FOOD_ECHO_PIN, INPUT);
+
+  pinMode(DOOR_TRIG_PIN, OUTPUT);
+  pinMode(DOOR_ECHO_PIN, INPUT);
+
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+  pinMode(RGB_R_PIN, OUTPUT);
+  pinMode(RGB_G_PIN, OUTPUT);
+  pinMode(RGB_B_PIN, OUTPUT);
+
+  for (int i = 0; i < 7; i++) {
+    pinMode(SEGMENT_PINS[i], OUTPUT);
+  }
+
+  setRGB(false, false, false);
+
+  // ทดสอบ 7-segment ก่อน MQTT
+  testSevenSegment();
+
+  mqtt.begin(MQTT_BROKER, MQTT_PORT, network);
+  mqtt.onMessage(messageReceived);
+
+  connectToWiFi();
+}
+
+
+// ======================================================
+// PART 15: ทำงานวนซ้ำ
+// ======================================================
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    if (millis() - lastWifiAttempt >= 10000UL) {
+      lastWifiAttempt = millis();
+      connectToWiFi();
+    }
+    return;
+  }
+
+  if (mqtt.connected()) {
+    mqtt.loop();
+  }
+
+  // อ่านปุ่มและระยะประตูทุกครึ่งวินาที
+  if (millis() - lastDoorTime >= DOOR_INTERVAL) {
+    lastDoorTime = millis();
+    publishDoorStatus();
+  }
+
+  // เชื่อม MQTT ใหม่ทุก 5 วินาทีเมื่อหลุด
+  if (!mqtt.connected()) {
+    if (!mqttAttempted ||
+        millis() - lastMqttAttempt >= 5000UL) {
+      mqttAttempted = true;
+      lastMqttAttempt = millis();
+      connectToMQTT();
+    }
+    return;
+  }
+
+  // ส่ง Sensor ทุก 3 วินาที
+  if (millis() - lastSensorTime >= SENSOR_INTERVAL) {
+    lastSensorTime = millis();
+    publishSensorData();
+  }
+}

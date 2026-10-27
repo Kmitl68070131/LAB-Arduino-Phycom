@@ -1,0 +1,649 @@
+================================================================================
+       ARDUINO UNO R4 WiFi | PHYSICAL COMPUTING COMMAND CHEAT SHEET
+                    รวมคำสั่ง + เซนเซอร์ + ตัวอย่างใช้งาน
+================================================================================
+รูปแบบ: ข้อความล้วนสำหรับ Notepad (UTF-8)
+หมายเหตุ: ตัวอย่างแต่ละหมวดเป็นโค้ดแยกส่วน ไม่ควรนำ setup()/loop() หลายชุดมาต่อกัน
+          โดยตรง หากจะรวมอุปกรณ์ต้องรวม setup() เป็นหนึ่งชุดและ loop() เป็นหนึ่งชุด
+
+[สารบัญ]
+  01 พื้นฐานภาษา Arduino C/C++       02 GPIO Digital / Analog
+  03 Serial Monitor                 04 การจับเวลาแบบไม่ใช้ delay
+  05 LED / RGB LED                  06 Button / PIR / Digital Sensor
+  07 Potentiometer / LDR            08 Ultrasonic HC-SR04
+  09 TMP36                          10 Thermistor NTC
+  11 DHT11 / DHT22                  12 Keypad 4x4 (ไม่ใช้ Keypad.h)
+  13 7-Segment                      14 LCD I2C 16x2
+  15 Wi-Fi (WiFiS3)                 16 MQTT Publish / Subscribe
+  17 MQTT + LCD + Sensor            18 คำสั่งคำนวณและ String
+  19 ผังต่อสายตัวอย่าง              20 ตรวจสอบและแก้ปัญหา
+
+================================================================================
+01 | โครงสร้างและชนิดข้อมูลพื้นฐาน
+================================================================================
+void setup()              ทำงานครั้งเดียวตอนเปิดหรือรีเซ็ตบอร์ด
+void loop()               ทำงานวนซ้ำตลอดเวลา
+int x = 10;               ตัวแปรจำนวนเต็ม
+float t = 25.5;           ตัวแปรทศนิยม
+bool active = true;       ค่าจริง/เท็จ
+char key = '5';           ตัวอักษรหนึ่งตัว (single quote)
+String msg = "hello";     ข้อความ (double quote)
+const int PIN = 9;        ค่าคงที่ที่ไม่ควรเปลี่ยนระหว่างรัน
+unsigned long start = 0; ตัวแปรเวลาจำนวนเต็มไม่ติดลบ
+byte value = 255;         จำนวนเต็ม 8 บิต 0..255
+
+if (x > 5) { ... }        ทำงานเมื่อเงื่อนไขจริง
+else { ... }              ทำงานเมื่อเงื่อนไข if เป็นเท็จ
+for (int i=0;i<5;i++) {} วนซ้ำตามจำนวนรอบ
+while (condition) {}      วนซ้ำขณะเงื่อนไขจริง
+break;                    ออกจากลูป
+continue;                 ข้ามไปการวนรอบถัดไป
+return;                   ออกจากฟังก์ชัน
+
+== เท่ากับ    != ไม่เท่ากับ    > มากกว่า    < น้อยกว่า
+>= มากกว่าหรือเท่ากับ      <= น้อยกว่าหรือเท่ากับ
+&& และ       || หรือ       ! ไม่ใช่
+
+ตัวอย่าง:
+void setup() {
+  Serial.begin(9600);
+}
+void loop() {
+  Serial.println("Arduino running");
+  delay(1000);
+}
+
+================================================================================
+02 | GPIO: DIGITAL / ANALOG
+================================================================================
+pinMode(9, OUTPUT);           ตั้ง D9 เป็นขาส่งสัญญาณ
+pinMode(4, INPUT);            ตั้ง D4 เป็นขารับสัญญาณ
+pinMode(4, INPUT_PULLUP);     ตั้ง D4 เป็นอินพุตพร้อมตัวต้านทาน Pull-up
+
+digitalWrite(9, HIGH);       ส่ง HIGH ที่ D9
+digitalWrite(9, LOW);        ส่ง LOW ที่ D9
+int state = digitalRead(4); อ่านค่า HIGH หรือ LOW ที่ D4
+
+analogReadResolution(12);    ตั้ง ADC 12 บิต: อ่านได้ 0..4095
+int adc = analogRead(A3);    อ่านค่า Analog ที่ A3
+analogWriteResolution(8);    ตั้ง PWM 8 บิต: ค่า 0..255
+analogWrite(9, 128);        สั่ง PWM ประมาณ 50% บนขาที่รองรับ PWM
+
+หมายเหตุ: analogWrite() ไม่ได้สร้างแรงดัน DC คงที่ แต่สร้างสัญญาณ PWM
+          ตรวจสอบขาที่รองรับ PWM ของ UNO R4 WiFi ก่อนใช้งาน
+
+================================================================================
+03 | SERIAL MONITOR
+================================================================================
+Serial.begin(9600);           เริ่ม Serial ที่ 9600 baud
+Serial.print("Temp: ");       พิมพ์ข้อความโดยไม่ขึ้นบรรทัดใหม่
+Serial.println(25.5);        พิมพ์ค่าแล้วขึ้นบรรทัดใหม่
+Serial.available();          จำนวนไบต์ที่รออ่าน
+Serial.read();               อ่าน 1 ไบต์
+Serial.parseInt();           อ่านจำนวนเต็มจากข้อความขาเข้า
+Serial.flush();              รอข้อมูลที่ส่งออกให้เสร็จ
+
+ตัวอย่าง:
+void setup() { Serial.begin(9600); }
+void loop() {
+  if (Serial.available() > 0) {
+    char c = Serial.read();
+    Serial.print("Received: ");
+    Serial.println(c);
+  }
+}
+
+================================================================================
+04 | การจับเวลา
+================================================================================
+delay(1000);                 หยุดรอ 1000 ms = 1 วินาที
+delayMicroseconds(10);       หยุดรอ 10 ไมโครวินาที
+millis();                    จำนวน ms ตั้งแต่บอร์ดเริ่มทำงาน
+micros();                    จำนวนไมโครวินาทีตั้งแต่บอร์ดเริ่มทำงาน
+
+ตัวอย่างแบบไม่บล็อกการทำงาน (แนะนำเมื่อใช้ MQTT):
+unsigned long lastTime = 0;
+void setup() { Serial.begin(9600); }
+void loop() {
+  if (millis() - lastTime >= 1000) {
+    lastTime = millis();
+    Serial.println("1 second elapsed");
+  }
+}
+
+================================================================================
+05 | LED / RGB LED
+================================================================================
+LED ธรรมดา: D9 -> ตัวต้านทาน 220-330Ω -> LED -> GND
+
+const int LED = 9;
+void setup() { pinMode(LED, OUTPUT); }
+void loop() {
+  digitalWrite(LED, HIGH);  // ติด (กรณีต่อ LED ไป GND)
+  delay(500);
+  digitalWrite(LED, LOW);   // ดับ
+  delay(500);
+}
+
+RGB LED: R=D9, G=D10, B=D11 (มีตัวต้านทานแยกแต่ละสี)
+Common Cathode: ขารวมต่อ GND, HIGH = ติด, LOW = ดับ
+Common Anode:   ขารวมต่อ 5V,  LOW = ติด, HIGH = ดับ
+
+ตัวอย่าง RGB แบบ COMMON ANODE (เปิดสีแดงอย่างเดียว):
+const int R=9, G=10, B=11;
+void setup() {
+  pinMode(R, OUTPUT); pinMode(G, OUTPUT); pinMode(B, OUTPUT);
+  digitalWrite(R, HIGH); digitalWrite(G, HIGH); digitalWrite(B, HIGH);
+}
+void loop() {
+  digitalWrite(R, LOW);   // แดงติด
+  digitalWrite(G, HIGH);  // เขียวดับ
+  digitalWrite(B, HIGH);  // น้ำเงินดับ
+}
+
+หากต้องการหรี่แสงด้วย PWM: analogWrite(pin, 0..255)
+สำหรับ Common Anode ค่า PWM ต้องกลับทิศ (0 = สว่างสุด, 255 = ดับ)
+
+================================================================================
+06 | BUTTON / PIR / DIGITAL SENSOR
+================================================================================
+Button แบบ INPUT_PULLUP: ต่อปุ่มระหว่าง D4 กับ GND
+ไม่กด = HIGH, กด = LOW
+
+const int BUTTON=4;
+void setup() {
+  pinMode(BUTTON, INPUT_PULLUP);
+  Serial.begin(9600);
+}
+void loop() {
+  if (digitalRead(BUTTON) == LOW) Serial.println("PRESSED");
+  else Serial.println("RELEASED");
+  delay(200);
+}
+
+PIR Sensor (ตัวอย่าง OUT -> D2):
+pinMode(2, INPUT);
+int motion = digitalRead(2); // HIGH = ตรวจพบการเคลื่อนไหวในหลายรุ่น
+
+คำสั่งสำคัญ:
+digitalRead(pin)          อ่านสัญญาณ Digital
+INPUT_PULLUP              ใช้ Pull-up ภายใน (เหมาะกับปุ่มต่อ GND)
+
+ข้อควรระวัง: Button อาจเด้ง (bounce) ต้อง debounce 20-50 ms
+             PIR อาจต้องรอ warm-up หลังเปิดเครื่อง
+
+================================================================================
+07 | POTENTIOMETER / LDR
+================================================================================
+Potentiometer: ขานอก 5V/GND, ขากลาง -> A0
+
+void setup() {
+  Serial.begin(9600);
+  analogReadResolution(10); // 0..1023
+}
+void loop() {
+  int pot = analogRead(A0);
+  Serial.println(pot);
+  delay(200);
+}
+
+แปลงค่าช่วง 0..1023 เป็น 0..100:
+int percent = map(pot, 0, 1023, 0, 100);
+
+LDR (ตัวต้านทานไวแสง): ต่อเป็นวงจรแบ่งแรงดันกับตัวต้านทานคงที่
+อ่านแรงดันจุดกึ่งกลางด้วย analogRead(A0)
+ค่าที่มากขึ้นหมายถึงสว่างขึ้นหรือมืดลง ขึ้นกับตำแหน่ง LDR ในวงจร
+
+================================================================================
+08 | ULTRASONIC HC-SR04
+================================================================================
+ต่อสาย: VCC->5V, GND->GND, TRIG->D2, ECHO->D3
+หมายเหตุ: ตรวจสอบระดับแรงดัน ECHO ให้เหมาะกับขารับของบอร์ด
+
+const int TRIG=2, ECHO=3;
+void setup() {
+  Serial.begin(9600);
+  pinMode(TRIG, OUTPUT);
+  pinMode(ECHO, INPUT);
+}
+void loop() {
+  digitalWrite(TRIG, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+
+  unsigned long duration = pulseIn(ECHO, HIGH, 30000UL);
+  if (duration == 0) {
+    Serial.println("NO ECHO");
+  } else {
+    float distanceCm = duration * 0.0343f / 2.0f;
+    Serial.print("Distance (cm): ");
+    Serial.println(distanceCm);
+  }
+  delay(100);
+}
+
+pulseIn(ECHO,HIGH,30000UL) = วัดความกว้างพัลส์ HIGH สูงสุด 30,000 us
+สูตรระยะทาง = เวลา(us) × 0.0343 / 2 (cm)
+หากไม่มี Echo หรือค่าผิดช่วง ควรข้ามค่าหรือแสดง SENSOR ERROR
+
+================================================================================
+09 | TMP36 TEMPERATURE SENSOR
+================================================================================
+ต่อสายตาม datasheet ของรุ่นที่ใช้: +Vs -> 5V, Vout -> A3, GND -> GND
+สำคัญ: ตรวจลำดับขาจาก datasheet ก่อนจ่ายไฟ เพื่อป้องกันเซนเซอร์ร้อน/เสีย
+
+void setup() {
+  Serial.begin(9600);
+  analogReadResolution(12); // ADC 0..4095
+}
+void loop() {
+  int adc = analogRead(A3);
+  float voltage = adc * (5.0f / 4095.0f); // สมมติ ADC reference = 5V
+  float tempC = (voltage - 0.5f) * 100.0f;
+  Serial.print("TMP36 C: ");
+  Serial.println(tempC);
+  delay(1000);
+}
+
+สูตร TMP36: Celsius = (Vout - 0.5) × 100
+หากใช้แรงดันอ้างอิง ADC ต่างจาก 5V ต้องปรับสูตรให้ตรง
+
+================================================================================
+10 | NTC THERMISTOR (เช่น 10kΩ, Beta 4050)
+================================================================================
+ตัวอย่างวงจร: 5V -> R_FIXED -> A3 -> NTC -> GND
+ใช้ตัวต้านทานคงที่ใกล้ค่า NTC ที่อุณหภูมิห้อง เช่น 10kΩ
+
+#include <math.h>
+const float R_FIXED=10000.0f;
+const float R0=10000.0f;
+const float BETA=4050.0f;
+void setup() {
+  Serial.begin(9600);
+  analogReadResolution(12);
+}
+void loop() {
+  int adc = analogRead(A3);
+  if (adc <= 0 || adc >= 4095) {
+    Serial.println("ADC OUT OF RANGE");
+  } else {
+    float rNtc = R_FIXED * adc / (4095.0f - adc);
+    float kelvin = 1.0f / (1.0f/298.15f + log(rNtc/R0)/BETA);
+    float celsius = kelvin - 273.15f;
+    Serial.println(celsius);
+  }
+  delay(1000);
+}
+
+log(x) = ลอการิทึมธรรมชาติ
+ค่าคงที่ R0 และ BETA ต้องใช้ตาม datasheet เซนเซอร์จริง
+หาก R_FIXED เป็น 330Ω ให้เปลี่ยน R_FIXED=330.0f แต่ความละเอียดแถว
+อุณหภูมิห้องจะด้อยกว่าใช้ตัวต้านทานใกล้ 10kΩ
+
+================================================================================
+11 | DHT11 / DHT22 (ต้องใช้ไลบรารี DHT)
+================================================================================
+#include <DHT.h>
+#define DHT_PIN 2
+#define DHT_TYPE DHT11 // เปลี่ยนเป็น DHT22 หากใช้ DHT22
+DHT dht(DHT_PIN, DHT_TYPE);
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+}
+void loop() {
+  float humidity = dht.readHumidity();     // ความชื้น %RH
+  float tempC = dht.readTemperature();     // อุณหภูมิ °C
+  if (isnan(humidity) || isnan(tempC)) {
+    Serial.println("DHT READ ERROR");
+  } else {
+    Serial.print("Temp: "); Serial.println(tempC);
+    Serial.print("Humidity: "); Serial.println(humidity);
+  }
+  delay(2000);
+}
+
+หมายเหตุ: DHT.h ไม่ใช่ไลบรารี Keypad และต้องติดตั้งให้ตรงรุ่น
+
+================================================================================
+12 | KEYPAD 4x4 (ไม่ใช้ Keypad.h)
+================================================================================
+สมมติลำดับสาย Keypad คือ R1 R2 R3 R4 C1 C2 C3 C4
+ต่อสายตามลำดับ: D9 D8 D7 D6 D5 D4 D3 D2
+
+const byte ROWS[4] = {9,8,7,6};
+const byte COLS[4] = {5,4,3,2};
+const char KEYS[4][4] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+
+char scanKeypad() {
+  for (int r=0; r<4; r++) digitalWrite(ROWS[r], HIGH);
+  for (int r=0; r<4; r++) {
+    digitalWrite(ROWS[r], LOW);
+    delayMicroseconds(10);
+    for (int c=0; c<4; c++) {
+      if (digitalRead(COLS[c]) == LOW) {
+        digitalWrite(ROWS[r], HIGH);
+        return KEYS[r][c];
+      }
+    }
+    digitalWrite(ROWS[r], HIGH);
+  }
+  return 0;
+}
+
+void setup() {
+  Serial.begin(9600);
+  for (int r=0; r<4; r++) {
+    pinMode(ROWS[r], OUTPUT);
+    digitalWrite(ROWS[r], HIGH);
+  }
+  for (int c=0; c<4; c++) pinMode(COLS[c], INPUT_PULLUP);
+}
+void loop() {
+  static char previous=0;
+  char current=scanKeypad();
+  if (current != 0 && previous == 0) Serial.println(current);
+  previous=current;
+  delay(20); // แบบพื้นฐาน; เพิ่ม debounce จริงเมื่อใช้งานจริง
+}
+
+คำสั่งหลัก:
+digitalWrite(ROW,LOW)     เลือกแถวที่จะสแกน
+digitalRead(COL)          ตรวจว่ามีปุ่มในคอลัมน์นั้นถูกกดหรือไม่
+INPUT_PULLUP             ดึงขาคอลัมน์ให้ HIGH เมื่อไม่กด
+หมายเหตุ: ถ้าปุ่มไม่ตรง ให้ตรวจผังสาย Row/Column ของ Keypad จริง
+
+================================================================================
+13 | 7-SEGMENT 1 DIGIT
+================================================================================
+ตัวอย่าง Segment A B C D E F G ต่อ D2 D3 D4 D5 D6 D7 D8
+ต่อผ่านตัวต้านทานจำกัดกระแสแยกทุก Segment
+Common Cathode: COM -> GND, HIGH = ติด
+Common Anode: COM -> 5V, LOW = ติด
+
+const int SEG[7]={2,3,4,5,6,7,8};
+const byte NUM[10][7]={
+  {1,1,1,1,1,1,0}, // 0
+  {0,1,1,0,0,0,0}, // 1
+  {1,1,0,1,1,0,1}, // 2
+  {1,1,1,1,0,0,1}, // 3
+  {0,1,1,0,0,1,1}, // 4
+  {1,0,1,1,0,1,1}, // 5
+  {1,0,1,1,1,1,1}, // 6
+  {1,1,1,0,0,0,0}, // 7
+  {1,1,1,1,1,1,1}, // 8
+  {1,1,1,1,0,1,1}  // 9
+};
+const bool COMMON_ANODE=false;
+void showNumber(int n) {
+  if (n<0 || n>9) return;
+  for (int s=0; s<7; s++) {
+    bool on=NUM[n][s];
+    digitalWrite(SEG[s], COMMON_ANODE ? !on : on);
+  }
+}
+void setup() {
+  for (int s=0; s<7; s++) pinMode(SEG[s], OUTPUT);
+  showNumber(0);
+}
+void loop() {
+  for (int n=0; n<=9; n++) {
+    showNumber(n);
+    delay(1000);
+  }
+}
+
+หมายเหตุ: ตารางเรียงตาม Segment A-G ไม่ใช่หมายเลขขากายภาพบนตัวหลอด
+
+================================================================================
+14 | LCD I2C 16x2
+================================================================================
+ต่อสาย: GND->GND, VCC->5V, SDA->SDA, SCL->SCL
+ไลบรารี: Wire และ LiquidCrystal_I2C
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27,16,2); // บางรุ่นใช้ 0x3F
+
+void setup() {
+  Wire.begin();
+  lcd.init();              // เริ่ม LCD
+  lcd.backlight();         // เปิดไฟพื้นหลัง
+  lcd.clear();             // ล้างหน้าจอ
+  lcd.setCursor(0,0);      // คอลัมน์ 0 แถว 0
+  lcd.print("Hello Arduino");
+  lcd.setCursor(0,1);      // คอลัมน์ 0 แถว 1
+  lcd.print("MQTT Ready");
+}
+void loop() {}
+
+คำสั่ง:
+lcd.init()                เริ่มต้น LCD
+lcd.backlight()           เปิดไฟพื้นหลัง
+lcd.noBacklight()         ปิดไฟพื้นหลัง
+lcd.clear()               ล้างทั้งจอ (อย่าเรียกถี่จนจอกะพริบ)
+lcd.home()                กลับตำแหน่งเริ่มต้น
+lcd.setCursor(col,row)    ย้ายตำแหน่งเคอร์เซอร์ (เริ่มนับ 0)
+lcd.print(value)          แสดงข้อความ/ตัวเลข
+lcd.cursor()              แสดงเคอร์เซอร์
+lcd.noCursor()            ซ่อนเคอร์เซอร์
+lcd.blink()               ทำเคอร์เซอร์กะพริบ
+lcd.noBlink()             หยุดกะพริบ
+
+================================================================================
+15 | WIFI (WiFiS3)
+================================================================================
+#include <WiFiS3.h>
+const char WIFI_SSID[]="YOUR_WIFI";
+const char WIFI_PASS[]="YOUR_PASSWORD";
+
+void setup() {
+  Serial.begin(9600);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status()!=WL_CONNECTED) {
+    Serial.println("Connecting...");
+    delay(1000);
+  }
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+}
+void loop() {}
+
+คำสั่ง:
+WiFi.begin(ssid,pass)     เริ่มเชื่อมต่อ Wi-Fi
+WiFi.status()             ตรวจสถานะ Wi-Fi
+WL_CONNECTED              สถานะเชื่อมต่อแล้ว
+WiFi.localIP()            IP ที่บอร์ดได้รับ
+WiFi.RSSI()               ความแรงสัญญาณ Wi-Fi (dBm)
+WiFi.disconnect()         ตัดการเชื่อมต่อ
+
+หมายเหตุ: UNO R4 WiFi ใช้เครือข่าย 2.4 GHz; ตรวจรหัสผ่านและสัญญาณ
+
+================================================================================
+16 | MQTT PUBLISH / SUBSCRIBE (MQTTClient.h)
+================================================================================
+ไลบรารี: MQTT by Joel Gaehwiler (256dpi)
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+
+const char WIFI_SSID[]="YOUR_WIFI";
+const char WIFI_PASS[]="YOUR_PASSWORD";
+const char BROKER[]="phycom.it.kmitl.ac.th";
+const char TOPIC_SEND[]="68070131/keypad";
+const char TOPIC_RECEIVE[]="68070131/prob_stat";
+WiFiClient net;
+MQTTClient mqtt(256);
+
+void onMessage(String &topic, String &payload) {
+  Serial.print("Topic: "); Serial.println(topic);
+  Serial.print("Payload: "); Serial.println(payload);
+}
+
+void setup() {
+  Serial.begin(9600);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status()!=WL_CONNECTED) delay(250);
+  mqtt.begin(BROKER,1883,net);
+  mqtt.onMessage(onMessage);
+  if (mqtt.connect("uno-r4-example-client")) {
+    mqtt.subscribe(TOPIC_RECEIVE);
+    mqtt.publish(TOPIC_SEND,"HELLO");
+  }
+}
+
+void loop() {
+  mqtt.loop();
+  // โปรแกรมใช้งานจริงต้องเพิ่ม reconnect Wi-Fi/MQTT และ subscribe ซ้ำ
+}
+
+คำสั่ง:
+mqtt.begin(host,port,net)      กำหนด MQTT Broker
+mqtt.connect(clientId)        เชื่อมต่อ Broker
+mqtt.connected()              ตรวจว่า MQTT ยังเชื่อมต่อหรือไม่
+mqtt.subscribe(topic)         สมัครรับข้อความจาก Topic
+mqtt.publish(topic,payload)   ส่งข้อความไปยัง Topic
+mqtt.onMessage(callback)      ตั้งฟังก์ชันรับข้อความ
+mqtt.loop()                   ดูแลการรับส่งและ Keepalive; เรียกบ่อย ๆ
+mqtt.disconnect()             ตัด MQTT
+mqtt.setTimeout(1000)         ตั้งเวลารอการสื่อสาร (ms)
+
+ตัวอย่าง Payload:
+"5"     ปุ่ม Keypad เลข 5
+"On"    คำสั่งเปิด (ตัวพิมพ์ใหญ่-เล็กมีผล)
+"Off"   คำสั่งปิด
+"25.6"  ค่าอุณหภูมิ
+
+สำคัญ: เว็บจะรับได้เมื่อ Subscribe Topic เดียวกันกับที่บอร์ด Publish
+        ชื่อ Topic ต้องตรงทุกตัวอักษร รวมทั้ง / และตัวพิมพ์เล็ก-ใหญ่
+        ใช้ Client ID ไม่ซ้ำกันระหว่างบอร์ด/เว็บ
+        หาก Broker ไม่อนุญาตการเชื่อมต่อจากอินเทอร์เน็ตภายนอก
+        เว็บที่อยู่นอกเครือข่ายอาจใช้งานไม่ได้
+
+================================================================================
+17 | ตัวอย่างการส่งค่า SENSOR ไป MQTT + แสดง LCD (แนวทางรวม)
+================================================================================
+1. อ่าน Sensor ด้วย analogRead()/digitalRead()/pulseIn()
+2. แปลงค่าเป็น String เช่น String(tempC,1)
+3. mqtt.publish("topic",payload) เมื่อ mqtt.connected() เป็นจริง
+4. lcd.setCursor(0,0); lcd.print("Temp: "); lcd.print(tempC,1);
+5. lcd.setCursor(0,1); lcd.print("MQTT: ONLINE");
+6. เรียก mqtt.loop() บ่อย ๆ และตั้งเวลาอ่าน Sensor ด้วย millis()
+7. ไม่ใช้ lcd.clear() ในทุก loop เพราะจอจะกะพริบ
+8. หากเซนเซอร์ผิดพลาด อย่าส่งตัวเลขปลอม ให้แสดง ERROR/ข้ามการส่ง
+
+ตัวอย่างคำสั่งส่งค่าที่อ่านจาก A0 (ใส่ใน loop ของโค้ด MQTT):
+static unsigned long lastPublish=0;
+if (millis()-lastPublish >= 1000) {
+  lastPublish=millis();
+  int value=analogRead(A0);
+  if (mqtt.connected()) mqtt.publish("68070131/light", String(value));
+}
+
+================================================================================
+18 | MATH / STRING / ARRAY
+================================================================================
+map(x,0,1023,0,100)      แปลงช่วงตัวเลข (ผลลัพธ์เป็นจำนวนเต็ม)
+constrain(x,0,100)       จำกัดค่าให้อยู่ระหว่าง 0..100
+abs(x)                   ค่าสัมบูรณ์
+sqrt(x)                  รากที่สอง
+pow(x,y)                 ยกกำลัง
+log(x)                   ลอการิทึมธรรมชาติ
+min(a,b)                 เลือกค่าน้อยกว่า
+max(a,b)                 เลือกค่ามากกว่า
+random(0,10)             สุ่มจำนวนเต็ม 0..9
+randomSeed(seed)         ตั้งค่าเริ่มต้นสำหรับการสุ่ม
+
+String(25.5,1)           แปลงตัวเลขเป็นข้อความทศนิยม 1 ตำแหน่ง
+String("A") + "B"         ต่อข้อความ
+msg.length()             ความยาวข้อความ
+msg.trim()               ตัดช่องว่างหัวท้าย
+msg.toInt()              แปลงข้อความเป็นจำนวนเต็ม
+msg.toFloat()            แปลงข้อความเป็นทศนิยม
+msg.charAt(0)            อ่านตัวอักษรตำแหน่งแรก
+
+int pins[3]={9,10,11};   อาร์เรย์ 3 ค่า
+pins[0]                  ค่าแรกของอาร์เรย์
+
+================================================================================
+19 | สรุปผังต่อสายตัวอย่าง
+================================================================================
+อุปกรณ์                ขา Arduino (ตัวอย่าง)
+------------------------------------------------------------------
+LED                    D9 + ตัวต้านทาน -> LED -> GND
+RGB R/G/B              D9 / D10 / D11 ผ่านตัวต้านทานแยก
+Button                 D4 -> ปุ่ม -> GND (INPUT_PULLUP)
+PIR OUT                D2
+Potentiometer          A0 (ขากลาง), 5V/GND (ขานอก)
+LDR                    A0 ผ่านวงจรแบ่งแรงดัน
+HC-SR04                TRIG D2, ECHO D3
+TMP36                  OUT A3 (ตรวจลำดับขาจาก datasheet)
+NTC Thermistor         A3 ผ่านวงจรแบ่งแรงดัน
+DHT11/DHT22            DATA D2
+Keypad 4x4             สาย 1..8 -> D9,D8,D7,D6,D5,D4,D3,D2
+7-Segment A..G         D2,D3,D4,D5,D6,D7,D8
+LCD I2C                SDA/SCL + 5V/GND
+
+คำเตือน: ตารางนี้เป็นตัวอย่าง "แยกแต่ละอุปกรณ์" หากต่อหลายอุปกรณ์
+         พร้อมกัน ห้ามใช้ขาเดียวกันสำหรับอุปกรณ์ที่ทำงานขัดกัน
+
+================================================================================
+20 | TROUBLESHOOTING / แก้ปัญหา
+================================================================================
+[Wi-Fi ไม่ติด]
+ - ตรวจ SSID/Password, ใช้ Wi-Fi 2.4 GHz
+ - เช็ก WiFi.status(), WiFi.localIP()
+ - ตรวจว่าเครือข่ายต้องล็อกอินผ่านหน้าเว็บหรือไม่
+
+[MQTT ไม่เชื่อมต่อ]
+ - เช็ก Broker/Port, เครือข่ายและ Firewall
+ - Client ID ต้องไม่ซ้ำกัน
+ - เรียก mqtt.loop() สม่ำเสมอ
+ - เมื่อ reconnect ให้ subscribe อีกครั้ง
+
+[เว็บไม่เห็นข้อมูล]
+ - Topic ฝั่งเว็บและบอร์ดต้องตรงกันทุกตัวอักษร
+ - ตรวจว่าบอร์ด Publish สำเร็จจริง
+ - MQTT TCP 1883 ไม่ใช่พอร์ต WebSocket ของเบราว์เซอร์
+ - เว็บต้องใช้ WebSocket Endpoint ที่ Broker รองรับ
+
+[LCD มีแสงแต่ไม่มีตัวอักษร]
+ - ตรวจ Address 0x27 / 0x3F และสาย SDA/SCL
+ - ปรับตัวต้านทาน Contrast หลังจอ I2C
+ - เรียก lcd.init() และ lcd.backlight()
+
+[Keypad เลขไม่ตรง / ขึ้น 1 รัว]
+ - ตรวจลำดับสาย Row/Column จริง
+ - ใช้ INPUT_PULLUP กับ Column
+ - เพิ่ม debounce และตรวจสายหลวม
+ - อย่าสมมติว่าลำดับสายบน Keypad ทุกตัวเหมือนกัน
+
+[Ultrasonic ขึ้น -1 / 0 / ระยะเกินจริง]
+ - ตรวจ TRIG/ECHO, กราวด์ร่วม, แรงดัน Echo
+ - ตั้ง timeout ใน pulseIn()
+ - ตรวจค่าที่อยู่ในช่วงเซนเซอร์ และอ่านซ้ำเพื่อกรอง noise
+
+[TMP36 ร้อนผิดปกติ]
+ - ปิดไฟทันที ตรวจว่าต่อ VCC/GND/OUT สลับหรือไม่
+ - ตรวจ datasheet และแรงดันจ่ายก่อนต่อใหม่
+
+[RGB ติดสีผิด]
+ - ตรวจ Common Anode หรือ Common Cathode
+ - Common Anode: LOW=ติด / HIGH=ดับ
+ - ตรวจ R/G/B ต่อ D9/D10/D11 ตามโค้ด
+
+[7-Segment เลขไม่ตรง]
+ - ตรวจลำดับ Segment A-G กับขาจริงบนตัวหลอด
+ - ตรวจชนิด Common Anode/Cathode
+ - ใส่ตัวต้านทานจำกัดกระแสแยกทุก Segment
+
+================================================================================
+                              END OF CHEAT SHEET
+================================================================================

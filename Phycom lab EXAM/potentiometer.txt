@@ -1,0 +1,387 @@
+
+/*
+=====================================================
+ PROJECT: Potentiometer WiFi MQTT LCD Monitor
+ BOARD: Arduino UNO R4 WiFi
+=====================================================
+
+ อุปกรณ์:
+ 1. Arduino UNO R4 WiFi
+ 2. Potentiometer 10kΩ (ตัวต้านทานปรับค่าได้)
+ 3. LCD I2C 16x2
+ 4. Breadboard และสาย Jumper
+
+ การต่อ Potentiometer:
+ ขานอก 1  -> 5V
+ ขากลาง   -> A0
+ ขานอก 2  -> GND
+
+ การต่อ LCD I2C:
+ VCC -> 5V
+ GND -> GND
+ SDA -> SDA
+ SCL -> SCL
+
+ Library:
+ - WiFiS3
+ - MQTT by Joel Gaehwiler (256dpi)
+ - Wire
+ - LiquidCrystal_I2C
+
+ การทำงาน:
+ 1. เชื่อมต่อ Wi-Fi
+ 2. เชื่อมต่อ MQTT Broker
+ 3. อ่าน Potentiometer จากขา A0
+ 4. แปลงค่าเป็นช่วง 0-1023
+ 5. แสดงค่าบน LCD 16x2
+ 6. Publish ค่าไป MQTT ทุก 1 วินาที
+ 7. เชื่อมต่อใหม่เมื่อ Wi-Fi/MQTT หลุด
+
+ MQTT Broker: phycom.it.kmitl.ac.th
+ MQTT Port: 1883
+ MQTT Topic: 68070131/light
+
+ ตัวอย่าง Payload:
+ 0
+ 295
+ 512
+ 1023
+
+ Serial Monitor: 9600 baud
+ LCD Address: 0x27
+=====================================================
+*/
+
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// ================================================
+// 1. WIFI CONFIGURATION
+// ================================================
+
+// ชื่อ Wi-Fi ที่ต้องการเชื่อมต่อ
+const char WIFI_SSID[] = "EDOK";
+
+// รหัสผ่าน Wi-Fi
+const char WIFI_PASSWORD[] = "1234567890";
+
+// ================================================
+// 2. MQTT CONFIGURATION
+// ================================================
+
+// MQTT Broker ของรายวิชา
+const char MQTT_BROKER[] = "phycom.it.kmitl.ac.th";
+
+// พอร์ต MQTT แบบ TCP
+const int MQTT_PORT = 1883;
+
+// Topic สำหรับส่งค่า Potentiometer
+const char MQTT_TOPIC[] = "68070131/light";
+
+// สร้าง Network Client สำหรับ MQTT
+WiFiClient network;
+
+// สร้าง MQTT Client
+MQTTClient mqtt(256);
+
+// ================================================
+// 3. HARDWARE CONFIGURATION
+// ================================================
+
+// Potentiometer ต่อขากลางเข้ากับ A0
+const int POT_PIN = A0;
+
+// LCD I2C Address 0x27 ขนาด 16x2
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// ================================================
+// 4. TIMING CONFIGURATION
+// ================================================
+
+// อ่านและแสดงค่าทุก 200 มิลลิวินาที
+const unsigned long READ_INTERVAL = 200;
+
+// ส่ง MQTT ทุก 1000 มิลลิวินาที
+const unsigned long SEND_INTERVAL = 1000;
+
+// ลองเชื่อมต่อใหม่ทุก 5000 มิลลิวินาที
+const unsigned long RETRY_INTERVAL = 5000;
+
+// เก็บเวลาอ่านค่าครั้งล่าสุด
+unsigned long lastRead = 0;
+
+// เก็บเวลาส่ง MQTT ครั้งล่าสุด
+unsigned long lastSend = 0;
+
+// เก็บเวลาพยายามเชื่อมต่อครั้งล่าสุด
+unsigned long lastRetry = 0;
+
+// เก็บค่า Potentiometer ล่าสุด
+int potValue = 0;
+
+// ================================================
+// 5. READ POTENTIOMETER
+// ================================================
+
+// อ่านค่า Analog จาก Potentiometer
+int readPotentiometer() {
+
+  // อ่านค่า Analog จาก A0
+  // ตั้งความละเอียด 10-bit ใน setup()
+  // จึงได้ค่าระหว่าง 0-1023
+  int value = analogRead(POT_PIN);
+
+  // ป้องกันค่าเกินช่วงที่กำหนด
+  value = constrain(value, 0, 1023);
+
+  // ส่งค่ากลับไปใช้งาน
+  return value;
+}
+
+// ================================================
+// 6. WIFI CONNECTION
+// ================================================
+
+// ฟังก์ชันเชื่อมต่อ Wi-Fi
+void connectWiFi() {
+
+  // ถ้าเชื่อมต่ออยู่แล้ว ไม่ต้องทำอะไร
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  Serial.println("Connecting WiFi...");
+
+  // เริ่มเชื่อมต่อ Wi-Fi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  // บันทึกเวลาเริ่มเชื่อมต่อ
+  unsigned long startTime = millis();
+
+  // รอการเชื่อมต่อสูงสุด 10 วินาที
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - startTime < 10000) {
+    delay(250);
+  }
+
+  // ตรวจสอบผลการเชื่อมต่อ
+  if (WiFi.status() == WL_CONNECTED) {
+
+    Serial.println("WiFi Connected!");
+
+    // แสดง IP Address
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+
+  } else {
+
+    Serial.println("WiFi Connection Failed!");
+  }
+}
+
+// ================================================
+// 7. MQTT CONNECTION
+// ================================================
+
+// ฟังก์ชันเชื่อมต่อ MQTT
+void connectMQTT() {
+
+  // ถ้า Wi-Fi ยังไม่เชื่อมต่อ ให้หยุดก่อน
+  if (WiFi.status() != WL_CONNECTED) {
+    return;
+  }
+
+  // ถ้า MQTT เชื่อมต่อแล้ว ไม่ต้องเชื่อมซ้ำ
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.println("Connecting MQTT...");
+
+  // สร้าง Client ID สำหรับบอร์ด
+  String clientId = "UNO-R4-POT-";
+
+  // เพิ่มค่าจาก millis เพื่อช่วยลดโอกาส ID ซ้ำ
+  clientId += String(millis(), HEX);
+
+  // เชื่อมต่อ MQTT Broker
+  if (mqtt.connect(clientId.c_str())) {
+
+    Serial.println("MQTT Connected!");
+
+  } else {
+
+    Serial.println("MQTT Connection Failed!");
+  }
+}
+
+// ================================================
+// 8. LCD DISPLAY
+// ================================================
+
+// ฟังก์ชันอัปเดตข้อความบน LCD
+void updateLCD() {
+
+  // บรรทัดแรก แสดงค่า Potentiometer
+  lcd.setCursor(0, 0);
+
+  lcd.print("POT: ");
+  lcd.print(potValue);
+
+  // เติมช่องว่างเพื่อลบตัวเลขเก่า
+  lcd.print("       ");
+
+  // บรรทัดที่สอง แสดงสถานะการเชื่อมต่อ
+  lcd.setCursor(0, 1);
+
+  if (WiFi.status() != WL_CONNECTED) {
+
+    lcd.print("WiFi: OFF       ");
+
+  } else if (!mqtt.connected()) {
+
+    lcd.print("MQTT: OFF       ");
+
+  } else {
+
+    lcd.print("MQTT: ONLINE    ");
+  }
+}
+
+// ================================================
+// 9. SETUP
+// ================================================
+
+void setup() {
+
+  // เปิด Serial Monitor ที่ 9600 baud
+  Serial.begin(9600);
+
+  // กำหนด ADC เป็น 10-bit
+  // ทำให้ analogRead() อ่านค่า 0-1023
+  analogReadResolution(10);
+
+  // กำหนดขา Potentiometer เป็น INPUT
+  pinMode(POT_PIN, INPUT);
+
+  // เริ่มต้นการสื่อสาร I2C
+  Wire.begin();
+
+  // เริ่มต้น LCD
+  lcd.init();
+
+  // เปิดไฟ Backlight ของ LCD
+  lcd.backlight();
+
+  // แสดงข้อความเริ่มต้น
+  lcd.setCursor(0, 0);
+  lcd.print("POT MQTT MONITOR");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Starting...     ");
+
+  // กำหนด MQTT Broker และ Port
+  mqtt.begin(MQTT_BROKER, MQTT_PORT, network);
+
+  // จำกัดเวลารอการทำงาน MQTT
+  mqtt.setTimeout(1000);
+
+  Serial.println("=========================");
+  Serial.println("POT MQTT LCD MONITOR");
+  Serial.println("=========================");
+
+  // เชื่อมต่อ Wi-Fi
+  connectWiFi();
+
+  // เชื่อมต่อ MQTT
+  connectMQTT();
+
+  // ล้างหน้าจอหลังเริ่มระบบ
+  lcd.clear();
+
+  // อ่านค่าเริ่มต้น
+  potValue = readPotentiometer();
+
+  // แสดงค่าบน LCD
+  updateLCD();
+}
+
+// ================================================
+// 10. MAIN LOOP
+// ================================================
+
+void loop() {
+
+  // อ่านเวลาปัจจุบัน
+  unsigned long now = millis();
+
+  // ดูแลการเชื่อมต่อ MQTT
+  if (mqtt.connected()) {
+    mqtt.loop();
+  }
+
+  // ตรวจสอบการเชื่อมต่อทุก 5 วินาที
+  if (now - lastRetry >= RETRY_INTERVAL) {
+
+    lastRetry = now;
+
+    // ถ้า Wi-Fi หลุด ให้เชื่อมต่อใหม่
+    if (WiFi.status() != WL_CONNECTED) {
+      connectWiFi();
+    }
+
+    // ถ้า MQTT หลุด ให้เชื่อมต่อใหม่
+    if (WiFi.status() == WL_CONNECTED &&
+        !mqtt.connected()) {
+      connectMQTT();
+    }
+  }
+
+  // อ่าน Potentiometer ทุก 200ms
+  if (now - lastRead >= READ_INTERVAL) {
+
+    lastRead = now;
+
+    // อ่านค่า Potentiometer
+    potValue = readPotentiometer();
+
+    // แสดงค่าบน Serial Monitor
+    Serial.print("Potentiometer: ");
+    Serial.println(potValue);
+
+    // อัปเดตหน้าจอ LCD
+    updateLCD();
+  }
+
+  // ส่งข้อมูล MQTT ทุก 1 วินาที
+  if (now - lastSend >= SEND_INTERVAL) {
+
+    lastSend = now;
+
+    // ตรวจสอบว่า MQTT เชื่อมต่ออยู่
+    if (mqtt.connected()) {
+
+      // แปลงค่าเป็น String เช่น "295"
+      String payload = String(potValue);
+
+      // Publish ไปยัง Topic ที่กำหนด
+      if (mqtt.publish(MQTT_TOPIC, payload)) {
+
+        Serial.print("Published to ");
+        Serial.print(MQTT_TOPIC);
+        Serial.print(": ");
+        Serial.println(payload);
+
+      } else {
+
+        Serial.println("MQTT Publish Failed!");
+      }
+
+    } else {
+
+      Serial.println("MQTT Offline - Skip Publish");
+    }
+  }
+}

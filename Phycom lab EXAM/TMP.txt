@@ -1,0 +1,206 @@
+
+/*
+====================================================
+ PROJECT: TMP36 Temperature MQTT
+ BOARD: Arduino UNO R4 WiFi
+====================================================
+
+ อุปกรณ์:
+ 1. Arduino UNO R4 WiFi
+ 2. TMP36 Temperature Sensor
+ 3. Breadboard และ Jumper
+
+ การต่อสาย TMP36:
+ (หันด้านแบนเข้าหาตัว ขาชี้ลง)
+
+ TMP36             Arduino
+ --------------------------------
+ ขาซ้าย  (+Vs)  -> 5V
+ ขากลาง (Vout) -> A3
+ ขาขวา  (GND)  -> GND
+
+ Library:
+ 1. WiFiS3
+ 2. MQTT by 256dpi
+
+ การทำงาน:
+ 1. เชื่อมต่อ WiFi EDOK
+ 2. เชื่อมต่อ MQTT Broker
+ 3. อ่านอุณหภูมิจาก TMP36 ผ่าน A3
+ 4. คำนวณเป็นองศาเซลเซียส
+ 5. Publish ทุก 3 วินาที
+ 6. เชื่อมต่อใหม่อัตโนมัติเมื่อหลุด
+
+ Broker: phycom.it.kmitl.ac.th
+ Port: 1883
+ Topic: 68070131/temp
+
+ Serial Monitor: 9600 baud
+====================================================
+*/
+
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+
+// ========== WiFi ==========
+const char WIFI_SSID[] = "EDOK";
+const char WIFI_PASSWORD[] = "1234567890";
+
+// ========== MQTT ==========
+const char MQTT_BROKER[] = "phycom.it.kmitl.ac.th";
+const int MQTT_PORT = 1883;
+const char MQTT_TOPIC[] = "68070131/temp";
+
+WiFiClient network;
+MQTTClient mqtt(256);
+
+// ========== TMP36 ==========
+const int TMP_PIN = A3;
+
+// แรงดันอ้างอิง ADC โดยประมาณ
+const float ADC_VREF = 5.0;
+
+// ========== TIMER ==========
+const unsigned long PUBLISH_INTERVAL = 3000;
+const unsigned long RETRY_INTERVAL = 5000;
+
+unsigned long lastPublish = 0;
+unsigned long lastRetry = 0;
+
+// ========== อ่านอุณหภูมิ ==========
+float readTemperature() {
+  long total = 0;
+
+  // อ่าน 20 ครั้งเพื่อลดสัญญาณรบกวน
+  for (int i = 0; i < 20; i++) {
+    total += analogRead(TMP_PIN);
+    delay(2);
+  }
+
+  float raw = total / 20.0;
+
+  // แปลง ADC 14-bit เป็นแรงดัน
+  float voltage = raw * ADC_VREF / 16383.0;
+
+  // TMP36: 500mV = 0°C, เพิ่ม 10mV ต่อ 1°C
+  float temperature = (voltage - 0.5) * 100.0;
+
+  Serial.print("Voltage: ");
+  Serial.print(voltage, 4);
+  Serial.println(" V");
+
+  return temperature;
+}
+
+// ========== เชื่อมต่อ WiFi ==========
+void connectWiFi() {
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  Serial.println("Connecting WiFi...");
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  unsigned long start = millis();
+
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - start < 15000) {
+    delay(500);
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi Connected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("WiFi Failed!");
+  }
+}
+
+// ========== เชื่อมต่อ MQTT ==========
+void connectMQTT() {
+  if (WiFi.status() != WL_CONNECTED) return;
+  if (mqtt.connected()) return;
+
+  Serial.println("Connecting MQTT...");
+
+  String clientId = "TMP36-68070131-";
+  clientId += String(millis(), HEX);
+
+  if (mqtt.connect(clientId.c_str())) {
+    Serial.println("MQTT Connected!");
+  } else {
+    Serial.println("MQTT Failed!");
+  }
+}
+
+// ========== SETUP ==========
+void setup() {
+  Serial.begin(9600);
+
+  // ตั้ง ADC เป็น 14-bit
+  analogReadResolution(14);
+
+  pinMode(TMP_PIN, INPUT);
+
+  // กำหนด MQTT Broker
+  mqtt.begin(MQTT_BROKER, MQTT_PORT, network);
+
+  Serial.println();
+  Serial.println("TMP36 Temperature MQTT");
+  Serial.println("======================");
+
+  connectWiFi();
+  connectMQTT();
+}
+
+// ========== LOOP ==========
+void loop() {
+
+  // เชื่อมต่อใหม่เมื่อ WiFi หรือ MQTT หลุด
+  if (WiFi.status() != WL_CONNECTED ||
+      !mqtt.connected()) {
+
+    if (millis() - lastRetry >= RETRY_INTERVAL) {
+      lastRetry = millis();
+
+      if (WiFi.status() != WL_CONNECTED) {
+        connectWiFi();
+      }
+
+      if (WiFi.status() == WL_CONNECTED) {
+        connectMQTT();
+      }
+    }
+
+    return;
+  }
+
+  // รักษาการเชื่อมต่อ MQTT
+  mqtt.loop();
+
+  // ส่งอุณหภูมิทุก 3 วินาที
+  if (millis() - lastPublish >= PUBLISH_INTERVAL) {
+    lastPublish = millis();
+
+    float temperature = readTemperature();
+
+    Serial.print("Temperature: ");
+    Serial.print(temperature, 2);
+    Serial.println(" C");
+
+    // ส่งเฉพาะตัวเลขไปยัง MQTT
+    String payload = String(temperature, 2);
+
+    if (mqtt.publish(MQTT_TOPIC, payload)) {
+      Serial.print("Published to ");
+      Serial.print(MQTT_TOPIC);
+      Serial.print(": ");
+      Serial.println(payload);
+    } else {
+      Serial.println("Publish Failed!");
+    }
+
+    Serial.println("-------------------------");
+  }
+}

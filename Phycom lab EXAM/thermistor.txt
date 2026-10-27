@@ -1,0 +1,437 @@
+
+/*
+=====================================================
+ PROJECT: TTC05103 WiFi MQTT LCD Temperature Monitor
+ BOARD: Arduino UNO R4 WiFi
+=====================================================
+
+ อุปกรณ์:
+ 1. Arduino UNO R4 WiFi
+ 2. TTC05103 NTC Thermistor 10kΩ
+ 3. Resistor 330Ω (ส้ม-ส้ม-น้ำตาล-ทอง)
+ 4. LCD I2C 16x2
+ 5. Breadboard และ Jumper
+
+ การต่อเซนเซอร์:
+ 5V -> Resistor 330Ω -> A3 -> TTC05103 -> GND
+
+ การต่อ LCD:
+ VCC -> 5V
+ GND -> GND
+ SDA -> SDA
+ SCL -> SCL
+
+ Libraries:
+ - WiFiS3 (สำหรับ UNO R4 WiFi)
+ - MQTTClient by 256dpi
+ - Wire
+ - LiquidCrystal_I2C
+ - math.h
+
+ การทำงาน:
+ 1. เชื่อมต่อ Wi-Fi
+ 2. เชื่อมต่อ MQTT Broker
+ 3. อ่าน TTC05103 ที่ A3
+ 4. คำนวณอุณหภูมิด้วยสมการ Beta
+ 5. แสดงอุณหภูมิบน LCD
+ 6. แสดง ADC และ Resistance ใน Serial
+ 7. ส่งค่า Celsius ไป MQTT ทุก 3 วินาที
+ 8. เชื่อมต่อใหม่อัตโนมัติเมื่อหลุด
+
+ MQTT:
+ Broker: phycom.it.kmitl.ac.th
+ Port: 1883
+ Topic: 68070131/temp
+
+ LCD I2C Address: 0x27
+ Serial Monitor: 9600 baud
+=====================================================
+*/
+
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <math.h>
+
+// -------------------- Wi-Fi --------------------
+
+// ชื่อเครือข่าย Wi-Fi
+const char WIFI_SSID[] = "EDOK";
+
+// รหัสผ่าน Wi-Fi
+const char WIFI_PASSWORD[] = "1234567890";
+
+// -------------------- MQTT --------------------
+
+// ที่อยู่ MQTT Broker
+const char MQTT_BROKER[] = "phycom.it.kmitl.ac.th";
+
+// พอร์ต MQTT
+const int MQTT_PORT = 1883;
+
+// Topic สำหรับส่งอุณหภูมิ
+const char MQTT_TOPIC[] = "68070131/temp";
+
+// สร้างการเชื่อมต่อ TCP
+WiFiClient network;
+
+// สร้าง MQTT Client
+MQTTClient mqtt(256);
+
+// -------------------- LCD --------------------
+
+// LCD I2C 16x2 ที่ Address 0x27
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// -------------------- SENSOR --------------------
+
+// ขา Analog ที่อ่าน TTC05103
+const int NTC_PIN = A3;
+
+// ตัวต้านทานคงที่จริง 330Ω
+const float R_FIXED = 330.0;
+
+// ความต้านทาน TTC05103 ที่ 25°C
+const float R0 = 10000.0;
+
+// ค่า Beta ของ TTC05103
+const float BETA = 4050.0;
+
+// อุณหภูมิอ้างอิง 25°C ในหน่วย Kelvin
+const float T0 = 298.15;
+
+// ค่าสูงสุดของ ADC 12-bit
+const float ADC_MAX = 4095.0;
+
+// -------------------- TIMING --------------------
+
+// อ่านและแสดงอุณหภูมิทุก 1 วินาที
+const unsigned long READ_INTERVAL = 1000;
+
+// ส่ง MQTT ทุก 3 วินาที
+const unsigned long SEND_INTERVAL = 3000;
+
+// พยายามเชื่อมต่อใหม่ทุก 5 วินาที
+const unsigned long RETRY_INTERVAL = 5000;
+
+// เวลาที่อ่านเซนเซอร์ล่าสุด
+unsigned long lastRead = 0;
+
+// เวลาที่ส่ง MQTT ล่าสุด
+unsigned long lastSend = 0;
+
+// เวลาที่พยายามเชื่อมต่อล่าสุด
+unsigned long lastRetry = 0;
+
+// เก็บอุณหภูมิล่าสุด
+float currentTemperature = NAN;
+
+// เก็บค่าความต้านทานล่าสุด
+float currentResistance = NAN;
+
+// เก็บค่า ADC ล่าสุด
+float currentADC = NAN;
+
+// -------------------- SENSOR FUNCTION --------------------
+
+// อ่าน ADC และคำนวณอุณหภูมิ TTC05103
+float readTemperature(float &resistance, float &adc) {
+
+  long total = 0;
+
+  // อ่าน ADC 30 ครั้งเพื่อลดสัญญาณรบกวน
+  for (int i = 0; i < 30; i++) {
+    total += analogRead(NTC_PIN);
+    delay(3);
+  }
+
+  // คำนวณค่า ADC เฉลี่ย
+  adc = total / 30.0;
+
+  // ตรวจสอบค่าที่ใกล้ขอบ ADC
+  if (adc <= 5 || adc >= 4090) {
+    resistance = NAN;
+    return NAN;
+  }
+
+  // คำนวณความต้านทานของ NTC
+  // ใช้สำหรับวงจร:
+  // 5V -> R_FIXED -> A3 -> NTC -> GND
+  resistance = R_FIXED * adc / (ADC_MAX - adc);
+
+  // ตรวจสอบค่าความต้านทาน
+  if (resistance <= 0 || !isfinite(resistance)) {
+    return NAN;
+  }
+
+  // คำนวณอุณหภูมิ Kelvin ด้วยสมการ Beta
+  float kelvin =
+      1.0 /
+      ((1.0 / T0) +
+       (log(resistance / R0) / BETA));
+
+  // แปลง Kelvin เป็น Celsius
+  return kelvin - 273.15;
+}
+
+// -------------------- WIFI FUNCTION --------------------
+
+// พยายามเชื่อมต่อ Wi-Fi
+void connectWiFi() {
+
+  // ถ้าเชื่อมต่ออยู่แล้ว ไม่ต้องทำซ้ำ
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  Serial.println("Connecting WiFi...");
+
+  // เริ่มเชื่อมต่อ Wi-Fi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  // บันทึกเวลาเริ่มเชื่อมต่อ
+  unsigned long startTime = millis();
+
+  // รอเชื่อมต่อไม่เกิน 10 วินาที
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - startTime < 10000) {
+    delay(250);
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi Connected!");
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("WiFi Connection Failed!");
+  }
+}
+
+// -------------------- MQTT FUNCTION --------------------
+
+// พยายามเชื่อมต่อ MQTT
+void connectMQTT() {
+
+  // ต้องมี Wi-Fi ก่อน
+  if (WiFi.status() != WL_CONNECTED) {
+    return;
+  }
+
+  // ถ้า MQTT เชื่อมต่อแล้ว ไม่ต้องทำซ้ำ
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.println("Connecting MQTT...");
+
+  // สร้าง Client ID
+  String clientId = "TTC05103-";
+  clientId += String(millis(), HEX);
+
+  // เชื่อมต่อ MQTT
+  if (mqtt.connect(clientId.c_str())) {
+    Serial.println("MQTT Connected!");
+  } else {
+    Serial.println("MQTT Connection Failed!");
+  }
+}
+
+// -------------------- LCD FUNCTION --------------------
+
+// แสดงอุณหภูมิและสถานะเครือข่าย
+void updateLCD() {
+
+  // ล้างเฉพาะข้อความเก่า ไม่ใช้ lcd.clear()
+  // ทุกครั้งเพื่อลดอาการจอกะพริบ
+
+  lcd.setCursor(0, 0);
+
+  // แสดงอุณหภูมิเมื่อเซนเซอร์ปกติ
+  if (isfinite(currentTemperature) &&
+      currentTemperature >= -30 &&
+      currentTemperature <= 125) {
+
+    lcd.print("Temp: ");
+    lcd.print(currentTemperature, 1);
+
+    // รหัสอักขระองศาบน LCD HD44780
+    lcd.write((uint8_t)223);
+
+    lcd.print("C     ");
+
+  } else {
+
+    // แสดงข้อความเมื่ออ่านเซนเซอร์ไม่ได้
+    lcd.print("Sensor Error!   ");
+  }
+
+  // บรรทัดที่ 2 แสดงสถานะ Wi-Fi และ MQTT
+  lcd.setCursor(0, 1);
+
+  if (WiFi.status() != WL_CONNECTED) {
+
+    lcd.print("WiFi: OFF       ");
+
+  } else if (!mqtt.connected()) {
+
+    lcd.print("WiFi ON MQTT OFF");
+
+  } else {
+
+    lcd.print("WiFi ON MQTT ON ");
+  }
+}
+
+// -------------------- SETUP --------------------
+
+void setup() {
+
+  // เริ่ม Serial Monitor
+  Serial.begin(9600);
+
+  // ตั้ง ADC ความละเอียด 12-bit
+  analogReadResolution(12);
+
+  // กำหนดขาเซนเซอร์เป็น INPUT
+  pinMode(NTC_PIN, INPUT);
+
+  // เริ่ม I2C
+  Wire.begin();
+
+  // เริ่ม LCD
+  lcd.init();
+
+  // เปิดไฟ Backlight
+  lcd.backlight();
+
+  // ข้อความเริ่มต้น
+  lcd.setCursor(0, 0);
+  lcd.print("TTC05103 MONITOR");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Starting...     ");
+
+  // เริ่ม MQTT Client
+  mqtt.begin(MQTT_BROKER, MQTT_PORT, network);
+
+  // จำกัดเวลารอ MQTT
+  mqtt.setTimeout(1000);
+
+  Serial.println("============================");
+  Serial.println("TTC05103 WiFi MQTT LCD");
+  Serial.println("============================");
+
+  // แสดงข้อความก่อนเชื่อมต่อ
+  lcd.setCursor(0, 1);
+  lcd.print("Connecting WiFi ");
+
+  // เชื่อมต่อ Wi-Fi
+  connectWiFi();
+
+  // เชื่อมต่อ MQTT
+  connectMQTT();
+
+  // ล้างหน้าจอหลังเริ่มระบบ
+  lcd.clear();
+
+  // อ่านและแสดงค่าเริ่มต้น
+  currentTemperature =
+      readTemperature(currentResistance, currentADC);
+
+  updateLCD();
+}
+
+// -------------------- LOOP --------------------
+
+void loop() {
+
+  unsigned long now = millis();
+
+  // ดูแลการเชื่อมต่อ MQTT
+  if (mqtt.connected()) {
+    mqtt.loop();
+  }
+
+  // ตรวจสอบ Wi-Fi และ MQTT ทุก 5 วินาที
+  if (now - lastRetry >= RETRY_INTERVAL) {
+
+    lastRetry = now;
+
+    // ถ้า Wi-Fi หลุด ให้เชื่อมต่อใหม่
+    if (WiFi.status() != WL_CONNECTED) {
+      connectWiFi();
+    }
+
+    // ถ้า Wi-Fi มีแล้วแต่ MQTT หลุด
+    if (WiFi.status() == WL_CONNECTED &&
+        !mqtt.connected()) {
+      connectMQTT();
+    }
+  }
+
+  // อ่านเซนเซอร์ทุก 1 วินาที
+  if (now - lastRead >= READ_INTERVAL) {
+
+    lastRead = now;
+
+    // อ่านอุณหภูมิและค่าความต้านทาน
+    currentTemperature =
+        readTemperature(currentResistance, currentADC);
+
+    // แสดงค่า ADC
+    Serial.print("ADC: ");
+    Serial.println(currentADC, 2);
+
+    // ตรวจสอบค่าอุณหภูมิ
+    if (isfinite(currentTemperature)) {
+
+      Serial.print("Resistance: ");
+      Serial.print(currentResistance, 2);
+      Serial.println(" ohm");
+
+      Serial.print("Temperature: ");
+      Serial.print(currentTemperature, 2);
+      Serial.println(" C");
+
+    } else {
+
+      Serial.println("Sensor Error!");
+    }
+
+    // อัปเดตหน้าจอ LCD
+    updateLCD();
+
+    Serial.println("----------------------------");
+  }
+
+  // ส่ง MQTT ทุก 3 วินาที
+  if (now - lastSend >= SEND_INTERVAL) {
+
+    lastSend = now;
+
+    // ส่งเฉพาะค่าที่ถูกต้องและมี MQTT
+    if (mqtt.connected() &&
+        isfinite(currentTemperature) &&
+        currentTemperature >= -30 &&
+        currentTemperature <= 125) {
+
+      // ส่งเฉพาะตัวเลข เช่น 26.45
+      String payload = String(currentTemperature, 2);
+
+      if (mqtt.publish(MQTT_TOPIC, payload)) {
+
+        Serial.print("MQTT Published: ");
+        Serial.println(payload);
+
+      } else {
+
+        Serial.println("MQTT Publish Failed!");
+      }
+
+    } else {
+
+      Serial.println("MQTT skipped: Offline or Sensor Error");
+    }
+  }
+}

@@ -1,0 +1,564 @@
+
+/*
+========================================================
+ PROJECT: SMART DOOR - ULTRASONIC + PUSH BUTTON
+ BOARD: Arduino UNO R4 WiFi
+========================================================
+
+ อุปกรณ์:
+ 1. Arduino UNO R4 WiFi
+ 2. Ultrasonic HC-SR04
+ 3. Push Button
+ 4. LCD I2C 16x2
+ 5. Breadboard และสาย Jumper
+
+ การต่อ HC-SR04:
+ VCC  -> Arduino 5V
+ GND  -> Arduino GND
+ TRIG -> Arduino D2
+ ECHO -> Arduino D3
+
+ การต่อ Push Button:
+ ขาหนึ่ง -> Arduino D4
+ อีกขา   -> Arduino GND
+
+ ใช้ INPUT_PULLUP:
+ กดปุ่ม    = LOW
+ ไม่กดปุ่ม = HIGH
+
+ การต่อ LCD I2C:
+ VCC -> Arduino 5V
+ GND -> Arduino GND
+ SDA -> Arduino SDA
+ SCL -> Arduino SCL
+
+ Libraries:
+ - WiFiS3
+ - MQTT by Joel Gaehwiler (256dpi)
+ - Wire
+ - LiquidCrystal_I2C
+
+ เงื่อนไข:
+ ระยะ >= 20 cm และกดปุ่ม -> Publish "On"
+ กรณีอื่นทั้งหมด        -> Publish "Off"
+
+ ถ้าเซนเซอร์อ่านไม่ได้:
+ - แสดง Sensor Error
+ - ส่ง Off เพื่อไม่ให้สถานะประตูค้างเป็น On
+
+ MQTT Broker: phycom.it.kmitl.ac.th
+ MQTT Port: 1883
+ MQTT Topic: 68070131/door
+
+ LCD Address: 0x27
+ Serial Monitor: 9600 baud
+========================================================
+*/
+
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// ====================================================
+// 1. WIFI
+// ====================================================
+
+// ชื่อเครือข่าย Wi-Fi
+const char WIFI_SSID[] = "EDOK";
+
+// รหัสผ่าน Wi-Fi
+const char WIFI_PASSWORD[] = "1234567890";
+
+// ====================================================
+// 2. MQTT
+// ====================================================
+
+// ที่อยู่ MQTT Broker
+const char MQTT_BROKER[] = "phycom.it.kmitl.ac.th";
+
+// พอร์ต MQTT
+const int MQTT_PORT = 1883;
+
+// Topic ของโจทย์ประตู
+const char MQTT_TOPIC[] = "68070131/door";
+
+// Client สำหรับการสื่อสาร TCP
+WiFiClient network;
+
+// MQTT Client
+MQTTClient mqtt(256);
+
+// ====================================================
+// 3. HARDWARE
+// ====================================================
+
+// ขาส่งคลื่น Ultrasonic
+const int TRIG_PIN = 2;
+
+// ขารับ Echo
+const int ECHO_PIN = 3;
+
+// ขารับสัญญาณ Push Button
+const int BUTTON_PIN = 4;
+
+// ระยะทางขั้นต่ำที่อนุญาตให้เปิดประตู
+const float DISTANCE_LIMIT = 20.0;
+
+// LCD I2C 16x2
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// ====================================================
+// 4. TIMING
+// ====================================================
+
+// อ่านเซนเซอร์ทุก 300 ms
+const unsigned long READ_INTERVAL = 300;
+
+// ส่ง MQTT ทุก 1 วินาที
+const unsigned long SEND_INTERVAL = 1000;
+
+// ลองเชื่อมต่อใหม่ทุก 5 วินาที
+const unsigned long RETRY_INTERVAL = 5000;
+
+// ระยะเวลาที่ปุ่มต้องนิ่งเพื่อยืนยันการกด
+const unsigned long DEBOUNCE_TIME = 30;
+
+// เก็บเวลาการทำงาน
+unsigned long lastRead = 0;
+unsigned long lastSend = 0;
+unsigned long lastRetry = 0;
+
+// เก็บระยะทางล่าสุด
+float distanceCM = -1;
+
+// สถานะว่าค่าระยะทางถูกต้องหรือไม่
+bool sensorValid = false;
+
+// สถานะปุ่มที่ผ่านการกรองการเด้ง
+bool buttonPressed = false;
+
+// สถานะประตูที่คำนวณล่าสุด
+bool doorOpen = false;
+
+// ตัวแปรสำหรับ Debounce
+int lastButtonReading = HIGH;
+int stableButtonState = HIGH;
+unsigned long lastButtonChange = 0;
+
+// ====================================================
+// 5. BUTTON FUNCTION
+// ====================================================
+
+// อ่านปุ่มและกรองการเด้งของหน้าสัมผัส
+void updateButton() {
+
+  // อ่านสัญญาณจริงจากขา D4
+  int reading = digitalRead(BUTTON_PIN);
+
+  // ถ้าสัญญาณเปลี่ยน ให้เริ่มจับเวลาใหม่
+  if (reading != lastButtonReading) {
+    lastButtonChange = millis();
+  }
+
+  // ยืนยันสถานะเมื่อสัญญาณนิ่งครบ 30 ms
+  if (millis() - lastButtonChange >= DEBOUNCE_TIME) {
+    stableButtonState = reading;
+  }
+
+  // INPUT_PULLUP: LOW หมายถึงกดปุ่ม
+  buttonPressed = (stableButtonState == LOW);
+
+  // เก็บค่าที่อ่านล่าสุด
+  lastButtonReading = reading;
+}
+
+// ====================================================
+// 6. ULTRASONIC FUNCTION
+// ====================================================
+
+// อ่านระยะทางหนึ่งครั้ง
+float readDistanceOnce() {
+
+  // เคลียร์ขา TRIG
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(3);
+
+  // ส่งสัญญาณ Trigger นาน 10 microseconds
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+
+  // ปิด Trigger
+  digitalWrite(TRIG_PIN, LOW);
+
+  // รอ Echo สูงสุด 25000 microseconds
+  unsigned long duration =
+      pulseIn(ECHO_PIN, HIGH, 25000UL);
+
+  // ถ้าไม่มี Echo ถือว่าอ่านไม่ได้
+  if (duration == 0) {
+    return -1;
+  }
+
+  // คำนวณระยะทาง หน่วย cm
+  float distance = duration * 0.0343 / 2.0;
+
+  // ตรวจสอบช่วงการวัด HC-SR04
+  if (distance < 2.0 || distance > 400.0) {
+    return -1;
+  }
+
+  return distance;
+}
+
+// อ่าน 3 ครั้งเพื่อช่วยลดการอ่านผิดพลาด
+float readDistance() {
+
+  // เก็บระยะทางที่อ่านได้
+  float values[3];
+
+  // จำนวนค่าที่อ่านได้ถูกต้อง
+  int count = 0;
+
+  // อ่านทั้งหมด 3 ครั้ง
+  for (int i = 0; i < 3; i++) {
+
+    // อ่านระยะทาง
+    float distance = readDistanceOnce();
+
+    // เก็บเฉพาะค่าที่ถูกต้อง
+    if (distance >= 0) {
+      values[count] = distance;
+      count++;
+    }
+
+    // เว้นระยะระหว่างการยิงคลื่นเสียง
+    if (i < 2) {
+      delay(60);
+    }
+  }
+
+  // ถ้าอ่านไม่ได้ทั้ง 3 ครั้ง
+  if (count == 0) {
+    return -1;
+  }
+
+  // เรียงค่าจากน้อยไปมาก
+  for (int i = 0; i < count - 1; i++) {
+    for (int j = i + 1; j < count; j++) {
+      if (values[j] < values[i]) {
+        float temp = values[i];
+        values[i] = values[j];
+        values[j] = temp;
+      }
+    }
+  }
+
+  // คืนค่ามัธยฐาน
+  return values[count / 2];
+}
+
+// ====================================================
+// 7. DOOR LOGIC
+// ====================================================
+
+// คำนวณสถานะประตูจากระยะทางและปุ่ม
+void updateDoorState() {
+
+  // ต้องอ่านเซนเซอร์ได้
+  // ระยะ >= 20 cm
+  // และปุ่มถูกกด
+  doorOpen =
+      sensorValid &&
+      distanceCM >= DISTANCE_LIMIT &&
+      buttonPressed;
+}
+
+// ====================================================
+// 8. WIFI FUNCTION
+// ====================================================
+
+// เชื่อมต่อ Wi-Fi
+void connectWiFi() {
+
+  // เชื่อมต่อแล้วไม่ต้องทำซ้ำ
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  Serial.println("Connecting WiFi...");
+
+  // เริ่มเชื่อมต่อ Wi-Fi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  // เก็บเวลาเริ่มเชื่อมต่อ
+  unsigned long startTime = millis();
+
+  // รอเชื่อมต่อสูงสุด 10 วินาที
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - startTime < 10000) {
+    delay(250);
+  }
+
+  // ตรวจสอบผล
+  if (WiFi.status() == WL_CONNECTED) {
+
+    Serial.println("WiFi Connected!");
+
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
+
+  } else {
+
+    Serial.println("WiFi Connection Failed!");
+  }
+}
+
+// ====================================================
+// 9. MQTT FUNCTION
+// ====================================================
+
+// เชื่อมต่อ MQTT
+void connectMQTT() {
+
+  // ต้องมี Wi-Fi ก่อน
+  if (WiFi.status() != WL_CONNECTED) {
+    return;
+  }
+
+  // MQTT เชื่อมต่อแล้ว ไม่ต้องทำซ้ำ
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.println("Connecting MQTT...");
+
+  // สร้าง Client ID
+  String clientId = "UNO-R4-DOOR-";
+  clientId += String(millis(), HEX);
+
+  // เชื่อมต่อ MQTT Broker
+  if (mqtt.connect(clientId.c_str())) {
+
+    Serial.println("MQTT Connected!");
+
+  } else {
+
+    Serial.println("MQTT Connection Failed!");
+  }
+}
+
+// ====================================================
+// 10. LCD FUNCTION
+// ====================================================
+
+// แสดงระยะทางและสถานะประตู
+void updateLCD() {
+
+  // บรรทัดที่ 1 แสดงระยะทาง
+  lcd.setCursor(0, 0);
+
+  if (sensorValid) {
+
+    lcd.print("Dist: ");
+    lcd.print(distanceCM, 1);
+    lcd.print(" cm     ");
+
+  } else {
+
+    lcd.print("Sensor Error    ");
+  }
+
+  // บรรทัดที่ 2 แสดงสถานะประตู
+  lcd.setCursor(0, 1);
+
+  if (doorOpen) {
+
+    lcd.print("Door: OPEN      ");
+
+  } else {
+
+    lcd.print("Door: CLOSED    ");
+  }
+}
+
+// ====================================================
+// 11. SETUP
+// ====================================================
+
+void setup() {
+
+  // เริ่ม Serial Monitor
+  Serial.begin(9600);
+
+  // TRIG เป็นขาส่งสัญญาณ
+  pinMode(TRIG_PIN, OUTPUT);
+
+  // ECHO เป็นขารับสัญญาณ
+  pinMode(ECHO_PIN, INPUT);
+
+  // ปุ่มใช้ Pull-up ภายในบอร์ด
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+
+  // ปิด TRIG เริ่มต้น
+  digitalWrite(TRIG_PIN, LOW);
+
+  // เริ่ม I2C
+  Wire.begin();
+
+  // เริ่ม LCD
+  lcd.init();
+
+  // เปิด Backlight
+  lcd.backlight();
+
+  // แสดงข้อความเริ่มต้น
+  lcd.setCursor(0, 0);
+  lcd.print("SMART DOOR MQTT");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Starting...     ");
+
+  // ตั้งค่า MQTT Broker
+  mqtt.begin(MQTT_BROKER, MQTT_PORT, network);
+
+  // จำกัดเวลารอ MQTT
+  mqtt.setTimeout(1000);
+
+  Serial.println("========================");
+  Serial.println("SMART DOOR MQTT LCD");
+  Serial.println("========================");
+
+  // เชื่อมต่อ Wi-Fi
+  connectWiFi();
+
+  // เชื่อมต่อ MQTT
+  connectMQTT();
+
+  // ล้าง LCD หลังเชื่อมต่อ
+  lcd.clear();
+
+  // อ่านปุ่มครั้งแรก
+  updateButton();
+
+  // อ่านระยะทางครั้งแรก
+  distanceCM = readDistance();
+
+  // ตรวจสอบเซนเซอร์
+  sensorValid = (distanceCM >= 0);
+
+  // คำนวณสถานะประตู
+  updateDoorState();
+
+  // แสดงผลบน LCD
+  updateLCD();
+}
+
+// ====================================================
+// 12. LOOP
+// ====================================================
+
+void loop() {
+
+  // เวลาปัจจุบัน
+  unsigned long now = millis();
+
+  // อ่านปุ่มทุกครั้งที่วนลูป
+  updateButton();
+
+  // คำนวณสถานะประตูจากค่าล่าสุด
+  updateDoorState();
+
+  // ดูแล MQTT
+  if (mqtt.connected()) {
+    mqtt.loop();
+  }
+
+  // เชื่อมต่อ Wi-Fi/MQTT ใหม่เมื่อหลุด
+  if (now - lastRetry >= RETRY_INTERVAL) {
+
+    lastRetry = now;
+
+    if (WiFi.status() != WL_CONNECTED) {
+      connectWiFi();
+    }
+
+    if (WiFi.status() == WL_CONNECTED &&
+        !mqtt.connected()) {
+      connectMQTT();
+    }
+  }
+
+  // อ่านระยะทางทุก 300 ms
+  if (now - lastRead >= READ_INTERVAL) {
+
+    lastRead = now;
+
+    // อ่าน Ultrasonic 3 ครั้ง
+    distanceCM = readDistance();
+
+    // ตรวจสอบการอ่านค่า
+    sensorValid = (distanceCM >= 0);
+
+    // อ่านปุ่มอีกครั้งหลังวัดระยะทาง
+    updateButton();
+
+    // คำนวณสถานะประตูใหม่
+    updateDoorState();
+
+    // แสดงระยะทาง
+    Serial.print("Distance: ");
+
+    if (sensorValid) {
+      Serial.print(distanceCM, 2);
+      Serial.println(" cm");
+    } else {
+      Serial.println("Sensor Error");
+    }
+
+    // แสดงสถานะปุ่ม
+    Serial.print("Button: ");
+    Serial.println(buttonPressed ? "PRESSED" : "RELEASED");
+
+    // แสดงสถานะประตู
+    Serial.print("Door: ");
+    Serial.println(doorOpen ? "OPEN" : "CLOSED");
+
+    Serial.println("------------------------");
+
+    // อัปเดต LCD
+    updateLCD();
+  }
+
+  // Publish MQTT ทุก 1 วินาที
+  if (now - lastSend >= SEND_INTERVAL) {
+
+    lastSend = now;
+
+    // อัปเดตสถานะก่อนส่ง
+    updateButton();
+    updateDoorState();
+
+    if (mqtt.connected()) {
+
+      // ส่ง On เมื่อเงื่อนไขครบ
+      // กรณีอื่นส่ง Off
+      const char* payload = doorOpen ? "On" : "Off";
+
+      // Publish ไปยัง Topic
+      if (mqtt.publish(MQTT_TOPIC, payload)) {
+
+        Serial.print("MQTT Published: ");
+        Serial.println(payload);
+
+      } else {
+
+        Serial.println("MQTT Publish Failed!");
+      }
+
+    } else {
+
+      Serial.println("MQTT Offline!");
+    }
+  }
+}

@@ -1,0 +1,500 @@
+
+/*
+========================================================
+ PROJECT: ULTRASONIC + LCD + WIFI + MQTT
+ BOARD: Arduino UNO R4 WiFi
+ SENSOR: HC-SR04
+ LCD: I2C 16x2
+========================================================
+
+ อุปกรณ์:
+ 1. Arduino UNO R4 WiFi
+ 2. Ultrasonic HC-SR04
+ 3. LCD I2C 16x2
+ 4. Breadboard และ Jumper
+
+ การต่อ HC-SR04:
+ VCC  -> Arduino 5V
+ GND  -> Arduino GND
+ TRIG -> Arduino D2
+ ECHO -> Arduino D3
+
+ การต่อ LCD:
+ VCC -> Arduino 5V
+ GND -> Arduino GND
+ SDA -> Arduino SDA
+ SCL -> Arduino SCL
+
+ Libraries:
+ - WiFiS3
+ - MQTT by Joel Gaehwiler (256dpi)
+ - Wire
+ - LiquidCrystal_I2C
+
+ การทำงาน:
+ 1. เชื่อมต่อ Wi-Fi
+ 2. เชื่อมต่อ MQTT Broker
+ 3. อ่านระยะทาง HC-SR04 จำนวน 3 ครั้ง
+ 4. กรองค่าที่ผิดปกติ
+ 5. แสดงระยะทางและ ON/OFF บน LCD
+ 6. ถ้าระยะ <= 20 cm ส่ง "on"
+ 7. ถ้าระยะ > 20 cm ส่ง "off"
+ 8. Publish ทุก 1 วินาที
+ 9. เชื่อมต่อใหม่อัตโนมัติเมื่อหลุด
+
+ MQTT Broker: phycom.it.kmitl.ac.th
+ MQTT Port: 1883
+ MQTT Topic: 68070131/food
+
+ Serial Monitor: 9600 baud
+ LCD I2C Address: 0x27
+========================================================
+*/
+
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// ====================================================
+// 1. WIFI CONFIGURATION
+// ====================================================
+
+// ชื่อ Wi-Fi
+const char WIFI_SSID[] = "EDOK";
+
+// รหัสผ่าน Wi-Fi
+const char WIFI_PASSWORD[] = "1234567890";
+
+// ====================================================
+// 2. MQTT CONFIGURATION
+// ====================================================
+
+// MQTT Broker
+const char MQTT_BROKER[] = "phycom.it.kmitl.ac.th";
+
+// MQTT Port
+const int MQTT_PORT = 1883;
+
+// MQTT Topic
+const char MQTT_TOPIC[] = "68070131/food";
+
+// สร้าง WiFi Client สำหรับ MQTT
+WiFiClient network;
+
+// สร้าง MQTT Client
+MQTTClient mqtt(256);
+
+// ====================================================
+// 3. HARDWARE CONFIGURATION
+// ====================================================
+
+// ขาส่งสัญญาณ Ultrasonic
+const int TRIG_PIN = 2;
+
+// ขารับสัญญาณ Echo
+const int ECHO_PIN = 3;
+
+// ระยะที่ใช้ตัดสิน ON/OFF
+const float DISTANCE_LIMIT = 20.0;
+
+// LCD I2C ขนาด 16x2
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// ====================================================
+// 4. TIMING CONFIGURATION
+// ====================================================
+
+// อ่านระยะทางทุก 500 ms
+const unsigned long READ_INTERVAL = 500;
+
+// ส่ง MQTT ทุก 1000 ms
+const unsigned long SEND_INTERVAL = 1000;
+
+// เชื่อมต่อใหม่ทุก 5000 ms
+const unsigned long RETRY_INTERVAL = 5000;
+
+// เวลาที่อ่านระยะทางล่าสุด
+unsigned long lastRead = 0;
+
+// เวลาที่ส่ง MQTT ล่าสุด
+unsigned long lastSend = 0;
+
+// เวลาที่พยายามเชื่อมต่อล่าสุด
+unsigned long lastRetry = 0;
+
+// เก็บค่าระยะทางล่าสุด
+float distanceCM = -1;
+
+// เก็บสถานะเซนเซอร์
+bool sensorValid = false;
+
+// ====================================================
+// 5. ULTRASONIC FUNCTION
+// ====================================================
+
+// อ่านระยะทาง 1 ครั้ง
+float readDistanceOnce() {
+
+  // เคลียร์ TRIG ก่อนยิงสัญญาณ
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(3);
+
+  // ส่งสัญญาณ HIGH 10 microseconds
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+
+  // ปิด TRIG
+  digitalWrite(TRIG_PIN, LOW);
+
+  // รอ Echo สูงสุด 25 ms
+  unsigned long duration =
+      pulseIn(ECHO_PIN, HIGH, 25000UL);
+
+  // ถ้าไม่มี Echo ให้คืนค่า -1
+  if (duration == 0) {
+    return -1;
+  }
+
+  // คำนวณระยะทางเป็นเซนติเมตร
+  float distance = duration * 0.0343 / 2.0;
+
+  // ตรวจสอบช่วงการวัด
+  if (distance < 2.0 || distance > 400.0) {
+    return -1;
+  }
+
+  // คืนค่าระยะทาง
+  return distance;
+}
+
+// อ่านระยะทาง 3 ครั้งและกรองค่า
+float readDistance() {
+
+  // เก็บค่าที่อ่านได้สูงสุด 3 ค่า
+  float readings[3];
+
+  // จำนวนค่าที่อ่านได้ถูกต้อง
+  int count = 0;
+
+  // อ่านเซนเซอร์ 3 ครั้ง
+  for (int i = 0; i < 3; i++) {
+
+    // อ่านระยะทาง 1 ครั้ง
+    float distance = readDistanceOnce();
+
+    // เก็บเฉพาะค่าที่ถูกต้อง
+    if (distance >= 0) {
+      readings[count] = distance;
+      count++;
+    }
+
+    // เว้นระยะให้คลื่นสะท้อนหมดก่อน
+    if (i < 2) {
+      delay(60);
+    }
+  }
+
+  // ถ้าอ่านไม่ได้เลย
+  if (count == 0) {
+    return -1;
+  }
+
+  // เรียงค่าจากน้อยไปมาก
+  for (int i = 0; i < count - 1; i++) {
+
+    for (int j = i + 1; j < count; j++) {
+
+      if (readings[j] < readings[i]) {
+
+        float temp = readings[i];
+        readings[i] = readings[j];
+        readings[j] = temp;
+      }
+    }
+  }
+
+  // คืนค่ามัธยฐาน
+  return readings[count / 2];
+}
+
+// ====================================================
+// 6. WIFI FUNCTION
+// ====================================================
+
+// เชื่อมต่อ Wi-Fi
+void connectWiFi() {
+
+  // ถ้าเชื่อมต่อแล้วไม่ต้องทำซ้ำ
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  Serial.println("Connecting WiFi...");
+
+  // เริ่มเชื่อมต่อ Wi-Fi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  // บันทึกเวลาเริ่มต้น
+  unsigned long startTime = millis();
+
+  // รอการเชื่อมต่อสูงสุด 10 วินาที
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - startTime < 10000) {
+    delay(250);
+  }
+
+  // ตรวจสอบการเชื่อมต่อ
+  if (WiFi.status() == WL_CONNECTED) {
+
+    Serial.println("WiFi Connected!");
+
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
+
+  } else {
+
+    Serial.println("WiFi Connection Failed!");
+  }
+}
+
+// ====================================================
+// 7. MQTT FUNCTION
+// ====================================================
+
+// เชื่อมต่อ MQTT
+void connectMQTT() {
+
+  // ต้องมี Wi-Fi ก่อน
+  if (WiFi.status() != WL_CONNECTED) {
+    return;
+  }
+
+  // ถ้า MQTT เชื่อมต่ออยู่แล้วไม่ต้องทำซ้ำ
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.println("Connecting MQTT...");
+
+  // สร้าง MQTT Client ID
+  String clientId = "UNO-R4-FOOD-";
+  clientId += String(millis(), HEX);
+
+  // เชื่อมต่อ MQTT
+  if (mqtt.connect(clientId.c_str())) {
+
+    Serial.println("MQTT Connected!");
+
+  } else {
+
+    Serial.println("MQTT Connection Failed!");
+  }
+}
+
+// ====================================================
+// 8. LCD FUNCTION
+// ====================================================
+
+// อัปเดตหน้าจอ LCD
+void updateLCD() {
+
+  // บรรทัดแรก แสดงระยะทาง
+  lcd.setCursor(0, 0);
+
+  if (sensorValid) {
+
+    // แสดงระยะทาง
+    lcd.print("Dist: ");
+    lcd.print(distanceCM, 1);
+    lcd.print(" cm     ");
+
+  } else {
+
+    // แสดงเมื่ออ่านไม่ได้
+    lcd.print("Sensor Error    ");
+  }
+
+  // บรรทัดที่สอง แสดงสถานะ ON/OFF
+  lcd.setCursor(0, 1);
+
+  if (!sensorValid) {
+
+    lcd.print("Status: ERROR   ");
+
+  } else if (distanceCM <= DISTANCE_LIMIT) {
+
+    lcd.print("Status: ON      ");
+
+  } else {
+
+    lcd.print("Status: OFF     ");
+  }
+}
+
+// ====================================================
+// 9. SETUP
+// ====================================================
+
+void setup() {
+
+  // เริ่ม Serial Monitor
+  Serial.begin(9600);
+
+  // กำหนด TRIG เป็น OUTPUT
+  pinMode(TRIG_PIN, OUTPUT);
+
+  // กำหนด ECHO เป็น INPUT
+  pinMode(ECHO_PIN, INPUT);
+
+  // ตั้งค่า TRIG เริ่มต้นเป็น LOW
+  digitalWrite(TRIG_PIN, LOW);
+
+  // เริ่ม I2C
+  Wire.begin();
+
+  // เริ่ม LCD
+  lcd.init();
+
+  // เปิดไฟ LCD
+  lcd.backlight();
+
+  // แสดงข้อความเริ่มต้น
+  lcd.setCursor(0, 0);
+  lcd.print("ULTRASONIC MQTT");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Starting...     ");
+
+  // เริ่ม MQTT
+  mqtt.begin(MQTT_BROKER, MQTT_PORT, network);
+
+  // กำหนด MQTT Timeout
+  mqtt.setTimeout(1000);
+
+  Serial.println("========================");
+  Serial.println("ULTRASONIC MQTT LCD");
+  Serial.println("========================");
+
+  // เชื่อมต่อ Wi-Fi
+  connectWiFi();
+
+  // เชื่อมต่อ MQTT
+  connectMQTT();
+
+  // ล้างหน้าจอหลังเชื่อมต่อ
+  lcd.clear();
+
+  // อ่านระยะทางครั้งแรก
+  distanceCM = readDistance();
+
+  // ตรวจสอบว่าอ่านได้หรือไม่
+  sensorValid = (distanceCM >= 0);
+
+  // แสดงค่าบน LCD
+  updateLCD();
+}
+
+// ====================================================
+// 10. LOOP
+// ====================================================
+
+void loop() {
+
+  // อ่านเวลาปัจจุบัน
+  unsigned long now = millis();
+
+  // ดูแล MQTT
+  if (mqtt.connected()) {
+    mqtt.loop();
+  }
+
+  // ตรวจสอบ Wi-Fi และ MQTT ทุก 5 วินาที
+  if (now - lastRetry >= RETRY_INTERVAL) {
+
+    lastRetry = now;
+
+    // เชื่อมต่อ Wi-Fi ใหม่เมื่อหลุด
+    if (WiFi.status() != WL_CONNECTED) {
+      connectWiFi();
+    }
+
+    // เชื่อมต่อ MQTT ใหม่เมื่อหลุด
+    if (WiFi.status() == WL_CONNECTED &&
+        !mqtt.connected()) {
+      connectMQTT();
+    }
+  }
+
+  // อ่านระยะทางทุก 500 ms
+  if (now - lastRead >= READ_INTERVAL) {
+
+    lastRead = now;
+
+    // อ่านระยะทาง 3 ครั้งและกรองค่า
+    distanceCM = readDistance();
+
+    // ตรวจสอบค่าเซนเซอร์
+    sensorValid = (distanceCM >= 0);
+
+    if (sensorValid) {
+
+      // แสดงระยะทางใน Serial
+      Serial.print("Distance: ");
+      Serial.print(distanceCM, 2);
+      Serial.println(" cm");
+
+      // แสดงสถานะ
+      if (distanceCM <= DISTANCE_LIMIT) {
+
+        Serial.println("Status: ON");
+
+      } else {
+
+        Serial.println("Status: OFF");
+      }
+
+    } else {
+
+      Serial.println("Ultrasonic Sensor Error!");
+    }
+
+    // อัปเดต LCD
+    updateLCD();
+  }
+
+  // ส่ง MQTT ทุก 1 วินาที
+  if (now - lastSend >= SEND_INTERVAL) {
+
+    lastSend = now;
+
+    // ต้องเชื่อมต่อ MQTT และอ่านเซนเซอร์ได้
+    if (mqtt.connected() && sensorValid) {
+
+      // กำหนด Payload ตามระยะทาง
+      const char* payload =
+          (distanceCM <= DISTANCE_LIMIT) ? "on" : "off";
+
+      // Publish ไปยัง Topic
+      if (mqtt.publish(MQTT_TOPIC, payload)) {
+
+        Serial.print("MQTT Published: ");
+        Serial.println(payload);
+
+      } else {
+
+        Serial.println("MQTT Publish Failed!");
+      }
+
+    } else if (!mqtt.connected()) {
+
+      // แจ้งเมื่อ MQTT ไม่เชื่อมต่อ
+      Serial.println("MQTT Offline!");
+
+    } else {
+
+      // แจ้งเมื่อเซนเซอร์อ่านไม่ได้
+      Serial.println("Sensor Error - MQTT skipped!");
+    }
+  }
+}

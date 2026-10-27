@@ -1,0 +1,483 @@
+
+/*
+=========================================================
+ PROJECT: MQTT TEMPERATURE SUBSCRIBE + RGB LED + LCD
+ BOARD: Arduino UNO R4 WiFi
+=========================================================
+
+ อุปกรณ์:
+ 1. Arduino UNO R4 WiFi
+ 2. RGB LED แบบ Common Cathode
+ 3. Resistor 330Ω จำนวน 3 ตัว
+ 4. LCD I2C 16x2
+ 5. Breadboard และ Jumper
+
+ การต่อ RGB LED:
+ R -> Resistor 330Ω -> Arduino D9
+ G -> Resistor 330Ω -> Arduino D10
+ B -> Resistor 330Ω -> Arduino D11
+ ขารวม Cathode -> Arduino GND
+
+ การต่อ LCD:
+ VCC -> Arduino 5V
+ GND -> Arduino GND
+ SDA -> Arduino SDA
+ SCL -> Arduino SCL
+
+ Libraries:
+ - WiFiS3
+ - MQTT by Joel Gaehwiler (256dpi)
+ - Wire
+ - LiquidCrystal_I2C
+
+ การทำงาน:
+ 1. เชื่อมต่อ Wi-Fi
+ 2. เชื่อมต่อ MQTT Broker
+ 3. Subscribe Topic 68070131/venus
+ 4. รับค่าอุณหภูมิจาก MQTT ทุกครั้งที่ Server ส่งมา
+ 5. แปลงข้อความที่ได้รับเป็นตัวเลข
+ 6. ควบคุม RGB LED ตามช่วงอุณหภูมิ
+ 7. แสดงอุณหภูมิและสีบน LCD
+ 8. เชื่อมต่อใหม่อัตโนมัติเมื่อหลุด
+
+ เงื่อนไข:
+ 36 ถึง 50°C -> RED
+ 26 ถึง <36°C -> BLUE
+ 10 ถึง <26°C -> GREEN
+ นอกช่วง -> OFF
+
+ RGB แบบ Common Cathode:
+ สีที่ต้องการ = HIGH
+ สีอื่น = LOW
+
+ MQTT Broker: phycom.it.kmitl.ac.th
+ MQTT Port: 1883
+ MQTT Subscribe Topic: 68070131/venus
+
+ LCD I2C Address: 0x27
+ Serial Monitor: 9600 baud
+=========================================================
+*/
+
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <stdlib.h>
+#include <math.h>
+
+// =====================================================
+// 1. WIFI CONFIGURATION
+// =====================================================
+
+// ชื่อเครือข่าย Wi-Fi
+const char WIFI_SSID[] = "EDOK";
+
+// รหัสผ่าน Wi-Fi
+const char WIFI_PASSWORD[] = "1234567890";
+
+// =====================================================
+// 2. MQTT CONFIGURATION
+// =====================================================
+
+// ที่อยู่ MQTT Broker
+const char MQTT_BROKER[] = "phycom.it.kmitl.ac.th";
+
+// พอร์ต MQTT
+const int MQTT_PORT = 1883;
+
+// Topic ที่ต้อง Subscribe ตามโจทย์
+const char MQTT_TOPIC[] = "68070131/venus";
+
+// สร้าง TCP Client
+WiFiClient network;
+
+// สร้าง MQTT Client
+MQTTClient mqtt(256);
+
+// =====================================================
+// 3. RGB LED CONFIGURATION
+// =====================================================
+
+// ขาควบคุมสีแดง
+const int RED_PIN = 9;
+
+// ขาควบคุมสีเขียว
+const int GREEN_PIN = 10;
+
+// ขาควบคุมสีฟ้า
+const int BLUE_PIN = 11;
+
+// =====================================================
+// 4. LCD CONFIGURATION
+// =====================================================
+
+// กำหนด LCD I2C ขนาด 16x2
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// =====================================================
+// 5. SYSTEM VARIABLES
+// =====================================================
+
+// เก็บค่าอุณหภูมิที่รับจาก MQTT
+float temperature = NAN;
+
+// เก็บชื่อสีที่แสดงอยู่
+String currentColor = "OFF";
+
+// เก็บสถานะว่าได้รับอุณหภูมิแล้วหรือยัง
+bool hasTemperature = false;
+
+// เวลาที่พยายามเชื่อมต่อล่าสุด
+unsigned long lastRetry = 0;
+
+// ระยะเวลาระหว่างการเชื่อมต่อใหม่
+const unsigned long RETRY_INTERVAL = 5000;
+
+// =====================================================
+// 6. RGB CONTROL FUNCTION
+// =====================================================
+
+// ควบคุม RGB LED
+// แต่ละสีจะติดเพียงขาเดียว
+
+/*
+ RGB LED: COMMON ANODE
+
+ ขารวม -> 5V
+ R -> Resistor 330Ω -> D9
+ G -> Resistor 330Ω -> D10
+ B -> Resistor 330Ω -> D11
+
+ LOW  = เปิดไฟ
+ HIGH = ปิดไฟ
+*/
+
+// เปิดเฉพาะสีที่กำหนด
+void setRGB(bool red, bool green, bool blue) {
+
+  // สีแดง: true = LOW = ติด
+  digitalWrite(RED_PIN, red ? LOW : HIGH);
+
+  // สีเขียว: true = LOW = ติด
+  digitalWrite(GREEN_PIN, green ? LOW : HIGH);
+
+  // สีฟ้า: true = LOW = ติด
+  digitalWrite(BLUE_PIN, blue ? LOW : HIGH);
+}
+
+
+// เปลี่ยนสี RGB ตามอุณหภูมิ
+void updateRGB(float temp) {
+
+  // อุณหภูมิ 36 ถึง 50°C
+  if (temp >= 36.0 && temp <= 50.0) {
+
+    // เปิดเฉพาะขาสีแดง D9
+    setRGB(true, false, false);
+
+    // บันทึกชื่อสี
+    currentColor = "RED";
+
+  }
+
+  // อุณหภูมิ 26 ถึงต่ำกว่า 36°C
+  else if (temp >= 26.0 && temp < 36.0) {
+
+    // เปิดเฉพาะขาสีฟ้า D11
+    setRGB(false, false, true);
+
+    // บันทึกชื่อสี
+    currentColor = "BLUE";
+
+  }
+
+  // อุณหภูมิ 10 ถึงต่ำกว่า 26°C
+  else if (temp >= 10.0 && temp < 26.0) {
+
+    // เปิดเฉพาะขาสีเขียว D10
+    setRGB(false, true, false);
+
+    // บันทึกชื่อสี
+    currentColor = "GREEN";
+
+  }
+
+  // นอกช่วงอุณหภูมิที่กำหนด
+  else {
+
+    // ปิดทุกสี
+    setRGB(false, false, false);
+
+    // บันทึกสถานะ OFF
+    currentColor = "OFF";
+  }
+}
+
+// =====================================================
+// 7. LCD DISPLAY FUNCTION
+// =====================================================
+
+// แสดงข้อมูลบน LCD
+void updateLCD() {
+
+  // บรรทัดแรกแสดงอุณหภูมิ
+  lcd.setCursor(0, 0);
+
+  if (hasTemperature) {
+
+    lcd.print("Temp: ");
+    lcd.print(temperature, 1);
+
+    // แสดงสัญลักษณ์องศา
+    lcd.write((uint8_t)223);
+
+    lcd.print("C     ");
+
+  } else {
+
+    lcd.print("Waiting Temp... ");
+  }
+
+  // บรรทัดที่สองแสดงสีของ RGB LED
+  lcd.setCursor(0, 1);
+
+  lcd.print("LED: ");
+  lcd.print(currentColor);
+
+  // เติมช่องว่างเพื่อลบข้อความเก่า
+  lcd.print("          ");
+}
+
+// =====================================================
+// 8. MQTT MESSAGE CALLBACK
+// =====================================================
+
+// ฟังก์ชันนี้ทำงานเมื่อได้รับข้อความจาก MQTT
+void messageReceived(String &topic, String &payload) {
+
+  // แสดง Topic ที่ได้รับ
+  Serial.print("Received Topic: ");
+  Serial.println(topic);
+
+  // แสดง Payload ที่ได้รับ
+  Serial.print("Received Payload: ");
+  Serial.println(payload);
+
+  // รับเฉพาะ Topic ที่ต้องการ
+  if (topic != MQTT_TOPIC) {
+    return;
+  }
+
+  // ตัดช่องว่างหน้าและหลังข้อความ
+  payload.trim();
+
+  // แปลงข้อความเป็นตัวเลข
+  char *endPointer;
+  float receivedTemp = strtof(payload.c_str(), &endPointer);
+
+  // ตรวจสอบว่า Payload เป็นตัวเลขจริง
+  if (endPointer == payload.c_str() ||
+      *endPointer != '\0' ||
+      !isfinite(receivedTemp)) {
+
+    Serial.println("Invalid Temperature Payload!");
+    return;
+  }
+
+  // บันทึกค่าอุณหภูมิที่ได้รับ
+  temperature = receivedTemp;
+
+  // ระบุว่าได้รับข้อมูลแล้ว
+  hasTemperature = true;
+
+  // ควบคุม RGB LED ตามอุณหภูมิ
+  updateRGB(temperature);
+
+  // แสดงข้อมูลบน LCD
+  updateLCD();
+
+  // แสดงผลผ่าน Serial Monitor
+  Serial.print("Temperature: ");
+  Serial.print(temperature, 2);
+  Serial.println(" C");
+
+  Serial.print("LED Color: ");
+  Serial.println(currentColor);
+
+  Serial.println("---------------------------");
+}
+
+// =====================================================
+// 9. WIFI CONNECTION
+// =====================================================
+
+// เชื่อมต่อ Wi-Fi
+void connectWiFi() {
+
+  // ถ้าเชื่อมต่อแล้วไม่ต้องทำซ้ำ
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  Serial.println("Connecting WiFi...");
+
+  // เริ่มเชื่อมต่อ Wi-Fi
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  // เก็บเวลาเริ่มเชื่อมต่อ
+  unsigned long startTime = millis();
+
+  // รอเชื่อมต่อไม่เกิน 10 วินาที
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - startTime < 10000) {
+
+    delay(250);
+  }
+
+  // ตรวจสอบผลการเชื่อมต่อ
+  if (WiFi.status() == WL_CONNECTED) {
+
+    Serial.println("WiFi Connected!");
+
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+
+  } else {
+
+    Serial.println("WiFi Connection Failed!");
+  }
+}
+
+// =====================================================
+// 10. MQTT CONNECTION
+// =====================================================
+
+// เชื่อมต่อ MQTT และ Subscribe Topic
+void connectMQTT() {
+
+  // ต้องมี Wi-Fi ก่อน
+  if (WiFi.status() != WL_CONNECTED) {
+    return;
+  }
+
+  // ถ้าเชื่อมต่อแล้วไม่ต้องทำซ้ำ
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.println("Connecting MQTT...");
+
+  // สร้าง Client ID
+  String clientId = "UNO-R4-VENUS-";
+  clientId += String(millis(), HEX);
+
+  // เชื่อมต่อ MQTT
+  if (mqtt.connect(clientId.c_str())) {
+
+    Serial.println("MQTT Connected!");
+
+    // Subscribe Topic ทุกครั้งที่เชื่อมต่อสำเร็จ
+    if (mqtt.subscribe(MQTT_TOPIC)) {
+
+      Serial.print("Subscribed: ");
+      Serial.println(MQTT_TOPIC);
+
+    } else {
+
+      Serial.println("Subscribe Failed!");
+    }
+
+  } else {
+
+    Serial.println("MQTT Connection Failed!");
+  }
+}
+
+// =====================================================
+// 11. SETUP
+// =====================================================
+
+void setup() {
+
+  // เริ่ม Serial Monitor
+  Serial.begin(9600);
+
+  // กำหนด RGB เป็น OUTPUT
+  pinMode(RED_PIN, OUTPUT);
+  pinMode(GREEN_PIN, OUTPUT);
+  pinMode(BLUE_PIN, OUTPUT);
+
+  // ปิด RGB ทุกสีเมื่อเริ่มต้น
+  setRGB(false, false, false);
+
+  // เริ่ม I2C
+  Wire.begin();
+
+  // เริ่ม LCD
+  lcd.init();
+
+  // เปิดไฟ Backlight
+  lcd.backlight();
+
+  // แสดงข้อความเริ่มต้น
+  lcd.setCursor(0, 0);
+  lcd.print("MQTT TEMP RGB   ");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Starting...     ");
+
+  // กำหนด MQTT Broker
+  mqtt.begin(MQTT_BROKER, MQTT_PORT, network);
+
+  // กำหนดฟังก์ชันรับข้อความ
+  mqtt.onMessage(messageReceived);
+
+  // กำหนด Timeout
+  mqtt.setTimeout(1000);
+
+  Serial.println("==========================");
+  Serial.println("MQTT SUBSCRIBE RGB LCD");
+  Serial.println("==========================");
+
+  // เชื่อมต่อ Wi-Fi
+  connectWiFi();
+
+  // เชื่อมต่อ MQTT
+  connectMQTT();
+
+  // ล้างจอหลังเริ่มระบบ
+  lcd.clear();
+
+  // แสดงสถานะเริ่มต้น
+  updateLCD();
+}
+
+// =====================================================
+// 12. MAIN LOOP
+// =====================================================
+
+void loop() {
+
+  // ดูแลการเชื่อมต่อ MQTT และรับข้อความ
+  if (mqtt.connected()) {
+    mqtt.loop();
+  }
+
+  // ตรวจสอบการเชื่อมต่อใหม่ทุก 5 วินาที
+  if (millis() - lastRetry >= RETRY_INTERVAL) {
+
+    lastRetry = millis();
+
+    // ถ้า Wi-Fi หลุดให้เชื่อมต่อใหม่
+    if (WiFi.status() != WL_CONNECTED) {
+      connectWiFi();
+    }
+
+    // ถ้า MQTT หลุดให้เชื่อมต่อใหม่
+    if (WiFi.status() == WL_CONNECTED &&
+        !mqtt.connected()) {
+      connectMQTT();
+    }
+  }
+}

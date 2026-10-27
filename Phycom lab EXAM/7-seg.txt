@@ -1,0 +1,386 @@
+
+/*
+====================================================
+ PROJECT: MQTT 7-Segment + LCD
+ BOARD: Arduino UNO R4 WiFi
+====================================================
+
+ อุปกรณ์:
+ - Arduino UNO R4 WiFi
+ - 7-Segment 1 หลัก
+ - Resistor 330Ω จำนวน 7 ตัว
+ - LCD I2C 16x2
+
+ การต่อ 7-Segment:
+ A -> D2
+ B -> D3
+ C -> D4
+ D -> D5
+ E -> D6
+ F -> D7
+ G -> D8
+
+ COM -> GND สำหรับ Common Cathode
+ COM -> 5V สำหรับ Common Anode
+
+ ต้องต่อตัวต้านทานจำกัดกระแสแยกแต่ละ Segment
+
+ การต่อ LCD:
+ VCC -> 5V
+ GND -> GND
+ SDA -> SDA
+ SCL -> SCL
+
+ Libraries:
+ - WiFiS3
+ - MQTT by Joel Gaehwiler (256dpi)
+ - Wire
+ - LiquidCrystal_I2C
+
+ การทำงาน:
+ 1. เชื่อมต่อ Wi-Fi
+ 2. เชื่อมต่อ MQTT
+ 3. Subscribe 68070131/prob_stat
+ 4. รับเลข 0-9
+ 5. แสดงบน 7-Segment
+ 6. แสดงเลขเดียวกันบน LCD
+ 7. เชื่อมต่อใหม่อัตโนมัติเมื่อหลุด
+
+ Serial Monitor: 9600
+ LCD Address: 0x27
+====================================================
+*/
+
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// ---------------- WIFI ----------------
+
+// ชื่อ Wi-Fi
+const char WIFI_SSID[] = "EDOK";
+
+// รหัสผ่าน Wi-Fi
+const char WIFI_PASSWORD[] = "1234567890";
+
+// ---------------- MQTT ----------------
+
+// ที่อยู่ MQTT Broker
+const char MQTT_BROKER[] = "phycom.it.kmitl.ac.th";
+
+// พอร์ต MQTT
+const int MQTT_PORT = 1883;
+
+// Topic ที่รับเลขจาก Server
+const char MQTT_TOPIC[] = "68070131/prob_stat";
+
+// ตัวเชื่อมต่อเครือข่าย
+WiFiClient network;
+
+// ตัวจัดการ MQTT
+MQTTClient mqtt(256);
+
+// ---------------- LCD ----------------
+
+// จอ LCD I2C 16x2
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// ---------------- 7-SEGMENT ----------------
+
+// กำหนดขา A ถึง G ตามโค้ดที่ส่งมา
+const int segmentPins[7] = {
+  2, 3, 4, 5, 6, 7, 8
+};
+
+// false = Common Cathode
+// true  = Common Anode
+const bool COMMON_ANODE = false;
+
+// ตารางตัวเลข 0-9
+// เรียง Segment A B C D E F G
+const int arr[10][7] = {
+  {1,1,1,1,1,1,0}, // 0
+  {0,1,1,0,0,0,0}, // 1
+  {1,1,0,1,1,0,1}, // 2
+  {1,1,1,1,0,0,1}, // 3
+  {0,1,1,0,0,1,1}, // 4
+  {1,0,1,1,0,1,1}, // 5
+  {1,0,1,1,1,1,1}, // 6
+  {1,1,1,0,0,0,0}, // 7
+  {1,1,1,1,1,1,1}, // 8
+  {1,1,1,1,0,1,1}  // 9
+};
+
+// เก็บตัวเลขล่าสุด
+int currentNumber = -1;
+
+// เวลาเชื่อมต่อใหม่
+unsigned long lastRetry = 0;
+
+// ลองเชื่อมต่อใหม่ทุก 5 วินาที
+const unsigned long RETRY_INTERVAL = 5000;
+
+// ---------------- SEGMENT FUNCTIONS ----------------
+
+// สั่ง Segment ติดหรือดับ
+void writeSegment(int index, bool on) {
+
+  // Common Cathode: HIGH = ติด
+  // Common Anode: LOW = ติด
+  int level;
+
+  if (COMMON_ANODE) {
+    level = on ? LOW : HIGH;
+  } else {
+    level = on ? HIGH : LOW;
+  }
+
+  digitalWrite(segmentPins[index], level);
+}
+
+// ปิดทุก Segment
+void clearSegment() {
+
+  for (int j = 0; j < 7; j++) {
+    writeSegment(j, false);
+  }
+}
+
+// แสดงตัวเลขตามตาราง arr
+void showNumber(int number) {
+
+  // รับเฉพาะเลข 0-9
+  if (number < 0 || number > 9) {
+    clearSegment();
+    return;
+  }
+
+  // เปิดหรือปิด Segment A-G
+  for (int j = 0; j < 7; j++) {
+    writeSegment(j, arr[number][j] == 1);
+  }
+}
+
+// ---------------- LCD FUNCTION ----------------
+
+// อัปเดตข้อความบน LCD
+void updateLCD() {
+
+  // บรรทัดแรกแสดงเลขที่ได้รับ
+  lcd.setCursor(0, 0);
+
+  if (currentNumber >= 0) {
+    lcd.print("Number: ");
+    lcd.print(currentNumber);
+    lcd.print("       ");
+  } else {
+    lcd.print("Waiting Number..");
+  }
+
+  // บรรทัดที่สองแสดงสถานะ MQTT
+  lcd.setCursor(0, 1);
+
+  if (WiFi.status() != WL_CONNECTED) {
+    lcd.print("WiFi: OFF       ");
+  } else if (!mqtt.connected()) {
+    lcd.print("MQTT: OFF       ");
+  } else {
+    lcd.print("MQTT: ONLINE    ");
+  }
+}
+
+// ---------------- MQTT CALLBACK ----------------
+
+// ทำงานเมื่อ Server ส่งข้อความมา
+void messageReceived(String &topic, String &payload) {
+
+  // ตรวจสอบ Topic
+  if (topic != MQTT_TOPIC) {
+    return;
+  }
+
+  // ลบช่องว่างหน้าและหลังข้อความ
+  payload.trim();
+
+  // แสดงค่าที่ได้รับ
+  Serial.print("Received: ");
+  Serial.println(payload);
+
+  // ตรวจสอบว่าเป็นเลข 0-9 เพียง 1 หลัก
+  if (payload.length() != 1 ||
+      payload[0] < '0' ||
+      payload[0] > '9') {
+
+    Serial.println("Invalid Number!");
+    return;
+  }
+
+  // แปลงตัวอักษรเป็นตัวเลข
+  currentNumber = payload[0] - '0';
+
+  // แสดงเลขบน 7-Segment
+  showNumber(currentNumber);
+
+  // แสดงเลขบน LCD
+  updateLCD();
+
+  Serial.print("Displayed: ");
+  Serial.println(currentNumber);
+}
+
+// ---------------- WIFI FUNCTION ----------------
+
+// เชื่อมต่อ Wi-Fi
+void connectWiFi() {
+
+  // ถ้าเชื่อมต่ออยู่แล้วไม่ต้องทำซ้ำ
+  if (WiFi.status() == WL_CONNECTED) {
+    return;
+  }
+
+  Serial.println("Connecting WiFi...");
+
+  // เริ่มเชื่อมต่อ
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  // บันทึกเวลาเริ่มต้น
+  unsigned long startTime = millis();
+
+  // รอสูงสุด 10 วินาที
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - startTime < 10000) {
+    delay(250);
+  }
+
+  // ตรวจสอบสถานะ
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi Connected!");
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("WiFi Failed!");
+  }
+}
+
+// ---------------- MQTT FUNCTION ----------------
+
+// เชื่อมต่อ MQTT และ Subscribe
+void connectMQTT() {
+
+  // ต้องเชื่อม Wi-Fi ก่อน
+  if (WiFi.status() != WL_CONNECTED) {
+    return;
+  }
+
+  // เชื่อมต่อแล้วไม่ต้องทำซ้ำ
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.println("Connecting MQTT...");
+
+  // สร้าง Client ID
+  String clientId = "UNO-R4-7SEG-";
+  clientId += String(millis(), HEX);
+
+  // เชื่อมต่อ Broker
+  if (mqtt.connect(clientId.c_str())) {
+
+    Serial.println("MQTT Connected!");
+
+    // Subscribe Topic
+    if (mqtt.subscribe(MQTT_TOPIC)) {
+      Serial.print("Subscribed: ");
+      Serial.println(MQTT_TOPIC);
+    } else {
+      Serial.println("Subscribe Failed!");
+    }
+
+  } else {
+    Serial.println("MQTT Failed!");
+  }
+}
+
+// ---------------- SETUP ----------------
+
+void setup() {
+
+  // เปิด Serial Monitor
+  Serial.begin(9600);
+
+  // กำหนดขา D2-D8 เป็น OUTPUT
+  for (int j = 0; j < 7; j++) {
+    pinMode(segmentPins[j], OUTPUT);
+  }
+
+  // ปิด Segment ทั้งหมด
+  clearSegment();
+
+  // เริ่ม I2C
+  Wire.begin();
+
+  // เริ่ม LCD
+  lcd.init();
+
+  // เปิด Backlight
+  lcd.backlight();
+
+  // ข้อความเริ่มต้น
+  lcd.setCursor(0, 0);
+  lcd.print("7SEG MQTT LCD   ");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Starting...     ");
+
+  // ตั้งค่า MQTT Broker
+  mqtt.begin(MQTT_BROKER, MQTT_PORT, network);
+
+  // ตั้ง Callback สำหรับรับข้อมูล
+  mqtt.onMessage(messageReceived);
+
+  // จำกัดเวลารอ MQTT
+  mqtt.setTimeout(1000);
+
+  // เชื่อมต่อ Wi-Fi
+  connectWiFi();
+
+  // เชื่อมต่อ MQTT
+  connectMQTT();
+
+  // ล้าง LCD
+  lcd.clear();
+
+  // แสดงสถานะเริ่มต้น
+  updateLCD();
+}
+
+// ---------------- LOOP ----------------
+
+void loop() {
+
+  // รับข้อความ MQTT
+  if (mqtt.connected()) {
+    mqtt.loop();
+  }
+
+  // ตรวจสอบการเชื่อมต่อทุก 5 วินาที
+  if (millis() - lastRetry >= RETRY_INTERVAL) {
+
+    lastRetry = millis();
+
+    // เชื่อมต่อ Wi-Fi ใหม่
+    if (WiFi.status() != WL_CONNECTED) {
+      connectWiFi();
+    }
+
+    // เชื่อมต่อ MQTT ใหม่
+    if (WiFi.status() == WL_CONNECTED &&
+        !mqtt.connected()) {
+      connectMQTT();
+    }
+
+    // อัปเดตสถานะ LCD
+    updateLCD();
+  }
+}
