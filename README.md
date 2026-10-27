@@ -805,3 +805,10 @@ void loop() {
 ![ภาพประกอบ Potentiometer และ LED Fading](GEN_Z/WEB/images/pot-led.svg)
 ![ภาพประกอบ TMP36 และ LCD](GEN_Z/WEB/images/tmp36-lcd.svg)
 ![ภาพประกอบ Ultrasonic](GEN_Z/WEB/images/ultrasonic.svg)
+
+
+## 📗 คู่มือ Library และสูตรคำนวณ Sensor (หน้าเว็บ)
+
+**[เปิดหน้าเว็บ Library + Sensor Formulas + MQTT Website Tutorial](https://kmitl68070131.github.io/LAB-Arduino-Phycom/GEN_Z/WEB/library-and-sensors.html)**
+
+มีตารางไลบรารีพร้อมวิธีติดตั้ง สูตร TMP36, LM35, NTC Thermistor, DHT, Ultrasonic, Potentiometer และ LDR พร้อมตัวอย่าง Arduino, Node.js Bridge และ JavaScript สำหรับส่งข้อมูลขึ้นเว็บ ซึ่งใช้ Topic prefix `68070131/` และ Broker `phycom.it.kmitl.ac.th`.
