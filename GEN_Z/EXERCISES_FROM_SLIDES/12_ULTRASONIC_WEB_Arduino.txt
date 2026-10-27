@@ -2,7 +2,7 @@
 ชื่อ: Ultrasonic วัดระยะขึ้นเว็บ
 อุปกรณ์: HC-SR04
 การต่อสาย: TRIG → D2, ECHO → D3, VCC → 5V, GND → GND
-WiFi SSID: EDOK | ตั้งรหัสใน WIFI_PASS ก่อนอัปโหลด
+WiFi SSID: EDOK | รหัส WiFi อยู่ใน WIFI_PASS แก้ได้ที่ตัวแปรนี้
 MQTT Broker: phycom.it.kmitl.ac.th:1883
 MQTT Topic: 68070131/12_ultrasonic_web
 แก้ขา: ตัวแปรส่วน HC-SR04
@@ -16,7 +16,7 @@ Arduino UNO R4 WiFi; Serial Monitor 115200
 #include <MQTTClient.h>
 
 const char WIFI_SSID[]="EDOK"; // ชื่อ WiFi
-const char WIFI_PASS[]="YOUR_WIFI_PASSWORD"; // ใส่รหัสผ่านที่นี่ก่อน Upload
+const char WIFI_PASS[]="1234567890"; // แก้รหัส WiFi ตรงนี้
 const char MQTT_HOST[]="phycom.it.kmitl.ac.th"; // Broker
 const char MQTT_TOPIC[]="68070131/12_ultrasonic_web"; // Topic เฉพาะข้อนี้
 WiFiClient net;

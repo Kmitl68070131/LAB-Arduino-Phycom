@@ -2,7 +2,7 @@
 ชื่อ: TMP36 แสดงอุณหภูมิบน LCD
 อุปกรณ์: TMP36+LCD
 การต่อสาย: TMP36 Vs/Vout/GND → 5V/A3/GND (ตรวจ datasheet), LCD → SDA/SCL
-WiFi SSID: EDOK | ตั้งรหัสใน WIFI_PASS ก่อนอัปโหลด
+WiFi SSID: EDOK | รหัส WiFi อยู่ใน WIFI_PASS แก้ได้ที่ตัวแปรนี้
 MQTT Broker: phycom.it.kmitl.ac.th:1883
 MQTT Topic: 68070131/06_tmp36_lcd
 แก้ขา: ตัวแปรส่วน TMP36+LCD
@@ -18,7 +18,7 @@ Arduino UNO R4 WiFi; Serial Monitor 115200
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27,16,2);
 const char WIFI_SSID[]="EDOK"; // ชื่อ WiFi
-const char WIFI_PASS[]="YOUR_WIFI_PASSWORD"; // ใส่รหัสผ่านที่นี่ก่อน Upload
+const char WIFI_PASS[]="1234567890"; // แก้รหัส WiFi ตรงนี้
 const char MQTT_HOST[]="phycom.it.kmitl.ac.th"; // Broker
 const char MQTT_TOPIC[]="68070131/06_tmp36_lcd"; // Topic เฉพาะข้อนี้
 WiFiClient net;
