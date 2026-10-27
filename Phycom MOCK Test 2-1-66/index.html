@@ -24,12 +24,12 @@
 <div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">➤</span> Publish</h3><p>ส่งข้อความไปยัง Topic (Ctrl/Cmd + Enter เพื่อส่ง)</p></div></div><form id="publishForm"><div class="publish-fields"><label>Topic<input id="pubTopic" required></label><label>QoS<select id="pubQos"><option>0</option><option>1</option><option>2</option></select></label><label class="check" style="flex-direction:column">Retain<input id="pubRetain" type="checkbox"></label></div><label>Message<textarea id="pubMessage" rows="3" placeholder="Payload" required></textarea></label><div class="publish-actions"><button class="btn orange" id="pubButton" disabled>➤ Publish</button></div></form></div>
 <div class="client-grid"><div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">◔</span> Subscriptions</h3><p>รับข้อความจาก Topic (รองรับ + และ #)</p></div></div><form id="subForm"><label>Topic<input id="subTopic" required></label><div class="sub-fields"><label>QoS<select id="subQos"><option>0</option><option>1</option><option>2</option></select></label><label>Color<input id="subColor" type="color" value="#3983f7"></label></div><button class="btn orange full" id="subButton" disabled>＋ Subscribe</button></form><div class="list-caption">SUBSCRIBED TOPICS <span id="subCount">0</span></div><div id="subList" class="sub-list"><div class="empty-small">ยังไม่ได้ Subscribe Topic ใด</div></div></div><div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">▢</span> Messages</h3><p>ข้อความล่าสุดอยู่ด้านบน (เก็บ 500 ข้อความล่าสุด)</p></div><div class="small-tools"><small id="messageCount">0 messages</small><button class="btn outline" id="clearMessages">ล้าง</button></div></div><div class="messages" id="messageList"><div class="no-messages">ยังไม่มีข้อความ — Subscribe Topic เพื่อเริ่มรับข้อความ</div></div></div></div></section>
 <section id="exam" class="page hidden"><h1 class="page-title">Mock Exam</h1><p class="page-sub">Physical Computing Mock Exam · ปีการศึกษา 2566</p><div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">♧</span> Connection</h3><p>กรอกรหัสนักศึกษาแล้วกด Connect เพื่อเริ่มรับและส่งค่าจาก Server</p></div><span id="examStatus" class="status off">● Not connected</span></div><div class="exam-conn-fields"><label>Host<input value="phycom.it.kmitl.ac.th" disabled></label><label>Port<input value="8884" disabled></label><label>Client ID<input id="examClientId" disabled></label></div><div class="exam-student"><label>Student ID<input id="examStudentId" disabled><small>รหัสนักศึกษาจากหน้าลงชื่อเข้าใช้</small></label><button class="btn orange" id="connectExam">♧ Connect</button></div><p id="examError" class="error"></p></div>
-<div class="exam-section"><div><h2><span class="blue">↑</span> Publish</h2><p>บอร์ดอ่านค่าจาก Sensor แล้วส่งค่าขึ้น Message Broker</p></div><div class="progress">ได้รับข้อมูลแล้ว <b id="progress">0/4</b><span class="progress-line"><i id="progressFill"></i></span></div></div><div class="exam-grid" id="publishTasks"></div><div class="exam-section"><div><h2><span class="purple">↓</span> Subscribe</h2><p>Server ส่งค่าลงมา บอร์ดต้องรับค่าแล้วแสดงผลให้ตรงกับด้านขวา</p></div></div><div class="exam-grid" id="subscribeTasks"></div><div class="simulation"><div><h3>จำลองการส่งข้อมูลจาก Server</h3><p>เว็บสามารถส่งค่าอุณหภูมิดาวศุกร์และเลข 7-Segment ทุก 3 วินาที เพื่อทดสอบบอร์ดของคุณ</p><small>ปิดไว้เป็นค่าเริ่มต้นเพื่อไม่ส่งข้อมูลเข้า MQTT Broker โดยไม่ตั้งใจ</small></div><label><input type="checkbox" id="simulate" disabled> เปิดโหมดจำลอง</label></div></section>
+<div class="exam-section"><div><h2><span class="blue">↑</span> Publish</h2><p>บอร์ดอ่านค่าจาก Sensor แล้วส่งค่าขึ้น Message Broker</p></div><div class="progress">ได้รับข้อมูลแล้ว <b id="progress">0/4</b><span class="progress-line"><i id="progressFill"></i></span></div></div><div class="exam-grid" id="publishTasks"></div><div class="exam-section"><div><h2><span class="purple">↓</span> Subscribe</h2><p>เว็บ Publish ค่าลง Broker เพื่อให้บอร์ด Subscribe และแสดงผลให้ตรงกับด้านขวา</p></div></div><div class="exam-grid" id="subscribeTasks"></div><div class="simulation"><div><h3>เว็บไซต์ส่งข้อมูลให้บอร์ดอัตโนมัติ</h3><p>เมื่อเชื่อมต่อ Mock Exam สำเร็จ เว็บจะ Publish ค่าอุณหภูมิดาวศุกร์และเลข 7-Segment ไปให้บอร์ดทุก 3 วินาที</p><small>เว็บต้องเปิดอยู่และเชื่อมต่อ MQTT จึงจะส่งค่าต่อเนื่องได้ · ใช้ Topic ตามรหัสนักศึกษาที่กรอก</small></div><span id="sendStatus" class="status off" aria-live="polite">● ยังไม่เริ่มส่ง</span></div></section>
 </main><footer class="footer">การประมวลผลทางกายภาพ · Physical Computing · IT KMITL | เว็บสำหรับฝึกสอบ</footer></div></div><div class="toast hidden" id="toast"></div>
 <script>
 (function(){
 "use strict";
-var STUDENT_KEY="phycom_mock_2_1_66";var BROKER="phycom.it.kmitl.ac.th";var PORT=8884;var student="";var c=null;var ec=null;var cOnline=false;var eOnline=false;var subs=new Map();var messages=[];var readings={};var simTimer=null;var simIndex=0;
+var STUDENT_KEY="phycom_mock_2_1_66";var BROKER="phycom.it.kmitl.ac.th";var PORT=8884;var student="";var c=null;var ec=null;var cOnline=false;var eOnline=false;var subs=new Map();var messages=[];var readings={};var publishTimer=null;var publishSequence=0;
 function el(id){return document.getElementById(id);}function set(id,value){el(id).textContent=value;}function topic(key){return student+"/"+key;}function newid(prefix){return prefix+"_"+Math.random().toString(16).slice(2,10);}function notice(str){var box=el("toast");box.textContent=str;box.classList.remove("hidden");clearTimeout(notice.timer);notice.timer=setTimeout(function(){box.classList.add("hidden");},2600);}
 function openPage(page){if(!student)return;if(["home","client","exam"].indexOf(page)<0)page="home";document.querySelectorAll(".page").forEach(function(x){x.classList.toggle("hidden",x.id!==page);});document.querySelectorAll(".nav").forEach(function(x){x.classList.toggle("active",x.dataset.nav===page);});el("sidebar").classList.remove("open");history.replaceState(null,"","#"+page);}
 function login(id){student=id;sessionStorage.setItem(STUDENT_KEY,id);el("login").classList.add("hidden");el("app").classList.remove("hidden");document.querySelectorAll("[data-student]").forEach(function(x){x.textContent=id;});el("pubTopic").value=topic("temp");el("subTopic").value=topic("#");el("clientId").value=newid("web_"+id);el("examStudentId").value=id;el("examClientId").value=newid("MockExam_"+id);renderTasks();openPage(location.hash.slice(1)||"home");}
@@ -52,19 +52,95 @@ var definitions=[
 {key:"light",title:"♧ ตัวต้านทานปรับค่าได้",desc:"อ่านค่าจากตัวต้านทานปรับค่าได้ (Potentiometer) แล้ว Publish ค่า 0 – 1023"},
 {key:"food",title:"◎ ระยะทาง (Ultrasonic)",desc:"อ่านค่าระยะทางจาก Ultrasonic หน่วยเป็น cm<br>ถ้ามากกว่า <b>20 cm</b> ให้ Publish ค่า <b>off</b><br>ถ้าน้อยกว่าหรือเท่ากับ <b>20 cm</b> ให้ Publish ค่า <b>on</b>"},
 {key:"door",title:"♧ ประตู (Ultrasonic + ปุ่ม)",desc:"อ่านค่าจาก Ultrasonic หน่วยเป็น cm<br>ถ้ามากกว่าหรือเท่ากับ <b>20 cm และกดปุ่ม</b> push button ให้ Publish <b>On</b><br>กรณีอื่น (น้อยกว่า 20 cm หรือไม่กดปุ่ม) ให้ Publish <b>Off</b>"},
-{key:"venus",title:"◎ อุณหภูมิดาวศุกร์",desc:"รับค่าแล้วแสดงผลออกทาง Color LED<br><span class='color-range'><i style='background:#f04449'></i>36 – 50 → LED สีแดง</span><br><span class='color-range'><i style='background:#1ba9e4'></i>26 – 35 → LED สีฟ้า</span><br><span class='color-range'><i style='background:#20bf65'></i>10 – 25 → LED สีเขียว</span>"},
-{key:"prob_stat",title:"＃ 7-Segment",desc:"รับค่าตัวเลข 0 – 9 แล้วแสดงค่าที่อ่านได้บนจอ 7-segment ขนาด 1 ตัวเลข"}
+{key:"venus",title:"◎ อุณหภูมิดาวศุกร์",desc:"เว็บส่งค่าอุณหภูมิให้บอร์ด Subscribe แล้วแสดงผลออกทาง Color LED<br><span class='color-range'><i style='background:#f04449'></i>36 – 50 → LED สีแดง</span><br><span class='color-range'><i style='background:#1ba9e4'></i>26 – 35 → LED สีฟ้า</span><br><span class='color-range'><i style='background:#20bf65'></i>10 – 25 → LED สีเขียว</span>"},
+{key:"prob_stat",title:"＃ 7-Segment",desc:"เว็บส่งค่าตัวเลข 0 – 9 ให้บอร์ด Subscribe แล้วแสดงผลบนจอ 7-segment ขนาด 1 ตัวเลข"}
 ];
 function renderTasks(){var p=el("publishTasks"),s=el("subscribeTasks");p.replaceChildren();s.replaceChildren();definitions.forEach(function(d,i){var card=document.createElement("article");card.className="task";var header=document.createElement("div");header.className="task-header";var num=document.createElement("span");num.className="number";num.textContent=(i<4?i+1:i-3);var heading=document.createElement("b");heading.textContent=d.title;var kind=document.createElement("span");kind.className="task-kind"+(i>=4?" down":"");kind.textContent=i>=4?"↓ Subscribe":"↑ Publish";header.append(num,heading,kind);
-var body=document.createElement("div");body.className="task-body";var desc=document.createElement("div");desc.className="task-desc";var label=document.createElement("div");label.className="topic-label";label.textContent="Topic";var cp=document.createElement("button");cp.className="topic";cp.textContent=topic(d.key);cp.title="คลิกเพื่อคัดลอก Topic";cp.addEventListener("click",function(){copyTopic(topic(d.key));});var prompt=document.createElement("p");prompt.innerHTML=d.desc;desc.append(label,cp,prompt);var visual=document.createElement("div");visual.className="visual";visual.id="visual-"+d.key;body.append(desc,visual);var foot=document.createElement("div");foot.className="task-foot"+(i>=4?" server-foot":"");foot.id="age-"+d.key;foot.textContent=i>=4?"● รอรับข้อความจาก Topic":"● ยังไม่ได้รับข้อมูล";card.append(header,body,foot);(i<4?p:s).appendChild(card);});renderReadings();}
+var body=document.createElement("div");body.className="task-body";var desc=document.createElement("div");desc.className="task-desc";var label=document.createElement("div");label.className="topic-label";label.textContent="Topic";var cp=document.createElement("button");cp.className="topic";cp.textContent=topic(d.key);cp.title="คลิกเพื่อคัดลอก Topic";cp.addEventListener("click",function(){copyTopic(topic(d.key));});var prompt=document.createElement("p");prompt.innerHTML=d.desc;desc.append(label,cp,prompt);var visual=document.createElement("div");visual.className="visual";visual.id="visual-"+d.key;body.append(desc,visual);var foot=document.createElement("div");foot.className="task-foot"+(i>=4?" server-foot":"");foot.id="age-"+d.key;foot.textContent=i>=4?"● รอเชื่อมต่อเพื่อเริ่มส่ง":"● ยังไม่ได้รับข้อมูล";card.append(header,body,foot);(i<4?p:s).appendChild(card);});renderReadings();}
 function copyTopic(s){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(function(){notice("คัดลอก "+s+" แล้ว");}).catch(function(){notice("ไม่สามารถคัดลอกอัตโนมัติ");});}else notice("เลือกข้อความเพื่อคัดลอกได้");}
-function examStatus(text,mode){set("examStatus","● "+text);el("examStatus").className="status "+mode;eOnline=mode==="on";el("connectExam").textContent=eOnline?"♧ Disconnect":"♧ Connect";el("connectExam").className="btn "+(eOnline?"danger":"orange");el("connectExam").disabled=mode==="pending";el("simulate").disabled=!eOnline;}
-function stopSimulation(){if(simTimer)clearInterval(simTimer);simTimer=null;el("simulate").checked=false;}
-function disconnectExam(){stopSimulation();var old=ec;ec=null;if(old){old.removeAllListeners();old.end(true);}examStatus("Not connected","off");}
-function connectExam(){if(eOnline){disconnectExam();return;}if(ec)disconnectExam();if(!mqttReady("examError"))return;readings={};renderReadings();set("examError","");examStatus("Connecting","pending");var id=newid("Server_"+student);el("examClientId").value=id;
-try{var self=window.mqtt.connect("wss://"+BROKER+":"+PORT,{clientId:id,clean:true,connectTimeout:10000,reconnectPeriod:4000,resubscribe:false,keepalive:30});ec=self;self.on("connect",function(){if(ec!==self)return;examStatus("Connected","on");set("examError","");definitions.forEach(function(d){self.subscribe(topic(d.key),{qos:0},function(err){if(err)set("examError","Subscribe "+topic(d.key)+" ไม่สำเร็จ: "+err.message);});});});self.on("message",function(name,payload,packet){if(ec!==self||!name.startsWith(student+"/"))return;var key=name.slice(student.length+1);var v=payload.toString().trim();if(["temp","light","food","door","venus","prob_stat"].indexOf(key)<0)return;
-var valid=false;if(key==="temp"||key==="venus")valid=v!==""&&Number.isFinite(Number(v));else if(key==="light")valid=/^\d+$/.test(v)&&Number(v)<=1023;else if(key==="prob_stat")valid=/^[0-9]$/.test(v);else valid=/^(on|off)$/i.test(v);
-if(!valid){notice("Payload ไม่ถูกต้อง: "+key);return;}readings[key]={value:v,at:Date.now(),retained:Boolean(packet&&packet.retain)};renderReadings();});self.on("reconnect",function(){if(ec===self)examStatus("Reconnecting","pending");});self.on("close",function(){if(ec===self){stopSimulation();examStatus("Not connected","off");}});self.on("error",function(err){if(ec===self){set("examError","MQTT: "+err.message);examStatus("Not connected","off");}});}catch(err){set("examError",err.message);examStatus("Not connected","off");}}
+function examStatus(text,mode){
+ set("examStatus","● "+text);
+ el("examStatus").className="status "+mode;
+ eOnline=mode==="on";
+ el("connectExam").textContent=eOnline?"♧ Disconnect":"♧ Connect";
+ el("connectExam").className="btn "+(eOnline?"danger":"orange");
+ el("connectExam").disabled=mode==="pending";
+}
+function publisherStatus(text,mode){
+ set("sendStatus","● "+text);
+ el("sendStatus").className="status "+mode;
+}
+function stopPublisher(){
+ if(publishTimer!==null){clearInterval(publishTimer);publishTimer=null;}
+ publisherStatus("หยุดส่งข้อมูล","off");
+}
+function disconnectExam(){
+ stopPublisher();
+ var old=ec;ec=null;
+ if(old){old.removeAllListeners();old.end(true);}
+ examStatus("Not connected","off");
+}
+function connectExam(){
+ if(eOnline){disconnectExam();return;}
+ if(ec)disconnectExam();
+ if(!mqttReady("examError"))return;
+ readings={};renderReadings();
+ set("examError","");
+ examStatus("Connecting","pending");
+ var id=newid("Server_"+student);el("examClientId").value=id;
+ try{
+  var self=window.mqtt.connect("wss://"+BROKER+":"+PORT,{
+   clientId:id,clean:true,connectTimeout:10000,reconnectPeriod:4000,resubscribe:false,keepalive:30
+  });
+  ec=self;
+  self.on("connect",function(){
+   if(ec!==self)return;
+   examStatus("Connected","on");
+   set("examError","");
+   // The board PUBLISHES these four values; this web app SUBSCRIBES.
+   ["temp","light","food","door"].forEach(function(key){
+    self.subscribe(topic(key),{qos:0},function(err){
+     if(err&&ec===self)set("examError","Subscribe "+topic(key)+" ไม่สำเร็จ: "+err.message);
+    });
+   });
+   // The web app PUBLISHES Venus temperature and 7-segment digit.
+   startPublisher(self);
+  });
+  self.on("message",function(name,payload,packet){
+   if(ec!==self||!name.startsWith(student+"/"))return;
+   var key=name.slice(student.length+1);
+   if(["temp","light","food","door"].indexOf(key)<0)return;
+   var v=payload.toString().trim();
+   var valid=false;
+   if(key==="temp")valid=v!==""&&Number.isFinite(Number(v));
+   else if(key==="light")valid=/^\d+$/.test(v)&&Number(v)<=1023;
+   else valid=/^(on|off)$/i.test(v);
+   if(!valid){notice("Payload ไม่ถูกต้อง: "+key);return;}
+   readings[key]={value:v,at:Date.now(),retained:Boolean(packet&&packet.retain)};
+   renderReadings();
+  });
+  self.on("reconnect",function(){
+   if(ec!==self)return;
+   stopPublisher();
+   examStatus("Reconnecting","pending");
+  });
+  self.on("close",function(){
+   if(ec!==self)return;
+   stopPublisher();
+   examStatus("Not connected","off");
+  });
+  self.on("error",function(err){
+   if(ec!==self)return;
+   stopPublisher();
+   set("examError","MQTT: "+err.message);
+   examStatus("Not connected","off");
+  });
+ }catch(err){
+  stopPublisher();
+  set("examError",err.message);
+  examStatus("Not connected","off");
+ }
+}
 var segmentMap=["abcdef","bc","abged","abgcd","fbgc","afgcd","afgecd","abc","abcdefg","abfgcd"];
 function addText(parent,text,tag,className){var n=document.createElement(tag||"span");n.textContent=text;if(className)n.className=className;parent.appendChild(n);return n;}
 function renderReadings(){if(!student)return;definitions.forEach(function(d){var root=el("visual-"+d.key);if(!root)return;root.replaceChildren();var r=readings[d.key];var v=r?r.value:null;
@@ -74,12 +150,63 @@ if(d.key==="food"||d.key==="door"){if(d.key==="door")addText(root,"▣","span","
 if(d.key==="venus"){var n=r?Number(v):null;var color="";if(n!==null){if(n>=36&&n<=50)color="red";else if(n>=26&&n<=35)color="cyan";else if(n>=10&&n<=25)color="green";}addText(root,r?n+"°C":"—","strong","venus-value");addText(root,"","div","lamp "+color);addText(root,!r?"ยังไม่มีข้อมูล":color==="red"?"LED ควรเป็นสีแดง":color==="cyan"?"LED ควรเป็นสีฟ้า":color==="green"?"LED ควรเป็นสีเขียว":"LED ดับ (นอกช่วง)","small");}
 if(d.key==="prob_stat"){var display=addText(root,"","div","segment-display");var chars=r?segmentMap[Number(v)]:"";"abcdefg".split("").forEach(function(k){addText(display,"","i","seg "+k+(chars.includes(k)?" on":""));});addText(root,r?"จอควรแสดงเลข "+v:"ยังไม่มีข้อมูล","small");}
 });var got=["temp","light","food","door"].filter(function(k){return !!readings[k];}).length;set("progress",got+"/4");el("progressFill").style.width=(got*25)+"%";updateAge();}
-function updateAge(){["temp","light","food","door"].forEach(function(key){var node=el("age-"+key);if(!node)return;var r=readings[key];if(!r){node.className="task-foot";node.textContent="● ยังไม่ได้รับข้อมูล";return;}var age=Math.floor((Date.now()-r.at)/1000);node.className="task-foot"+(age<6?" fresh":"");node.textContent=age<6?"● รับข้อมูลแล้ว"+(r.retained?" (retained)":""):"● ไม่มีข้อมูลใหม่ "+age+" วินาที";});["venus","prob_stat"].forEach(function(key){var node=el("age-"+key);if(node)node.textContent=readings[key]?"● รับข้อมูลจาก Topic แล้ว":"● รอรับข้อความจาก Topic";});}
-function simulateSend(){if(!eOnline||!ec){stopSimulation();return;}simIndex++;var temp=[19,31,46][simIndex%3];var digit=String(Math.floor(Math.random()*10));ec.publish(topic("venus"),String(temp),{qos:0,retain:false});ec.publish(topic("prob_stat"),digit,{qos:0,retain:false});}
-function toggleSimulation(){stopSimulation();if(!el("simulate").disabled&&el("simulate").dataset.wanted==="true"&&eOnline){el("simulate").checked=true;simulateSend();simTimer=setInterval(simulateSend,3000);}el("simulate").dataset.wanted="false";}
+function updateAge(){
+ ["temp","light","food","door"].forEach(function(key){
+  var node=el("age-"+key);if(!node)return;
+  var r=readings[key];
+  if(!r){node.className="task-foot";node.textContent="● ยังไม่ได้รับข้อมูล";return;}
+  var age=Math.floor((Date.now()-r.at)/1000);
+  node.className="task-foot"+(age<6?" fresh":"");
+  node.textContent=age<6?"● รับข้อมูลแล้ว"+(r.retained?" (retained)":""):"● ไม่มีข้อมูลใหม่ "+age+" วินาที";
+ });
+ ["venus","prob_stat"].forEach(function(key){
+  var node=el("age-"+key);if(!node)return;
+  var r=readings[key];
+  node.className="task-foot server-foot";
+  if(!eOnline)node.textContent="● ยังไม่เชื่อมต่อ — หยุดส่ง";
+  else if(!r)node.textContent="● กำลังเตรียม Publish ข้อมูล";
+  else {
+   var seconds=Math.floor((Date.now()-r.at)/1000);
+   node.textContent=seconds<7?"● เว็บส่งค่าทุก 3 วินาที":"● ส่งล่าสุด "+seconds+" วินาทีที่แล้ว";
+  }
+ });
+}
+function publishExamValues(sender){
+ if(ec!==sender||!eOnline||!sender.connected)return;
+ var count=publishSequence++;
+ // Cycle through the three LED colors; cycle through all digits 0-9.
+ var temp=String([19,31,46][count%3]);
+ var digit=String(count%10);
+ var data=[{key:"venus",value:temp},{key:"prob_stat",value:digit}];
+ var success=0;
+ data.forEach(function(item){
+  sender.publish(topic(item.key),item.value,{qos:0,retain:false},function(err){
+   if(ec!==sender||!eOnline)return;
+   if(err){
+    publisherStatus("ส่งข้อมูลไม่สำเร็จ","off");
+    set("examError","Publish "+topic(item.key)+": "+err.message);
+    return;
+   }
+   readings[item.key]={value:item.value,at:Date.now(),retained:false};
+   renderReadings();
+   success++;
+   if(success===2){
+    publisherStatus("กำลังส่งทุก 3 วินาที","on");
+    set("examError","");
+   }
+  });
+ });
+}
+function startPublisher(sender){
+ stopPublisher();
+ if(ec!==sender||!eOnline)return;
+ publisherStatus("กำลังเริ่มส่ง","pending");
+ publishExamValues(sender);
+ publishTimer=setInterval(function(){publishExamValues(sender);},3000);
+}
 el("loginForm").addEventListener("submit",function(ev){ev.preventDefault();var v=el("studentInput").value.trim();if(!/^\d{8}$/.test(v)){set("loginError","กรุณากรอกรหัสนักศึกษาเป็นตัวเลข 8 หลัก");return;}set("loginError","");login(v);});
 el("studentInput").addEventListener("input",function(){this.value=this.value.replace(/\D/g,"").slice(0,8);});
 document.querySelectorAll("[data-nav]").forEach(function(b){b.addEventListener("click",function(ev){ev.preventDefault();openPage(b.dataset.nav);});});
-el("logout").addEventListener("click",logout);el("mobileMenu").addEventListener("click",function(){el("sidebar").classList.toggle("open");});el("regenId").addEventListener("click",function(){el("clientId").value=newid("web_"+student);});["host","port","path","ssl"].forEach(function(id){el(id).addEventListener("input",preview);});el("connectClient").addEventListener("click",connectClient);el("connectExam").addEventListener("click",connectExam);el("publishForm").addEventListener("submit",publish);el("pubMessage").addEventListener("keydown",function(e){if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))publish(e);});el("subForm").addEventListener("submit",subscribe);el("clearMessages").addEventListener("click",function(){messages=[];renderMessages();});el("simulate").addEventListener("change",function(){this.dataset.wanted=this.checked?"true":"false";toggleSimulation();});window.addEventListener("hashchange",function(){if(student)openPage(location.hash.slice(1));});window.addEventListener("beforeunload",function(){stopSimulation();if(c)c.end(true);if(ec)ec.end(true);});setInterval(updateAge,1000);preview();renderMessages();var prev=sessionStorage.getItem(STUDENT_KEY);if(prev&&/^\d{8}$/.test(prev))login(prev);else el("studentInput").focus();
+el("logout").addEventListener("click",logout);el("mobileMenu").addEventListener("click",function(){el("sidebar").classList.toggle("open");});el("regenId").addEventListener("click",function(){el("clientId").value=newid("web_"+student);});["host","port","path","ssl"].forEach(function(id){el(id).addEventListener("input",preview);});el("connectClient").addEventListener("click",connectClient);el("connectExam").addEventListener("click",connectExam);el("publishForm").addEventListener("submit",publish);el("pubMessage").addEventListener("keydown",function(e){if(e.key==="Enter"&&(e.ctrlKey||e.metaKey))publish(e);});el("subForm").addEventListener("submit",subscribe);el("clearMessages").addEventListener("click",function(){messages=[];renderMessages();});window.addEventListener("hashchange",function(){if(student)openPage(location.hash.slice(1));});window.addEventListener("beforeunload",function(){stopPublisher();if(c)c.end(true);if(ec)ec.end(true);});setInterval(updateAge,1000);preview();renderMessages();var prev=sessionStorage.getItem(STUDENT_KEY);if(prev&&/^\d{8}$/.test(prev))login(prev);else el("studentInput").focus();
 })();
 </script></body></html>
