@@ -18,22 +18,22 @@
 <section id="login"><div class="login-box"><div class="login-cover"><span class="eyebrow">IT KMITL · PHYSICAL COMPUTING</span><h1>Physical<br>Computing<span style="color:#fa7428">.</span></h1><p>เว็บจำลองการสอบ Arduino และ MQTT สำหรับฝึกการประมวลผลทางกายภาพ</p><footer>MQTT Console · Mock Exam · 2/1/66</footer></div><div class="login-form"><div class="brand"><strong>KMITL</strong><span><b>Physical Computing</b><small>MQTT Console</small></span></div><span style="color:#ea7226;font-size:11px;letter-spacing:.12em">STUDENT ACCESS</span><h2>เข้าสู่ระบบ</h2><p>กรอกรหัสนักศึกษา 8 หลักเพื่อเริ่มใช้งาน</p><form id="loginForm"><label>รหัสนักศึกษา (Student ID)<input id="studentInput" maxlength="8" inputmode="numeric" autocomplete="off" placeholder="เช่น 68070131" required></label><p id="loginError" class="error"></p><button class="btn orange full">เข้าสู่ระบบ →</button></form><div class="login-note">เว็บฝึกสอบนี้ใช้รหัสนักศึกษาเพื่อกำหนด MQTT Topic ไม่ใช่ระบบยืนยันตัวตนของ KMITL</div></div></div></section>
 <div id="app" class="hidden"><aside class="sidebar" id="sidebar"><a class="brand" href="#home" data-nav="home"><strong>KMITL</strong><span><b>Physical Computing</b><small>MQTT Console</small></span></a><div class="nav-section"><div class="nav-caption">OVERVIEW</div><button class="nav active" data-nav="home"><i>⌂</i> หน้าหลัก</button><button class="nav" data-nav="client"><i>♧</i> MQTT Client</button></div><div class="nav-section"><div class="nav-caption">EXAMS</div><button class="nav" data-nav="exam"><i>▣</i> Mock Exam</button></div><div class="side-bottom"><div class="student-badge"><span class="avatar">ภ</span><span><b>นักศึกษา <span data-student></span></b><small><span data-student></span>@kmitl.ac.th</small></span></div><button class="logout" id="logout">⇥ ออกจากระบบ</button><small>คณะเทคโนโลยีสารสนเทศ<br>สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง</small></div></aside>
 <div class="layout"><header class="mobile-header"><button id="mobileMenu">☰</button><b>Physical Computing</b></header><main class="main">
-<section id="home" class="page"><div class="hero"><div><div class="hero-tag">✧ คณะเทคโนโลยีสารสนเทศ สจล.</div><h1>Physical Computing</h1><h2>การประมวลผลทางกายภาพ</h2><p>เว็บฝึกสอบ MQTT รับค่าจากบอร์ด Arduino/ESP แบบเรียลไทม์ และส่งคำสั่งทดสอบผ่าน Message Broker</p></div><div class="glass"><div class="tile">▣</div><p>สวัสดี นักศึกษา <b data-student></b></p><h3>พร้อมเริ่มการทดสอบ</h3><p>เชื่อมต่อบอร์ดของคุณกับ Broker ได้ด้วย MQTT Client</p><button class="btn orange" data-nav="client">♧ เปิด MQTT Client</button></div></div><div class="steps-label">ใช้งานอย่างไร</div><div class="steps"><div class="step"><span class="bubble">✓</span><h3>เข้าสู่ระบบ <small>สำเร็จแล้ว</small></h3><p>ใช้รหัสนักศึกษาเพื่อสร้าง Topic โดยอัตโนมัติ</p></div><div class="step"><span class="bubble">2</span><h3>เปิดหน้าข้อสอบ</h3><p>เว็บจะเชื่อมต่อ Broker เมื่อกด Connect</p></div><div class="step"><span class="bubble">3</span><h3>ให้บอร์ดส่งข้อมูล</h3><p>ส่งข้อมูลไปยัง Topic แล้วดูผลทันที</p></div></div><h2 class="home-heading">เลือกข้อสอบ</h2><div class="home-card"><div class="tile">▣</div><h3>Mock Exam</h3><p>ข้อสอบทดลอง ปีการศึกษา 2566</p><button class="btn full" data-nav="exam">เข้าทำข้อสอบ　→</button></div></section>
+<section id="home" class="page"><div class="hero"><div><div class="hero-tag">✧ คณะเทคโนโลยีสารสนเทศ สจล.</div><h1>Physical Computing</h1><h2>การประมวลผลทางกายภาพ</h2><p>เว็บฝึกสอบ MQTT รับค่าจากบอร์ด Arduino/ESP แบบเรียลไทม์ และส่งคำสั่งทดสอบผ่าน Message Broker</p></div><div class="glass"><div class="tile">▣</div><p>สวัสดี นักศึกษา <b data-student></b></p><h3>พร้อมเริ่มการทดสอบ</h3><p>ระบบ Publish ไปยังบอร์ดอัตโนมัติหลังเข้าสู่ระบบ</p><p><span id="homeSendStatus" class="status pending" aria-live="polite">● กำลังเริ่มเชื่อมต่อ</span></p><button class="btn orange" data-nav="client">♧ เปิด MQTT Client</button></div></div><div class="steps-label">ใช้งานอย่างไร</div><div class="steps"><div class="step"><span class="bubble">✓</span><h3>เข้าสู่ระบบ <small>สำเร็จแล้ว</small></h3><p>ใช้รหัสนักศึกษาเพื่อสร้าง Topic โดยอัตโนมัติ</p></div><div class="step"><span class="bubble">2</span><h3>เปิดหน้าข้อสอบ</h3><p>เว็บจะเชื่อมต่อ Broker เมื่อกด Connect</p></div><div class="step"><span class="bubble">3</span><h3>ให้บอร์ดส่งข้อมูล</h3><p>ส่งข้อมูลไปยัง Topic แล้วดูผลทันที</p></div></div><h2 class="home-heading">เลือกข้อสอบ</h2><div class="home-card"><div class="tile">▣</div><h3>Mock Exam</h3><p>ข้อสอบทดลอง ปีการศึกษา 2566</p><button class="btn full" data-nav="exam">เข้าทำข้อสอบ　→</button></div></section>
 <section id="client" class="page hidden"><h1 class="page-title">MQTT Client</h1><p class="page-sub">ทดสอบการเชื่อมต่อ ส่ง และรับข้อความผ่าน MQTT over WebSocket</p>
 <div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">♧</span> Connection</h3><p>เชื่อมต่อกับ MQTT Broker ผ่าน WebSocket</p></div><span id="clientStatus" class="status off">● Not connected</span></div><div class="connection-fields"><label>Host<input id="host" value="phycom.it.kmitl.ac.th"></label><label>Port<input id="port" type="number" min="1" max="65535" value="8884"></label><label>Client ID<input id="clientId"></label><button id="regenId" class="btn outline" title="สร้าง Client ID ใหม่">⟳</button><button class="btn orange" id="connectClient">♧ Connect</button></div><details class="advanced"><summary>Advanced: Path, SSL, Authentication, Last Will</summary><div class="advanced-grid"><label>WebSocket Path<input id="path" placeholder="/ (default)"></label><label class="check"><input id="ssl" type="checkbox" checked> SSL / WSS</label><label>Username<input id="username"></label><label>Password<input id="password" type="password"></label><label>Last Will Topic<input id="willTopic"></label><label>Last Will Message<input id="willMessage" placeholder="offline"></label><label>Last Will QoS<select id="willQos"><option>0</option><option>1</option><option>2</option></select></label><label class="check"><input id="willRetain" type="checkbox"> Retain Last Will</label></div></details><p class="broker">Broker: <code id="brokerPreview"></code></p><p id="clientError" class="error"></p></div>
 <div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">➤</span> Publish</h3><p>ส่งข้อความไปยัง Topic (Ctrl/Cmd + Enter เพื่อส่ง)</p></div></div><form id="publishForm"><div class="publish-fields"><label>Topic<input id="pubTopic" required></label><label>QoS<select id="pubQos"><option>0</option><option>1</option><option>2</option></select></label><label class="check" style="flex-direction:column">Retain<input id="pubRetain" type="checkbox"></label></div><label>Message<textarea id="pubMessage" rows="3" placeholder="Payload" required></textarea></label><div class="publish-actions"><button class="btn orange" id="pubButton" disabled>➤ Publish</button></div></form></div>
 <div class="client-grid"><div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">◔</span> Subscriptions</h3><p>รับข้อความจาก Topic (รองรับ + และ #)</p></div></div><form id="subForm"><label>Topic<input id="subTopic" required></label><div class="sub-fields"><label>QoS<select id="subQos"><option>0</option><option>1</option><option>2</option></select></label><label>Color<input id="subColor" type="color" value="#3983f7"></label></div><button class="btn orange full" id="subButton" disabled>＋ Subscribe</button></form><div class="list-caption">SUBSCRIBED TOPICS <span id="subCount">0</span></div><div id="subList" class="sub-list"><div class="empty-small">ยังไม่ได้ Subscribe Topic ใด</div></div></div><div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">▢</span> Messages</h3><p>ข้อความล่าสุดอยู่ด้านบน (เก็บ 500 ข้อความล่าสุด)</p></div><div class="small-tools"><small id="messageCount">0 messages</small><button class="btn outline" id="clearMessages">ล้าง</button></div></div><div class="messages" id="messageList"><div class="no-messages">ยังไม่มีข้อความ — Subscribe Topic เพื่อเริ่มรับข้อความ</div></div></div></div></section>
-<section id="exam" class="page hidden"><h1 class="page-title">Mock Exam</h1><p class="page-sub">Physical Computing Mock Exam · ปีการศึกษา 2566</p><div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">♧</span> Connection</h3><p>กรอกรหัสนักศึกษาแล้วกด Connect เพื่อเริ่มรับและส่งค่าจาก Server</p></div><span id="examStatus" class="status off">● Not connected</span></div><div class="exam-conn-fields"><label>Host<input value="phycom.it.kmitl.ac.th" disabled></label><label>Port<input value="8884" disabled></label><label>Client ID<input id="examClientId" disabled></label></div><div class="exam-student"><label>Student ID<input id="examStudentId" disabled><small>รหัสนักศึกษาจากหน้าลงชื่อเข้าใช้</small></label><button class="btn orange" id="connectExam">♧ Connect</button></div><p id="examError" class="error"></p></div>
-<div class="exam-section"><div><h2><span class="blue">↑</span> Publish</h2><p>บอร์ดอ่านค่าจาก Sensor แล้วส่งค่าขึ้น Message Broker</p></div><div class="progress">ได้รับข้อมูลแล้ว <b id="progress">0/4</b><span class="progress-line"><i id="progressFill"></i></span></div></div><div class="exam-grid" id="publishTasks"></div><div class="exam-section"><div><h2><span class="purple">↓</span> Subscribe</h2><p>เว็บ Publish ค่าลง Broker เพื่อให้บอร์ด Subscribe และแสดงผลให้ตรงกับด้านขวา</p></div></div><div class="exam-grid" id="subscribeTasks"></div><div class="simulation"><div><h3>เว็บไซต์ส่งข้อมูลให้บอร์ดอัตโนมัติ</h3><p>เมื่อเชื่อมต่อ Mock Exam สำเร็จ เว็บจะ Publish ค่าอุณหภูมิดาวศุกร์และเลข 7-Segment ไปให้บอร์ดทุก 3 วินาที</p><small>เว็บต้องเปิดอยู่และเชื่อมต่อ MQTT จึงจะส่งค่าต่อเนื่องได้ · ใช้ Topic ตามรหัสนักศึกษาที่กรอก</small></div><span id="sendStatus" class="status off" aria-live="polite">● ยังไม่เริ่มส่ง</span></div></section>
+<section id="exam" class="page hidden"><h1 class="page-title">Mock Exam</h1><p class="page-sub">Physical Computing Mock Exam · ปีการศึกษา 2566</p><div class="panel"><div class="panel-head"><div><h3><span class="icon-orange">♧</span> Connection</h3><p>ปุ่ม Connect ใช้รับค่าจากบอร์ด (4 ข้อบน) เท่านั้น · ระบบส่งค่าทดสอบ 2 ข้อล่างอัตโนมัติหลังเข้าสู่ระบบ</p></div><span id="examStatus" class="status off">● Not connected</span></div><div class="exam-conn-fields"><label>Host<input value="phycom.it.kmitl.ac.th" disabled></label><label>Port<input value="8884" disabled></label><label>Client ID<input id="examClientId" disabled></label></div><div class="exam-student"><label>Student ID<input id="examStudentId" disabled><small>รหัสนักศึกษาจากหน้าลงชื่อเข้าใช้</small></label><button class="btn orange" id="connectExam">♧ Connect</button></div><p id="examError" class="error"></p></div>
+<div class="exam-section"><div><h2><span class="blue">↑</span> Publish</h2><p>บอร์ดอ่านค่าจาก Sensor แล้วส่งค่าขึ้น Message Broker</p></div><div class="progress">ได้รับข้อมูลแล้ว <b id="progress">0/4</b><span class="progress-line"><i id="progressFill"></i></span></div></div><div class="exam-grid" id="publishTasks"></div><div class="exam-section"><div><h2><span class="purple">↓</span> Subscribe</h2><p>เว็บ Publish ค่าลง Broker เพื่อให้บอร์ด Subscribe และแสดงผลให้ตรงกับด้านขวา</p></div></div><div class="exam-grid" id="subscribeTasks"></div><div class="simulation"><div><h3>Automatic MQTT Publisher</h3><p>เว็บเชื่อมต่อ Broker ให้อัตโนมัติหลังกรอกรหัสนักศึกษา และ Publish ค่า Venus / 7-Segment ทุก 3 วินาที แม้ไม่ได้กด Connect ใน Mock Exam</p><small>เว็บต้องเปิดอยู่และต้องเชื่อมต่อ Broker สำเร็จก่อนจึงส่งได้ · การ Disconnect ของส่วนรับข้อมูลไม่ทำให้หยุดส่ง</small></div><span id="sendStatus" class="status pending" aria-live="polite">● กำลังเริ่มต้น</span></div></section>
 </main><footer class="footer">การประมวลผลทางกายภาพ · Physical Computing · IT KMITL | เว็บสำหรับฝึกสอบ</footer></div></div><div class="toast hidden" id="toast"></div>
 <script>
 (function(){
 "use strict";
-var STUDENT_KEY="phycom_mock_2_1_66";var BROKER="phycom.it.kmitl.ac.th";var PORT=8884;var student="";var c=null;var ec=null;var cOnline=false;var eOnline=false;var subs=new Map();var messages=[];var readings={};var publishTimer=null;var publishSequence=0;
+var STUDENT_KEY="phycom_mock_2_1_66";var BROKER="phycom.it.kmitl.ac.th";var PORT=8884;var student="";var c=null;var ec=null;var cOnline=false;var eOnline=false;var subs=new Map();var messages=[];var readings={};var publisherClient=null;var publishTimer=null;var publishSequence=0;
 function el(id){return document.getElementById(id);}function set(id,value){el(id).textContent=value;}function topic(key){return student+"/"+key;}function newid(prefix){return prefix+"_"+Math.random().toString(16).slice(2,10);}function notice(str){var box=el("toast");box.textContent=str;box.classList.remove("hidden");clearTimeout(notice.timer);notice.timer=setTimeout(function(){box.classList.add("hidden");},2600);}
 function openPage(page){if(!student)return;if(["home","client","exam"].indexOf(page)<0)page="home";document.querySelectorAll(".page").forEach(function(x){x.classList.toggle("hidden",x.id!==page);});document.querySelectorAll(".nav").forEach(function(x){x.classList.toggle("active",x.dataset.nav===page);});el("sidebar").classList.remove("open");history.replaceState(null,"","#"+page);}
-function login(id){student=id;sessionStorage.setItem(STUDENT_KEY,id);el("login").classList.add("hidden");el("app").classList.remove("hidden");document.querySelectorAll("[data-student]").forEach(function(x){x.textContent=id;});el("pubTopic").value=topic("temp");el("subTopic").value=topic("#");el("clientId").value=newid("web_"+id);el("examStudentId").value=id;el("examClientId").value=newid("MockExam_"+id);renderTasks();openPage(location.hash.slice(1)||"home");}
-function logout(){disconnectClient();disconnectExam();subs.clear();messages=[];readings={};student="";sessionStorage.removeItem(STUDENT_KEY);el("app").classList.add("hidden");el("login").classList.remove("hidden");el("studentInput").value="";history.replaceState(null,"",location.pathname+location.search);}
+function login(id){student=id;sessionStorage.setItem(STUDENT_KEY,id);el("login").classList.add("hidden");el("app").classList.remove("hidden");document.querySelectorAll("[data-student]").forEach(function(x){x.textContent=id;});el("pubTopic").value=topic("temp");el("subTopic").value=topic("#");el("clientId").value=newid("web_"+id);el("examStudentId").value=id;el("examClientId").value=newid("MockExam_"+id);renderTasks();openPage(location.hash.slice(1)||"home");connectAutoPublisher();}
+function logout(){disconnectClient();disconnectExam();stopPublisher();subs.clear();messages=[];readings={};student="";sessionStorage.removeItem(STUDENT_KEY);el("app").classList.add("hidden");el("login").classList.remove("hidden");el("studentInput").value="";history.replaceState(null,"",location.pathname+location.search);}
 function mqttReady(errorId){if(!window.mqtt||!window.mqtt.connect){set(errorId,"โหลด MQTT.js ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตและรีเฟรชหน้าเว็บ");return false;}return true;}
 function url(){var host=el("host").value.trim();var port=Number(el("port").value);var path=el("path").value.trim();if(!/^[a-z0-9.-]+$/i.test(host)||!Number.isInteger(port)||port<1||port>65535)throw Error("Host หรือ Port ไม่ถูกต้อง");return (el("ssl").checked?"wss://":"ws://")+host+":"+port+(path?"/"+path.replace(/^\/+/,""):"");}
 function preview(){try{set("brokerPreview",url());}catch(err){set("brokerPreview","Host/Port ไม่ถูกต้อง");}}
@@ -67,15 +67,18 @@ function examStatus(text,mode){
  el("connectExam").disabled=mode==="pending";
 }
 function publisherStatus(text,mode){
- set("sendStatus","● "+text);
- el("sendStatus").className="status "+mode;
+ ["sendStatus","homeSendStatus"].forEach(function(id){var node=el(id);if(node){node.textContent="● "+text;node.className="status "+mode;}});
 }
 function stopPublisher(){
  if(publishTimer!==null){clearInterval(publishTimer);publishTimer=null;}
+ var old=publisherClient;
+ publisherClient=null;
+ if(old){old.removeAllListeners();old.end(true);}
  publisherStatus("หยุดส่งข้อมูล","off");
+ if(student)updateAge();
 }
 function disconnectExam(){
- stopPublisher();
+ // Disconnecting the optional board-data receiver never interrupts publishing.
  var old=ec;ec=null;
  if(old){old.removeAllListeners();old.end(true);}
  examStatus("Not connected","off");
@@ -84,10 +87,12 @@ function connectExam(){
  if(eOnline){disconnectExam();return;}
  if(ec)disconnectExam();
  if(!mqttReady("examError"))return;
- readings={};renderReadings();
+ // Clear only the four incoming measurements; keep outgoing values displayed.
+ ["temp","light","food","door"].forEach(function(key){delete readings[key];});
+ renderReadings();
  set("examError","");
  examStatus("Connecting","pending");
- var id=newid("Server_"+student);el("examClientId").value=id;
+ var id=newid("MockExam_RX_"+student);el("examClientId").value=id;
  try{
   var self=window.mqtt.connect("wss://"+BROKER+":"+PORT,{
    clientId:id,clean:true,connectTimeout:10000,reconnectPeriod:4000,resubscribe:false,keepalive:30
@@ -97,14 +102,12 @@ function connectExam(){
    if(ec!==self)return;
    examStatus("Connected","on");
    set("examError","");
-   // The board PUBLISHES these four values; this web app SUBSCRIBES.
+   // The four sensors are the only topics the receiver subscribes to.
    ["temp","light","food","door"].forEach(function(key){
     self.subscribe(topic(key),{qos:0},function(err){
      if(err&&ec===self)set("examError","Subscribe "+topic(key)+" ไม่สำเร็จ: "+err.message);
     });
    });
-   // The web app PUBLISHES Venus temperature and 7-segment digit.
-   startPublisher(self);
   });
   self.on("message",function(name,payload,packet){
    if(ec!==self||!name.startsWith(student+"/"))return;
@@ -119,24 +122,10 @@ function connectExam(){
    readings[key]={value:v,at:Date.now(),retained:Boolean(packet&&packet.retain)};
    renderReadings();
   });
-  self.on("reconnect",function(){
-   if(ec!==self)return;
-   stopPublisher();
-   examStatus("Reconnecting","pending");
-  });
-  self.on("close",function(){
-   if(ec!==self)return;
-   stopPublisher();
-   examStatus("Not connected","off");
-  });
-  self.on("error",function(err){
-   if(ec!==self)return;
-   stopPublisher();
-   set("examError","MQTT: "+err.message);
-   examStatus("Not connected","off");
-  });
+  self.on("reconnect",function(){if(ec===self)examStatus("Reconnecting","pending");});
+  self.on("close",function(){if(ec===self)examStatus("Not connected","off");});
+  self.on("error",function(err){if(ec===self){set("examError","MQTT receiver: "+err.message);examStatus("Not connected","off");}});
  }catch(err){
-  stopPublisher();
   set("examError",err.message);
   examStatus("Not connected","off");
  }
@@ -223,7 +212,7 @@ function updateAge(){
   var node=el("age-"+key);if(!node)return;
   var r=readings[key];
   node.className="task-foot server-foot";
-  if(!eOnline)node.textContent="● ยังไม่เชื่อมต่อ — หยุดส่ง";
+  if(!publisherClient||!publisherClient.connected)node.textContent="● ยังไม่เชื่อมต่อ Publisher — กำลังลองใหม่";
   else if(!r)node.textContent="● กำลังเตรียม Publish ข้อมูล";
   else {
    var seconds=Math.floor((Date.now()-r.at)/1000);
@@ -232,37 +221,74 @@ function updateAge(){
  });
 }
 function publishExamValues(sender){
- if(ec!==sender||!eOnline||!sender.connected)return;
+ if(publisherClient!==sender||!sender.connected||!student)return;
  var count=publishSequence++;
- // Cycle through the three LED colors; cycle through all digits 0-9.
+ // Cycle green, blue, red; digit cycles 0-9.
  var temp=String([19,31,46][count%3]);
  var digit=String(count%10);
  var data=[{key:"venus",value:temp},{key:"prob_stat",value:digit}];
  var success=0;
  data.forEach(function(item){
   sender.publish(topic(item.key),item.value,{qos:0,retain:false},function(err){
-   if(ec!==sender||!eOnline)return;
+   if(publisherClient!==sender||!sender.connected)return;
    if(err){
     publisherStatus("ส่งข้อมูลไม่สำเร็จ","off");
-    set("examError","Publish "+topic(item.key)+": "+err.message);
     return;
    }
    readings[item.key]={value:item.value,at:Date.now(),retained:false};
    renderReadings();
    success++;
-   if(success===2){
-    publisherStatus("กำลังส่งทุก 3 วินาที","on");
-    set("examError","");
-   }
+   if(success===2)publisherStatus("กำลังส่งทุก 3 วินาที","on");
   });
  });
 }
 function startPublisher(sender){
- stopPublisher();
- if(ec!==sender||!eOnline)return;
- publisherStatus("กำลังเริ่มส่ง","pending");
+ if(publishTimer!==null){clearInterval(publishTimer);publishTimer=null;}
+ if(publisherClient!==sender||!sender.connected)return;
+ publisherStatus("เชื่อมต่อแล้ว กำลังเริ่มส่ง","pending");
  publishExamValues(sender);
  publishTimer=setInterval(function(){publishExamValues(sender);},3000);
+}
+function connectAutoPublisher(){
+ // Student ID is required for topics, but pressing the Mock Exam Connect button is not.
+ if(!student)return;
+ stopPublisher();
+ if(!mqttReady("examError")){
+  publisherStatus("โหลด MQTT.js ไม่สำเร็จ","off");
+  return;
+ }
+ publisherStatus("กำลังเชื่อมต่อ MQTT อัตโนมัติ","pending");
+ try{
+  var self=window.mqtt.connect("wss://"+BROKER+":"+PORT,{
+   clientId:newid("WebPublisher_"+student),
+   clean:true,connectTimeout:10000,reconnectPeriod:4000,
+   resubscribe:false,keepalive:30
+  });
+  publisherClient=self;
+  self.on("connect",function(){
+   if(publisherClient!==self)return;
+   startPublisher(self);
+  });
+  self.on("reconnect",function(){
+   if(publisherClient!==self)return;
+   if(publishTimer!==null){clearInterval(publishTimer);publishTimer=null;}
+   publisherStatus("กำลังเชื่อมต่อใหม่อัตโนมัติ","pending");
+  });
+  self.on("close",function(){
+   if(publisherClient!==self)return;
+   if(publishTimer!==null){clearInterval(publishTimer);publishTimer=null;}
+   publisherStatus("Broker หลุด · กำลังรอเชื่อมต่อใหม่","pending");
+  });
+  self.on("error",function(err){
+   if(publisherClient!==self)return;
+   publisherStatus("เชื่อมต่อ Publisher ไม่สำเร็จ · กำลังลองใหม่","off");
+   var indicator=el("sendStatus");
+   if(indicator)indicator.title=err.message;
+  });
+ }catch(err){
+  publisherStatus("เปิด MQTT Publisher ไม่สำเร็จ","off");
+  set("examError",err.message);
+ }
 }
 el("loginForm").addEventListener("submit",function(ev){ev.preventDefault();var v=el("studentInput").value.trim();if(!/^\d{8}$/.test(v)){set("loginError","กรุณากรอกรหัสนักศึกษาเป็นตัวเลข 8 หลัก");return;}set("loginError","");login(v);});
 el("studentInput").addEventListener("input",function(){this.value=this.value.replace(/\D/g,"").slice(0,8);});
