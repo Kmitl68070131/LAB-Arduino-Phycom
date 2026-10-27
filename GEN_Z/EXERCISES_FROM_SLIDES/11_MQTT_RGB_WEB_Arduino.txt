@@ -1,0 +1,59 @@
+/*
+ชื่อ: MQTT RGB ควบคุมสีจากเว็บ
+อุปกรณ์: RGB LED
+การต่อสาย: Common Cathode → GND; R/G/B → D9/D10/D11 ผ่าน R
+WiFi SSID: EDOK | ตั้งรหัสใน WIFI_PASS ก่อนอัปโหลด
+MQTT Broker: phycom.it.kmitl.ac.th:1883
+MQTT Topic: 68070131/11_mqtt_rgb_web
+แก้ขา: ตัวแปรส่วน RGB LED
+แก้ความถี่: INTERVAL (ms)
+Arduino UNO R4 WiFi; Serial Monitor 115200
+ไลบรารี: WiFiS3, MQTTClient by 256dpi
+วิธีใช้: คัดลอก .txt ลง Arduino IDE -> ตั้ง WiFi -> Upload -> เปิดเว็บ Dashboard
+ข้อควรระวัง: โค้ดแต่ละไฟล์เป็น Sketch แยก; ตรวจ COM ของ 7-Segment และลำดับ Keypad
+*/
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+
+const char WIFI_SSID[]="EDOK"; // ชื่อ WiFi
+const char WIFI_PASS[]="YOUR_WIFI_PASSWORD"; // ใส่รหัสผ่านที่นี่ก่อน Upload
+const char MQTT_HOST[]="phycom.it.kmitl.ac.th"; // Broker
+const char MQTT_TOPIC[]="68070131/11_mqtt_rgb_web"; // Topic เฉพาะข้อนี้
+WiFiClient net;
+MQTTClient mqtt(256);
+const int R=9,G=10,B=11;int phase=0;
+const unsigned long INTERVAL=1000UL; // ช่วงเวลาการทำงาน
+unsigned long lastRead=0,lastRetry=0;
+void onMessage(String &topic,String &payload){
+  // ข้อมูลมาจากเว็บผ่าน MQTT Subscribe
+  digitalWrite(R,payload.indexOf("R")>=0);digitalWrite(G,payload.indexOf("G")>=0);digitalWrite(B,payload.indexOf("B")>=0);
+}
+void setup(){
+ Serial.begin(115200);
+ pinMode(R,OUTPUT);pinMode(G,OUTPUT);pinMode(B,OUTPUT);
+ mqtt.begin(MQTT_HOST,1883,net);
+ mqtt.onMessage(onMessage);
+ WiFi.begin(WIFI_SSID,WIFI_PASS);
+}
+void loop(){
+ if(WiFi.status()!=WL_CONNECTED){
+  if(millis()-lastRetry>=10000UL){lastRetry=millis();WiFi.begin(WIFI_SSID,WIFI_PASS);}
+  return;
+ }
+ if(!mqtt.connected()){
+  if(millis()-lastRetry>=5000UL){
+   lastRetry=millis();
+   String clientId="genz-11_mqtt_rgb_web-"+String(millis(),HEX);
+   if(mqtt.connect(clientId.c_str()))mqtt.subscribe(MQTT_TOPIC);
+  }
+  return;
+ }
+ mqtt.loop();
+ if(millis()-lastRead<INTERVAL)return;
+ lastRead=millis();
+ // ส่วนการอ่าน Sensor / การแสดงผล แก้ได้ตรงนี้
+ phase=(phase+1)%3;digitalWrite(R,phase==0);digitalWrite(G,phase==1);digitalWrite(B,phase==2);String payload=phase==0?"RED":phase==1?"GREEN":"BLUE";
+ Serial.println(payload);
+ // ตัวรับยัง Publish สถานะ READY/ค่าตรวจสอบเพื่อให้หน้าเว็บเห็นข้อมูล
+ mqtt.publish(MQTT_TOPIC,payload);
+}

@@ -1,0 +1,55 @@
+/*
+ชื่อ: LED PWM Fading สี่รูปแบบ
+อุปกรณ์: LED 4 ดวง
+การต่อสาย: LED ผ่าน R ต่อ PWM D3,D5,D6,D9; cathode ไป GND
+WiFi SSID: EDOK | ตั้งรหัสใน WIFI_PASS ก่อนอัปโหลด
+MQTT Broker: phycom.it.kmitl.ac.th:1883
+MQTT Topic: 68070131/03_led_fading_4
+แก้ขา: ตัวแปรส่วน LED 4 ดวง
+แก้ความถี่: INTERVAL (ms)
+Arduino UNO R4 WiFi; Serial Monitor 115200
+ไลบรารี: WiFiS3, MQTTClient by 256dpi
+วิธีใช้: คัดลอก .txt ลง Arduino IDE -> ตั้ง WiFi -> Upload -> เปิดเว็บ Dashboard
+ข้อควรระวัง: โค้ดแต่ละไฟล์เป็น Sketch แยก; ตรวจ COM ของ 7-Segment และลำดับ Keypad
+*/
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+
+const char WIFI_SSID[]="EDOK"; // ชื่อ WiFi
+const char WIFI_PASS[]="YOUR_WIFI_PASSWORD"; // ใส่รหัสผ่านที่นี่ก่อน Upload
+const char MQTT_HOST[]="phycom.it.kmitl.ac.th"; // Broker
+const char MQTT_TOPIC[]="68070131/03_led_fading_4"; // Topic เฉพาะข้อนี้
+WiFiClient net;
+MQTTClient mqtt(256);
+const byte leds[4]={3,5,6,9};int stepNo=0;
+const unsigned long INTERVAL=40UL; // ช่วงเวลาการทำงาน
+unsigned long lastRead=0,lastRetry=0;
+void setup(){
+ Serial.begin(115200);
+ for(int i=0;i<4;i++)pinMode(leds[i],OUTPUT);
+ mqtt.begin(MQTT_HOST,1883,net);
+ 
+ WiFi.begin(WIFI_SSID,WIFI_PASS);
+}
+void loop(){
+ if(WiFi.status()!=WL_CONNECTED){
+  if(millis()-lastRetry>=10000UL){lastRetry=millis();WiFi.begin(WIFI_SSID,WIFI_PASS);}
+  return;
+ }
+ if(!mqtt.connected()){
+  if(millis()-lastRetry>=5000UL){
+   lastRetry=millis();
+   String clientId="genz-03_led_fading_4-"+String(millis(),HEX);
+   if(mqtt.connect(clientId.c_str())){}
+  }
+  return;
+ }
+ mqtt.loop();
+ if(millis()-lastRead<INTERVAL)return;
+ lastRead=millis();
+ // ส่วนการอ่าน Sensor / การแสดงผล แก้ได้ตรงนี้
+ int v=stepNo%256;analogWrite(leds[0],v);analogWrite(leds[1],(v*2)%256);analogWrite(leds[2],255-v);analogWrite(leds[3],128+v/2);String payload=String(v);stepNo=(stepNo+5)%256;
+ Serial.println(payload);
+ 
+ mqtt.publish(MQTT_TOPIC,payload);
+}

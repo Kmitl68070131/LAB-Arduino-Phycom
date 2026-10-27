@@ -1,0 +1,55 @@
+/*
+ชื่อ: MQTT Keypad ส่งปุ่มขึ้นเว็บ
+อุปกรณ์: Keypad
+การต่อสาย: R1–R4 → D9,D8,D7,D6; C1–C4 → D5,D4,D3,D2 (ตรวจสายจริง)
+WiFi SSID: EDOK | ตั้งรหัสใน WIFI_PASS ก่อนอัปโหลด
+MQTT Broker: phycom.it.kmitl.ac.th:1883
+MQTT Topic: 68070131/07_mqtt_keypad_tx
+แก้ขา: ตัวแปรส่วน Keypad
+แก้ความถี่: INTERVAL (ms)
+Arduino UNO R4 WiFi; Serial Monitor 115200
+ไลบรารี: WiFiS3, MQTTClient by 256dpi
+วิธีใช้: คัดลอก .txt ลง Arduino IDE -> ตั้ง WiFi -> Upload -> เปิดเว็บ Dashboard
+ข้อควรระวัง: โค้ดแต่ละไฟล์เป็น Sketch แยก; ตรวจ COM ของ 7-Segment และลำดับ Keypad
+*/
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+
+const char WIFI_SSID[]="EDOK"; // ชื่อ WiFi
+const char WIFI_PASS[]="YOUR_WIFI_PASSWORD"; // ใส่รหัสผ่านที่นี่ก่อน Upload
+const char MQTT_HOST[]="phycom.it.kmitl.ac.th"; // Broker
+const char MQTT_TOPIC[]="68070131/07_mqtt_keypad_tx"; // Topic เฉพาะข้อนี้
+WiFiClient net;
+MQTTClient mqtt(256);
+const byte row[4]={9,8,7,6},col[4]={5,4,3,2};const char keys[4][4]={{'1','2','3','A'},{'4','5','6','B'},{'7','8','9','C'},{'*','0','#','D'}};char previous=0;
+const unsigned long INTERVAL=50UL; // ช่วงเวลาการทำงาน
+unsigned long lastRead=0,lastRetry=0;
+void setup(){
+ Serial.begin(115200);
+ for(int i=0;i<4;i++){pinMode(row[i],OUTPUT);digitalWrite(row[i],HIGH);pinMode(col[i],INPUT_PULLUP);}
+ mqtt.begin(MQTT_HOST,1883,net);
+ 
+ WiFi.begin(WIFI_SSID,WIFI_PASS);
+}
+void loop(){
+ if(WiFi.status()!=WL_CONNECTED){
+  if(millis()-lastRetry>=10000UL){lastRetry=millis();WiFi.begin(WIFI_SSID,WIFI_PASS);}
+  return;
+ }
+ if(!mqtt.connected()){
+  if(millis()-lastRetry>=5000UL){
+   lastRetry=millis();
+   String clientId="genz-07_mqtt_keypad_tx-"+String(millis(),HEX);
+   if(mqtt.connect(clientId.c_str())){}
+  }
+  return;
+ }
+ mqtt.loop();
+ if(millis()-lastRead<INTERVAL)return;
+ lastRead=millis();
+ // ส่วนการอ่าน Sensor / การแสดงผล แก้ได้ตรงนี้
+ char k=0;for(int r=0;r<4;r++){digitalWrite(row[r],LOW);delayMicroseconds(10);for(int c=0;c<4;c++)if(digitalRead(col[c])==LOW)k=keys[r][c];digitalWrite(row[r],HIGH);}if(!k){previous=0;return;}if(k==previous)return;previous=k;String payload=String(k);
+ Serial.println(payload);
+ 
+ mqtt.publish(MQTT_TOPIC,payload);
+}
