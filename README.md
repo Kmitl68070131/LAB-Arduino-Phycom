@@ -646,3 +646,149 @@ void loop() {
 ---
 
 **Physical Computing • Arduino UNO R4 WiFi • IT KMITL**
+
+---
+
+## 🧪 ตัวอย่างการใช้โค้ด Arduino + MQTT แบบทำตามได้
+
+> **ตั้งค่ากลาง:** Arduino UNO R4 WiFi, Wi-Fi `EDOK`, Broker `phycom.it.kmitl.ac.th:1883`, Topic ขึ้นต้นด้วย `68070131/`. ติดตั้งไลบรารี **MQTTClient by 256dpi** และใช้ **WiFiS3** ที่มากับแพ็กเกจบอร์ด. ตัวอย่างแต่ละชุดเป็น Sketch แยกกัน
+
+### ตัวอย่าง 1: ปุ่มกดส่ง MQTT ขึ้นเว็บไซต์
+**อุปกรณ์:** ปุ่มกด 1 ตัว, Arduino UNO R4 WiFi, สาย Jumper
+
+**ต่อสาย:** ปุ่มด้านหนึ่ง → D4, อีกด้าน → GND (ใช้ `INPUT_PULLUP`, ไม่ต้องเพิ่มตัวต้านทาน Pull-up ภายนอก)
+
+**การทำงาน:** เมื่อกดปุ่มจะส่ง `PRESSED` ไปที่ `68070131/button`; เมื่อปล่อยส่ง `RELEASED` และสามารถดูข้อความบน Dashboard ที่ Subscribe Topic นี้
+
+```cpp
+#include <WiFiS3.h>
+#include <MQTTClient.h>
+
+const char WIFI_SSID[] = "EDOK";         // ชื่อ Wi-Fi
+const char WIFI_PASS[] = "1234567890";  // รหัส Wi-Fi
+const char BROKER[] = "phycom.it.kmitl.ac.th";
+const char TOPIC[] = "68070131/button"; // Topic ที่เว็บรับ
+WiFiClient network;
+MQTTClient mqtt(256);
+const int BUTTON_PIN = 4;
+int lastState = HIGH;
+unsigned long lastTry = 0;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  mqtt.begin(BROKER, 1883, network);
+}
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    if (millis() - lastTry > 10000UL) {
+      lastTry = millis();
+      WiFi.begin(WIFI_SSID, WIFI_PASS);
+    }
+    return;
+  }
+  if (!mqtt.connected()) {
+    if (millis() - lastTry > 5000UL) {
+      lastTry = millis();
+      String id = "button-" + String(millis(), HEX);
+      mqtt.connect(id.c_str());
+    }
+    return;
+  }
+  mqtt.loop();
+  int current = digitalRead(BUTTON_PIN);
+  if (current != lastState) {
+    delay(30); // Debounce
+    if (digitalRead(BUTTON_PIN) == current) {
+      lastState = current;
+      const char* message = current == LOW ? "PRESSED" : "RELEASED";
+      mqtt.publish(TOPIC, message);
+      Serial.println(message);
+    }
+  }
+}
+```
+
+**ทดลอง:** เปิด Serial Monitor ที่ 115200 → กด/ปล่อยปุ่ม → ตรวจข้อความ `PRESSED`/`RELEASED` → เปิดเว็บที่รับ Topic `68070131/button`.
+
+### ตัวอย่าง 2: Potentiometer → MQTT → LED Fading (ทำเป็นคู่)
+
+**ตัวส่ง:** Potentiometer ขานอกต่อ 5V/GND, ขากลางต่อ A0 บอร์ดตัวที่ 1
+
+**ตัวรับ:** LED ขา Anode ต่อ D9 ผ่านตัวต้านทาน 220–330Ω, Cathode ต่อ GND บอร์ดตัวที่ 2
+
+**หลักการ:** ตัวส่งอ่าน Analog 0–1023 และ Publish ที่ `68070131/09_mqtt_pot_tx`; ตัวรับ Subscribe Topic เดียวกันแล้วใช้ `map()` แปลงเป็น PWM 0–255 เพื่อปรับความสว่าง LED
+
+- [เปิดโค้ด Potentiometer ตัวส่ง](GEN_Z/EXERCISES_FROM_SLIDES/09_MQTT_POT_TX_Arduino.txt)
+- [เปิดโค้ด LED Fading ตัวรับ](GEN_Z/EXERCISES_FROM_SLIDES/10_MQTT_LED_FADE_RX_Arduino.txt)
+
+**ทดลอง:** อัปโหลดคนละ Sketch ลงบอร์ดสองตัว → หมุน Potentiometer → LED อีกบอร์ดสว่างตามค่า → เว็บรับค่าจาก `68070131/09_mqtt_pot_tx`
+
+### ตัวอย่าง 3: Keypad → MQTT → LED (ทำเป็นคู่)
+
+**ตัวส่ง:** Keypad 4×4 สายแถว R1–R4 ต่อ D9,D8,D7,D6 และคอลัมน์ C1–C4 ต่อ D5,D4,D3,D2 (ตรวจลำดับสายจริง)
+
+**ตัวรับ:** LED ผ่านตัวต้านทานต่อ D13 และ GND
+
+**หลักการ:** กดปุ่ม Keypad → ตัวส่ง Publish ตัวอักษรที่ `68070131/07_mqtt_keypad_tx` → ตัวรับ Subscribe Topic นี้ → กด `1` เปิด LED, ปุ่มอื่นปิด LED
+
+- [เปิดโค้ด Keypad ตัวส่ง](GEN_Z/EXERCISES_FROM_SLIDES/07_MQTT_KEYPAD_TX_Arduino.txt)
+- [เปิดโค้ด Keypad ตัวรับ](GEN_Z/EXERCISES_FROM_SLIDES/08_MQTT_KEYPAD_RX_Arduino.txt)
+
+**ทดลอง:** เปิด Serial Monitor ทั้งสองบอร์ด → กดเลข 1 → LED ตัวรับติด → กดเลข 2 → LED ดับ → เว็บแสดงข้อความปุ่มที่กด
+
+### ตัวอย่าง 4: Ultrasonic → MQTT → เว็บ
+**อุปกรณ์:** HC-SR04 (VCC→5V, GND→GND, TRIG→D2, ECHO→D3)
+
+```cpp
+digitalWrite(TRIG, LOW);
+delayMicroseconds(2);
+digitalWrite(TRIG, HIGH);
+delayMicroseconds(10);
+digitalWrite(TRIG, LOW);
+unsigned long us = pulseIn(ECHO, HIGH, 30000UL);
+float cm = us * 0.0343f / 2.0f;
+if (us > 0) mqtt.publish("68070131/12_ultrasonic_web", String(cm, 1));
+```
+
+**วิธีใช้:** นำโค้ดส่วนนี้ไปใช้ใน `loop()` หลังเชื่อม MQTT แล้ว โดยกำหนด `TRIG`/`ECHO` และ `pinMode()` ใน `setup()` ก่อน หรือใช้ [Sketch ฉบับเต็ม](GEN_Z/EXERCISES_FROM_SLIDES/12_ULTRASONIC_WEB_Arduino.txt)
+
+### ตัวอย่าง 5: LCD I2C แสดงค่าเซนเซอร์
+**ต่อสาย:** LCD VCC→5V, GND→GND, SDA→SDA, SCL→SCL
+
+```cpp
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+void setup() {
+  Wire.begin();
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("GEN_Z MQTT");
+}
+void loop() {
+  lcd.setCursor(0, 1);
+  lcd.print("READY           ");
+}
+```
+
+**วิธีใช้:** ติดตั้ง `LiquidCrystal_I2C` → ต่อ LCD → Upload → ตรวจจอ. ถ้าไฟติดแต่ไม่มีตัวอักษรให้ตรวจ Contrast และ Address (อาจเป็น 0x3F)
+
+### วิธีดู MQTT บนเว็บ
+
+- [หน้าแกลเลอรีตัวอย่าง 12 ข้อ พร้อมภาพประกอบ](GEN_Z/WEB/example-gallery.html)
+- [หน้าเว็บ MQTT Exercises](GEN_Z/WEB/exercises.html)
+- [เว็บคู่มือแบบเลือกแท็บ](index.html)
+
+**สำคัญ:** MQTT Broker ใช้ TCP port 1883 จึงต้องมี Node.js Bridge หรือ MQTT WebSocket endpoint ที่ใช้งานได้จริง; การเปิด HTML ตรงจาก GitHub Pages อย่างเดียวไม่ทำให้ข้อมูล MQTT สดขึ้นอัตโนมัติ
+
+### 🖼️ ภาพประกอบแบบฝึกหัด
+
+[![ดูภาพประกอบ Arduino และ MQTT ทั้ง 12 ตัวอย่าง](https://img.shields.io/badge/OPEN-12%20Illustrated%20Examples-00AFA5?style=for-the-badge)](GEN_Z/WEB/example-gallery.html)
+
+ภาพในแกลเลอรีเป็น **แผนภาพ SVG เพื่ออธิบายแนวคิด** ไม่ใช่รูปการต่อสายจริง; ให้ตรวจหมายเลขขาและวงจรตามคอมเมนต์ในไฟล์โค้ดก่อนทดลอง
+
