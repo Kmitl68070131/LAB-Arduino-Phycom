@@ -780,15 +780,28 @@ void loop() {
 
 ### วิธีดู MQTT บนเว็บ
 
-- [หน้าแกลเลอรีตัวอย่าง 12 ข้อ พร้อมภาพประกอบ](GEN_Z/WEB/example-gallery.html)
-- [หน้าเว็บ MQTT Exercises](GEN_Z/WEB/exercises.html)
-- [เว็บคู่มือแบบเลือกแท็บ](index.html)
+- [หน้าแกลเลอรีตัวอย่าง 12 ข้อ พร้อมภาพประกอบ](https://kmitl68070131.github.io/LAB-Arduino-Phycom/GEN_Z/WEB/example-gallery.html)
+- [หน้าเว็บ MQTT Exercises](https://kmitl68070131.github.io/LAB-Arduino-Phycom/GEN_Z/WEB/exercises.html)
+- [เว็บคู่มือแบบเลือกแท็บ](https://kmitl68070131.github.io/LAB-Arduino-Phycom/)
 
 **สำคัญ:** MQTT Broker ใช้ TCP port 1883 จึงต้องมี Node.js Bridge หรือ MQTT WebSocket endpoint ที่ใช้งานได้จริง; การเปิด HTML ตรงจาก GitHub Pages อย่างเดียวไม่ทำให้ข้อมูล MQTT สดขึ้นอัตโนมัติ
 
 ### 🖼️ ภาพประกอบแบบฝึกหัด
 
-[![ดูภาพประกอบ Arduino และ MQTT ทั้ง 12 ตัวอย่าง](https://img.shields.io/badge/OPEN-12%20Illustrated%20Examples-00AFA5?style=for-the-badge)](GEN_Z/WEB/example-gallery.html)
+[![ดูภาพประกอบ Arduino และ MQTT ทั้ง 12 ตัวอย่าง](https://img.shields.io/badge/OPEN-12%20Illustrated%20Examples-00AFA5?style=for-the-badge)](https://kmitl68070131.github.io/LAB-Arduino-Phycom/GEN_Z/WEB/example-gallery.html)
 
 ภาพในแกลเลอรีเป็น **แผนภาพ SVG เพื่ออธิบายแนวคิด** ไม่ใช่รูปการต่อสายจริง; ให้ตรวจหมายเลขขาและวงจรตามคอมเมนต์ในไฟล์โค้ดก่อนทดลอง
 
+
+### 🌐 เปิดหน้าเว็บโดยตรง (ไม่ใช่ไฟล์โค้ด GitHub)
+
+- [🏠 เปิดเว็บคู่มือ Arduino](https://kmitl68070131.github.io/LAB-Arduino-Phycom/)
+- [🖼️ เปิดแกลเลอรีรูปและตัวอย่าง 12 ข้อ](https://kmitl68070131.github.io/LAB-Arduino-Phycom/GEN_Z/WEB/example-gallery.html)
+- [📊 เปิดหน้า MQTT Exercises](https://kmitl68070131.github.io/LAB-Arduino-Phycom/GEN_Z/WEB/exercises.html)
+
+> ถ้าคลิกไฟล์ HTML บน GitHub จะเห็น Source Code; ต้องใช้ลิงก์ github.io ข้างบนเพื่อเปิดเป็นหน้าเว็บ
+
+![ภาพประกอบ Keypad และ MQTT](GEN_Z/WEB/images/keypad-mqtt.svg)
+![ภาพประกอบ Potentiometer และ LED Fading](GEN_Z/WEB/images/pot-led.svg)
+![ภาพประกอบ TMP36 และ LCD](GEN_Z/WEB/images/tmp36-lcd.svg)
+![ภาพประกอบ Ultrasonic](GEN_Z/WEB/images/ultrasonic.svg)
