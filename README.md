@@ -1,3 +1,6 @@
+| [🏠 คู่มือ LAB](#menu) | [📚 GitHub พี่เต้ — PhysicalComputing-167](https://github.com/TaeTanakrit0089/PhysicalComputing-167) | [🧩 ประยุกต์ LAB](%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20LAB/) |
+|:---:|:---:|:---:|
+
 # 🔌 LAB-Arduino-Phycom
 
 ![Arduino](https://img.shields.io/badge/Arduino-UNO%20R4%20WiFi-00878F?logo=arduino&logoColor=white) ![Language](https://img.shields.io/badge/Language-Thai-blue) ![MQTT](https://img.shields.io/badge/MQTT-IoT-7C3AED) ![Docs](https://img.shields.io/badge/Documentation-Cheat%20Sheet-16A34A)
