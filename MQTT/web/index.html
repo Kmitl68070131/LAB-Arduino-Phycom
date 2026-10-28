@@ -4,14 +4,14 @@
 <label>โหมด <select id="mode"><option value="mqtt">MQTT</option><option value="stats">กันเหลี่ยม (stats)</option></select></label>
 <label>อุปกรณ์ <select id="sensor"></select></label><p id="status">กำลังเชื่อม stream…</p>
 <textarea id="command">{"text":"Hello LCD","interval_ms":2500,"reset":false}</textarea><button id="send">ส่ง JSON ไปบอร์ด</button>
-<h2>ข้อมูลล่าสุด</h2><pre id="latest">รอข้อมูล</pre><h2>ACK / ผลส่ง</h2><pre id="ack">ยังไม่มี ACK</pre>
+<h2>สถานะปุ่ม 2 ขา</h2><p id="buttonState">เลือก ButtonEvents แล้วกดปุ่มจริงบนบอร์ด</p><h2>ข้อมูลล่าสุด</h2><pre id="latest">รอข้อมูล</pre><h2>ACK / ผลส่ง</h2><pre id="ack">ยังไม่มี ACK</pre>
 <script>
 // อ้าง DOM ชัดเจน ไม่ใช้ implicit globals; ทุกข้อความภายนอกแสดงด้วย textContent
-const ui = Object.fromEntries(['mode','sensor','status','command','send','latest','ack'].map(id => [id,document.getElementById(id)])); // id=ชื่อ element; ui=ชุด DOM
-for (const name of ['TMP36','MCP9700','LM35','TTC05103','NTC','Potentiometer','LDR','Ultrasonic','PIR','Button','Keypad','DHT11','DHT22']) ui.sensor.add(new Option(name,name)); // name=อุปกรณ์
+const ui = Object.fromEntries(['mode','sensor','status','command','send','latest','ack','buttonState'].map(id => [id,document.getElementById(id)])); // id=ชื่อ element; ui=ชุด DOM
+for (const name of ['TMP36','MCP9700','LM35','TTC05103','NTC','Potentiometer','LDR','Ultrasonic','PIR','ButtonEvents','Button','Keypad','DHT11','DHT22']) ui.sensor.add(new Option(name,name)); // name=อุปกรณ์
 const events = new EventSource('/events'); // SSE stream จาก bridge
 let lastData = 0; // เวลา telemetry ล่าสุด
-function clearView(){lastData=0;ui.latest.textContent='รอข้อมูล';ui.ack.textContent='ยังไม่มี ACK';}
+function clearView(){lastData=0;ui.latest.textContent='รอข้อมูล';ui.ack.textContent='ยังไม่มี ACK';ui.buttonState.textContent='รอข้อมูลปุ่ม';}
 ui.mode.onchange=clearView;ui.sensor.onchange=clearView;
 events.onopen=()=>ui.status.textContent='Stream connected; รอข้อมูลบอร์ด';
 events.onerror=()=>ui.status.textContent='Stream disconnected; retrying';
@@ -21,7 +21,11 @@ events.onmessage=event=>{ // event=ข้อความ SSE
   if(!packet.topic.startsWith(prefix)) return;
   let shown; try{shown=JSON.stringify(JSON.parse(packet.payload),null,2);}catch{shown=packet.payload;} // shown=ข้อความปลอดภัย
   if(packet.topic.endsWith('/ack')) ui.ack.textContent=shown;
-  else {ui.latest.textContent=shown;lastData=Date.now();ui.status.textContent='ได้รับ telemetry จริงจากบอร์ด';}
+  else {
+    if(ui.sensor.value==='ButtonEvents'){
+      try{ const data=JSON.parse(packet.payload); ui.buttonState.textContent=`${data.pressed ? '🟢 กำลังกด' : '⚪ ปล่อยปุ่ม'} | จำนวนกด ${data.press_count} | ${data.event}`; }catch{}
+    }
+    ui.latest.textContent=shown;lastData=Date.now();ui.status.textContent='ได้รับ telemetry จริงจากบอร์ด';}
 };
 setInterval(()=>{if(lastData && Date.now()-lastData>15000)ui.status.textContent='ข้อมูลเกิน 15 วินาที: ตรวจ interval/บอร์ด/broker';},3000);
 ui.send.onclick=async()=>{

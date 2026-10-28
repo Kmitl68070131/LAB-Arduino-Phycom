@@ -1,8 +1,40 @@
-# MQTT — UNO R4 WiFi + JSON + LCD
+# 📡 MQTT — UNO R4 WiFi + JSON + LCD
 
 [หน้าแรก](../README.md) · [อีกส่วน](../กันเหลี่ยม/README.md)
 
 ทุกตัวอย่างเชื่อม Wi-Fi, publish JSON, subscribe คำสั่งจากเว็บ, แสดง Serial/LCD และ reconnect อัตโนมัติ อัปโหลด **ทีละ sketch** ไม่ต่อทุกชุดพร้อมกัน
+
+
+> 🔘 **อยากกดปุ่ม 2 ขาให้ขึ้นเว็บ?** [เปิดคู่มือทำตามทีละขั้น](ButtonEvents/README.md) → เลือก `MQTT / ButtonEvents` ในเว็บ
+>
+> 📚 **ติดตั้งอะไรบ้าง?** [Library + MQTT Protocol + API + วิธีแก้ปัญหา](LIBRARIES.md)
+
+## 🧭 เลือกหัวข้อที่ต้องการ
+
+| ต้องการทำอะไร | กดเปิด |
+|---|---|
+| 🔘 ปุ่ม 2 ขา กด–ปล่อยแล้วขึ้นเว็บ | [ต่อสาย + Upload + เปิดเว็บ + ทดลองกด](ButtonEvents/README.md) |
+| 📚 ลงไลบรารีให้ครบ | [Arduino / LCD / Sensor / Node.js](LIBRARIES.md#ไลบรารีที่ต้องติดตั้ง) |
+| 🌐 ตั้ง Wi-Fi / Broker / บัญชี | [ตารางค่าที่ต้องแก้](LIBRARIES.md#ตั้งค่าเครือข่ายและบัญชี) |
+| 📦 ส่งหรือรับ JSON | [Topic และรูปแบบข้อมูล](LIBRARIES.md#topic-และ-json) |
+| 🛠 ดู API และหัวข้อ MQTT | [MQTTClient / QoS / retain / will](LIBRARIES.md#คำสั่ง-mqttclient) |
+| 🌡 เลือกเซนเซอร์และต่อวงจร | [ตารางตัวอย่าง](#เลือกตัวอย่างและการต่อสาย) |
+| 💻 เปิดเว็บรับ–ส่งจริง | [ขั้นตอน Node bridge](#เปิดเว็บรับส่งจริง) |
+| 📊 คำนวณ min/max/avg/median/std | [โฟลเดอร์กันเหลี่ยม](../กันเหลี่ยม/README.md) |
+| 🔍 ทำแล้วไม่ขึ้น | [ตารางตรวจปัญหา](LIBRARIES.md#ตรวจปัญหา) |
+
+<details>
+<summary>⚡ เริ่มใช้งานด่วน — คลิกขยาย</summary>
+
+1. ต่อปุ่มระหว่าง **D4 กับ GND** และ LCD ที่ **5V/GND/SDA/SCL**
+2. เปิด `ButtonEvents/ButtonEvents.ino` ใส่ Wi-Fi และติดตั้งไลบรารีตามคู่มือ
+3. Upload ลง UNO R4 WiFi เปิด Serial **115200**
+4. ที่ `MQTT/web` รัน `npm ci` แล้ว `npm start`
+5. เปิด http://127.0.0.1:3000 เลือก **MQTT / ButtonEvents**
+6. กดปุ่มนิ่งประมาณ 0.1–1 วินาทีแล้วปล่อย → เว็บแสดงสถานะและจำนวนครั้ง
+7. ส่ง `{"text":"Hello LCD"}` จากเว็บ → ดู Serial, LCD และ ACK
+
+</details>
 
 ## เลือกตัวอย่างและการต่อสาย
 
@@ -17,6 +49,7 @@
 | [LDR](LDR/README.md) | ADC | 5V → LDR → A0 → R 10k → GND; ค่าสูงเมื่อสว่าง ไม่ใช่ lux |
 | [Ultrasonic](Ultrasonic/README.md) | cm | HC-SR04 VCC → 5V; GND → GND; TRIG → D2; ECHO → D3 |
 | [PIR](PIR/README.md) | state | VCC → 5V; GND → GND; OUT → D4; รอ warm-up ตามรุ่น |
+| [🔘 ButtonEvents](ButtonEvents/README.md) | state + จำนวนกด | ปุ่ม NO 2 ขา ระหว่าง D4 และ GND; debounce 30ms ส่งขอบกด/ปล่อย |
 | [Button](Button/README.md) | state | ปุ่มระหว่าง D4 กับ GND ใช้ INPUT_PULLUP; อ่าน 1 = กด |
 | [Keypad](Keypad/README.md) | code | 4x4 R1–R4 → D9,D8,D7,D6; C1–C4 → D5,D4,D3,D2 |
 | [DHT11](DHT11/README.md) | C | VCC → 5V; GND → GND; DATA → D2; pull-up 10k DATA ไป VCC |
@@ -91,3 +124,9 @@ g++ -std=c++11 MQTT/tests/statistics.cpp -o /tmp/statistics-test
 ```
 คำสั่ง g++ ให้รันจาก root ของ repository ทดสอบ min/max/avg/median/std, หน้าต่างเต็มและ reset จาก Statistics.h จริง; bridge test ตรวจ HTTP/JSON/เป้าหมายผิด/broker offline โดยไม่ส่งเข้า broker ห้องเรียน
 ยังไม่ได้ compile ด้วย Arduino toolchain หรือทดสอบบอร์ด/LCD/broker จริงในสภาพแวดล้อมนี้
+
+ทดสอบ debounce ปุ่มเพิ่มจาก root repo:
+```sh
+g++ -std=c++11 MQTT/tests/button.cpp -o /tmp/button-test
+/tmp/button-test
+```

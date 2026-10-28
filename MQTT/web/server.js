@@ -2,7 +2,7 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const mqtt = require('mqtt');
-const sensors = new Set(['TMP36','MCP9700','LM35','TTC05103','NTC','Potentiometer','LDR','Ultrasonic','PIR','Button','Keypad','DHT11','DHT22']); // อุปกรณ์ที่อนุญาต
+const sensors = new Set(['TMP36','MCP9700','LM35','TTC05103','NTC','Potentiometer','LDR','Ultrasonic','PIR','ButtonEvents','Button','Keypad','DHT11','DHT22']); // อุปกรณ์ที่อนุญาต
 const clients = new Set(); // SSE responses ที่ยังเปิด
 const broker = mqtt.connect(process.env.MQTT_URL || 'mqtt://phycom.it.kmitl.ac.th:1883'); // broker connection
 broker.on('connect', () => broker.subscribe(['68070131/mqtt/+/telemetry','68070131/mqtt/+/ack','68070131/stats/+/telemetry','68070131/stats/+/ack']));

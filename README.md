@@ -1,3 +1,11 @@
+## 🔘 ปุ่ม 2 ขา + เมนู MQTT
+
+| เลือกดู | รายละเอียด |
+|---|---|
+| [🔘 ปุ่มกด 2 ขาขึ้นเว็บ](MQTT/ButtonEvents/README.md) | ต่อ D4–GND, กด/ปล่อย, จำนวนครั้ง, JSON, Serial และ LCD |
+| [📡 เมนู MQTT](MQTT/README.md) | เลือกตัวอย่างและวิธีเริ่มใช้งาน |
+| [📚 Library + คู่มือ MQTT](MQTT/LIBRARIES.md) | วิธีติดตั้ง, Broker, Topic, JSON, API, QoS, retain, will และแก้ปัญหา |
+
 ## เพิ่มใหม่: MQTT JSON และสถิติเซนเซอร์
 
 - [MQTT — รับ/ส่ง JSON ผ่านเว็บ พร้อม Serial และ LCD](MQTT/README.md)
