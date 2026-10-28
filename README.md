@@ -9,6 +9,22 @@
 
 <a id="menu"></a>
 
+## 🌐 เปิด GitHub Pages หากเว็บไซต์ขึ้น 404
+
+ไฟล์เว็บพร้อมเผยแพร่แล้ว แต่ถ้าเปิดลิงก์ `github.io` แล้วขึ้นข้อความ **There isn't a GitHub Pages site here** ให้เข้า [Settings → Pages](https://github.com/Kmitl68070131/LAB-Arduino-Phycom/settings/pages) และตั้งค่าตามนี้:
+
+1. **Source:** `Deploy from a branch`
+2. **Branch:** `main`
+3. **Folder:** `/(root)`
+4. คลิก **Save** แล้วตรวจสถานะ Publish ในหน้า Pages และแท็บ [Actions](https://github.com/Kmitl68070131/LAB-Arduino-Phycom/actions)
+
+ลิงก์หลังเปิดใช้งาน:
+- [หน้าแรก](https://kmitl68070131.github.io/LAB-Arduino-Phycom/)
+- [ค้นหาโจทย์ LAB และ Mock](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/web/)
+- [ค้นหาคำสั่งและเซนเซอร์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/)
+
+> GitHub Pages เป็นระบบเผยแพร่เว็บไซต์แบบ Static ไม่ใช่ MQTT TCP Broker; หากต้องการส่งคำสั่ง MQTT ไปที่พอร์ต 1883 ต้องมี Bridge ที่รันอยู่จริงหรือใช้ Broker ที่รองรับ MQTT WebSocket
+
 ## 📖 ค้นหาคำสั่ง Arduino และคู่มือเซนเซอร์อย่างละเอียด
 
 [🌐 **เปิดเว็บค้นหาคำสั่งและเซนเซอร์**](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/) · [📂 ดูฐานคำสั่ง](ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/) · [📑 คู่มือการใช้งาน](ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/README.md)
