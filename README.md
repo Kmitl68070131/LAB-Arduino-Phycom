@@ -1,5 +1,5 @@
-| [🏠 คู่มือ LAB](#menu) | [📡 คู่มือ MQTT ฉบับเต็ม](https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/MQTT/LIBRARIES.md) | [🔎 ค้นหาโจทย์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/web/) | [📖 ค้นหาคำสั่งและเซนเซอร์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/) | [📚 GitHub พี่เต้](https://github.com/TaeTanakrit0089/PhysicalComputing-167) | [🤝 GitHub เพื่อน](https://github.com/ObeOne-KMITL/lab_iot/blob/main/arduino_R4/mqtt.ino) | [🧩 ประยุกต์ LAB](%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20LAB/) |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| [🏠 คู่มือ LAB](#menu) | [📡 คู่มือ MQTT ฉบับเต็ม](https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/MQTT/LIBRARIES.md) | [🔎 ค้นหาโจทย์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/web/) | [📖 ค้นหาคำสั่งและเซนเซอร์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/) | [📚 GitHub พี่เต้](https://github.com/TaeTanakrit0089/PhysicalComputing-167) | [🤝 GitHub เพื่อน](https://github.com/ObeOne-KMITL/lab_iot/blob/main/arduino_R4/mqtt.ino) | [🧩 ประยุกต์ LAB](%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20LAB/) | | [🛠️ แก้ Error](แก้ข้อผิดพลาด/) |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 
 # 🔌 LAB-Arduino-Phycom
 
@@ -8,6 +8,12 @@
 **คู่มือ Arduino UNO R4 WiFi สำหรับเรียน Physical Computing** — คำสั่งต่าง ๆ พร้อมหน้าที่ วิธีใช้ การต่อสาย และตัวอย่างโค้ดแยกตามอุปกรณ์
 
 <a id="menu"></a>
+
+## 🛠️ ค้นหา Error และวิธีแก้ไข
+
+[🌐 เปิดเว็บแก้ Error](https://kmitl68070131.github.io/LAB-Arduino-Phycom/แก้ข้อผิดพลาด/) · [📁 โฟลเดอร์แก้ข้อผิดพลาด](แก้ข้อผิดพลาด/) · [🔎 I2C Scanner](แก้ข้อผิดพลาด/I2C_Scanner/I2C_Scanner.ino)
+
+รวม 37 อาการพร้อมสาเหตุ ขั้นตอนแก้ทีละข้อและโค้ดทดสอบ สำหรับ Compile, Wi-Fi/MQTT, LCD, เซนเซอร์, พินชนกัน และ GitHub Pages
 
 ## 🌐 เปิด GitHub Pages หากเว็บไซต์ขึ้น 404
 

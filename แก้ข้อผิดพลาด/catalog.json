@@ -1,0 +1,335 @@
+[
+  {
+    "id": 1,
+    "category": "Arduino IDE / Compile",
+    "pattern": "WiFiS3.h: No such file or directory",
+    "title": "ไม่พบไลบรารี WiFiS3",
+    "cause": "ยังไม่ติดตั้ง Arduino UNO R4 Boards หรือเลือกบอร์ดผิด",
+    "steps": "เปิด Boards Manager ติดตั้ง Arduino UNO R4 Boards แล้วเลือก Arduino UNO R4 WiFi; ลอง Verify อีกครั้ง",
+    "sample": "#include <WiFiS3.h>"
+  },
+  {
+    "id": 2,
+    "category": "Arduino IDE / Compile",
+    "pattern": "MQTTClient.h: No such file or directory",
+    "title": "ไม่พบไลบรารี MQTT by 256dpi",
+    "cause": "ติดตั้ง PubSubClient แทน MQTT หรือยังไม่มี MQTT library",
+    "steps": "Arduino IDE → Library Manager → ค้นหา MQTT โดย 256dpi และ Install; ตรวจว่า include MQTTClient.h",
+    "sample": " #include <MQTTClient.h>"
+  },
+  {
+    "id": 3,
+    "category": "Arduino IDE / Compile",
+    "pattern": "LiquidCrystal_I2C.h: No such file or directory",
+    "title": "ไลบรารีจอ LCD หาย",
+    "cause": "ยังไม่ติดตั้ง LCD I2C",
+    "steps": "Library Manager → LiquidCrystal I2C ที่ใช้ API lcd.init() ให้ตรงรุ่น; ตรวจว่ามีไลบรารีซ้ำกันหรือไม่",
+    "sample": "#include <LiquidCrystal_I2C.h>"
+  },
+  {
+    "id": 4,
+    "category": "Arduino IDE / Compile",
+    "pattern": "Adafruit_MCP23X17.h: No such file or directory",
+    "title": "ไลบรารีขยายพิน MCP23017 หาย",
+    "cause": "ไม่ได้ลง Adafruit MCP23017 หรือ dependencies",
+    "steps": "Library Manager ติดตั้ง Adafruit MCP23017 Arduino Library และ Adafruit BusIO",
+    "sample": "#include <Adafruit_MCP23X17.h>"
+  },
+  {
+    "id": 5,
+    "category": "Arduino IDE / Compile",
+    "pattern": "no matching function for call to 'CWifi::macAddress()'",
+    "title": "WiFi.macAddress() ใช้ผิดรูปแบบ",
+    "cause": "UNO R4 WiFi ใช้รับ byte array ไม่ใช่ WiFi.macAddress() โดยไม่มี argument",
+    "steps": "ประกาศ byte mac[6]; เรียก WiFi.macAddress(mac); สร้าง MQTT clientId จาก MAC ที่ได้รับ",
+    "sample": "byte mac[6]={0};\nWiFi.macAddress(mac);"
+  },
+  {
+    "id": 6,
+    "category": "Arduino IDE / Compile",
+    "pattern": "'PubSubClient' does not name a type",
+    "title": "ใช้ไลบรารี MQTT คนละแบบ",
+    "cause": "โค้ดสำหรับ PubSubClient แต่ include MQTTClient.h หรือกลับกัน",
+    "steps": "เลือกไลบรารีหนึ่งชุดให้ตรง API; 256dpi ใช้ MQTTClient mqtt(512); ไม่ใช่ PubSubClient mqtt(client)",
+    "sample": "WiFiClient network;\nMQTTClient mqtt(512);\nmqtt.begin(\"phycom.it.kmitl.ac.th\",1883,network);"
+  },
+  {
+    "id": 7,
+    "category": "Arduino IDE / Compile",
+    "pattern": "'lcd.begin' / 'lcd.init' was not declared",
+    "title": "API LCD ไม่ตรงเวอร์ชัน Library",
+    "cause": "รุ่น LiquidCrystal_I2C ใช้เมธอดต่างกัน",
+    "steps": "ตรวจ Examples ของไลบรารีที่ติดตั้ง; ตัวอย่างชุดนี้ใช้ lcd.init() + lcd.backlight()",
+    "sample": "LiquidCrystal_I2C lcd(0x27,16,2);\nvoid setup(){ Wire.begin();lcd.init();lcd.backlight();}"
+  },
+  {
+    "id": 8,
+    "category": "Arduino IDE / Compile",
+    "pattern": "multiple definition of 'void setup()'",
+    "title": "มี setup()/loop() ซ้ำ",
+    "cause": "นำ Sketch หลายข้อวางรวมในไฟล์เดียว",
+    "steps": "เก็บแต่ละ LAB ในโฟลเดอร์แยก และเลือกเปิด Sketch แค่ 1 ชุด",
+    "sample": "void setup(){ /* ตั้งค่าเพียงครั้งเดียว */ }\nvoid loop(){ /* วนทำงาน */ }"
+  },
+  {
+    "id": 9,
+    "category": "Arduino IDE / Compile",
+    "pattern": "expected ';' before '}' token",
+    "title": "ลืม ; หรือวงเล็บ",
+    "cause": "ประกาศตัวแปรขาด ; หรือปีกกาไม่ครบ",
+    "steps": "ดูบรรทัดที่ Error และย้อนขึ้นไปหนึ่งบรรทัด; นับ () {} และปิด String ด้วย \"",
+    "sample": "int sensorPin=2;\nvoid setup(){pinMode(sensorPin,INPUT);}"
+  },
+  {
+    "id": 10,
+    "category": "Arduino IDE / Compile",
+    "pattern": "Compilation error: exit status 1",
+    "title": "เป็นข้อความสรุป ไม่ใช่ Error ต้นเหตุ",
+    "cause": "อ่านแค่บรรทัดสุดท้ายของ Compiler",
+    "steps": "เลื่อนขึ้นไปหา first error: / filename:line:column; แก้บรรทัดแรกก่อน และกด Verify ใหม่",
+    "sample": "// มองหาบรรทัดแรกที่มี error: ก่อน exit status 1"
+  },
+  {
+    "id": 11,
+    "category": "Arduino IDE / Compile",
+    "pattern": "A library named ... already exists",
+    "title": "ไลบรารีซ้ำ",
+    "cause": "Library Manager พบหลายแพ็กเกจหรือ path ชนกัน",
+    "steps": "ตรวจ Sketchbook/libraries และลบเวอร์ชันซ้ำอย่างระมัดระวัง; ปิดแล้วเปิด Arduino IDE ใหม่",
+    "sample": "// ตรวจ Sketch > Include Library > Manage Libraries"
+  },
+  {
+    "id": 12,
+    "category": "Wi-Fi",
+    "pattern": "WiFi.status() != WL_CONNECTED",
+    "title": "Wi-Fi ไม่เชื่อมต่อ",
+    "cause": "SSID/รหัสผ่านผิด เครือข่าย 5 GHz อย่างเดียว หรือมี Captive Portal",
+    "steps": "ตรวจ 2.4 GHz, ความแรงสัญญาณ และเครือข่ายที่รองรับ; ทดสอบ Serial ด้วย WL_CONNECTED และ localIP",
+    "sample": "WiFi.begin(\"EDOK\",\"1234567890\");\nif(WiFi.status()==WL_CONNECTED) Serial.println(WiFi.localIP());"
+  },
+  {
+    "id": 13,
+    "category": "Wi-Fi",
+    "pattern": "IP address: 0.0.0.0",
+    "title": "ยังไม่ได้ IP จาก DHCP",
+    "cause": "อ่าน localIP ก่อนเชื่อมต่อหรือ DHCP ไม่สำเร็จ",
+    "steps": "รอ WiFi.status()==WL_CONNECTED ก่อนพิมพ์ IP; ตรวจ DHCP/Router/Firewall",
+    "sample": "if(WiFi.status()==WL_CONNECTED){Serial.println(WiFi.localIP());}"
+  },
+  {
+    "id": 14,
+    "category": "Wi-Fi",
+    "pattern": "Serial Monitor แสดง ����",
+    "title": "ข้อความ Serial อ่านไม่ออก",
+    "cause": "Baud Rate ไม่ตรงกับ Serial.begin()",
+    "steps": "ตั้ง Serial Monitor เป็น 115200 ให้ตรงกับ Serial.begin(115200); ปิดเปิด Serial Monitor",
+    "sample": "Serial.begin(115200);\nSerial.println(\"READY\");"
+  },
+  {
+    "id": 15,
+    "category": "MQTT",
+    "pattern": "MQTT connect failed / rc=-2 / rc=-1",
+    "title": "MQTT Broker ไม่เชื่อม",
+    "cause": "Host/Port/Firewall/Wi-Fi ไม่พร้อม หรือใช้ TCP/WS ผิด",
+    "steps": "ตรวจ Wi-Fi ก่อน, ping/telnet เครือข่าย, Broker phycom.it.kmitl.ac.th:1883, Client ID ไม่ซ้ำ; หลีกเลี่ยง Retry ถี่",
+    "sample": "mqtt.begin(\"phycom.it.kmitl.ac.th\",1883,network);\nif(mqtt.connect(\"uno-r4-unique-id\")){mqtt.subscribe(\"68070131/test/set\");}"
+  },
+  {
+    "id": 16,
+    "category": "MQTT",
+    "pattern": "Publish แล้วเว็บไม่เห็นข้อมูล",
+    "title": "Topic Subscribe ไม่ตรงหรือบอร์ดยังไม่ได้ Publish",
+    "cause": "พิมพ์ Topic คนละตัว รวมทั้งตัวพิมพ์ใหญ่/เล็ก หรือไม่มี MQTT Bridge",
+    "steps": "ตรวจ TOPIC_DATA ที่บอร์ดและ Subscribe ฝั่งเว็บ; ลอง MQTT Client Subscribe 68070131/# และ Serial TX",
+    "sample": "mqtt.publish(\"68070131/test/data\",String(25.5));"
+  },
+  {
+    "id": 17,
+    "category": "MQTT",
+    "pattern": "Subscribe แล้ว Arduino ไม่รับ",
+    "title": "ไม่มี mqtt.loop() หรือไม่ Subscribe ใหม่หลัง reconnect",
+    "cause": "Callback ไม่ถูกผูกหรือ Topic ไม่ตรง",
+    "steps": "เรียก mqtt.loop() ทุก loop; ผูก mqtt.onMessage(); subscribe หลัง connect สำเร็จทุกครั้ง; ตรวจคำสั่งใน Serial",
+    "sample": "mqtt.onMessage(onMessage);\n// หลัง connect สำเร็จ\nmqtt.subscribe(\"68070131/test/set\");\n// ใน loop\nmqtt.loop();"
+  },
+  {
+    "id": 18,
+    "category": "MQTT",
+    "pattern": "client disconnected unexpectedly",
+    "title": "MQTT Client ID ซ้ำ",
+    "cause": "บอร์ดและเว็บใช้ชื่อ clientId เดียวกัน",
+    "steps": "ใช้ Client ID ไม่ซ้ำต่ออุปกรณ์ โดยสร้างจาก MAC ของ UNO R4; หลีกเลี่ยง clientId ฮาร์ดโค้ดร่วมกัน",
+    "sample": "byte mac[6];WiFi.macAddress(mac);"
+  },
+  {
+    "id": 19,
+    "category": "MQTT",
+    "pattern": "เห็น Payload เก่าเมื่อเชื่อมต่อใหม่",
+    "title": "Publish แบบ retain",
+    "cause": "คำสั่งควบคุมถูกตั้ง retain=true แล้ว Broker เก็บข้อความไว้",
+    "steps": "คำสั่งควบคุมไม่ควร retain; ล้าง retained message ผ่าน Client ที่ตั้ง retain ได้; แยก Topic command กับ data",
+    "sample": "// เว็บ publish(topic,command,{retain:false})"
+  },
+  {
+    "id": 20,
+    "category": "LCD / I2C",
+    "pattern": "LCD มีไฟแต่ไม่มีตัวหนังสือ",
+    "title": "LCD Address/Contrast/SDA-SCL ผิด",
+    "cause": "0x27 ไม่ตรงหรือหมุน Contrast ไม่ถูก",
+    "steps": "รัน I2C Scanner; ถ้าพบ 0x3F แก้ LCD Address; หมุน Potentiometer ด้านหลังจอและตรวจ SDA/SCL",
+    "sample": "LiquidCrystal_I2C lcd(0x27,16,2);\nWire.begin();lcd.init();lcd.backlight();"
+  },
+  {
+    "id": 21,
+    "category": "LCD / I2C",
+    "pattern": "I2C Scanner ไม่พบอุปกรณ์",
+    "title": "สาย I2C ผิด/อุปกรณ์ไม่ได้ไฟ",
+    "cause": "SDA SCL ต่อสลับ หรือ GND ไม่ร่วมกัน",
+    "steps": "ตรวจ 5V/GND, SDA/SCL, คอนเนกเตอร์ และแรงดัน; หากใช้ MCP23017 ตั้ง A0/A1/A2 ที่ GND ได้ Address 0x20",
+    "sample": "Wire.beginTransmission(0x27);\nbyte error=Wire.endTransmission();\nSerial.println(error);"
+  },
+  {
+    "id": 22,
+    "category": "LCD / I2C",
+    "pattern": "LCD ข้อความเก่าค้าง / กระพริบ",
+    "title": "เขียนข้อความสั้นทับยาวหรือ lcd.clear() ทุก loop",
+    "cause": "จอ 16x2 ไม่ล้างอักขระอัตโนมัติ",
+    "steps": "เติมช่องว่างให้ครบ 16 ตัวต่อแถว และอัปเดตทุก 200–500 ms แทน clear() ตลอด",
+    "sample": "lcd.setCursor(0,0);\nlcd.print(\"READY           \");"
+  },
+  {
+    "id": 23,
+    "category": "Ultrasonic",
+    "pattern": "HC-SR04 return -1 / NO_ECHO",
+    "title": "ไม่มี Echo ในเวลาที่กำหนด",
+    "cause": "TRIG/ECHO ต่อสลับ ไม่มี GND ร่วม หรือวัตถุอยู่นอกระยะ",
+    "steps": "ใช้ TRIG pulse 10µs และ pulseIn(ECHO,HIGH,30000UL); ถ้า 0 ให้แสดง NO_ECHO ไม่ใช่ระยะ 0",
+    "sample": "unsigned long us=pulseIn(3,HIGH,30000UL);\nfloat cm=us==0?-1.0f:us*0.0343f/2.0f;"
+  },
+  {
+    "id": 24,
+    "category": "Switch / Keypad",
+    "pattern": "Switch อ่าน HIGH ตลอด / กดไม่เปลี่ยน",
+    "title": "Pull-up/Pull-down ต่อผิด",
+    "cause": "INPUT_PULLUP กด=LOW แต่เขียน if (HIGH)",
+    "steps": "D2 → ปุ่ม → GND; pinMode(2,INPUT_PULLUP); digitalRead(2)==LOW คือกด",
+    "sample": "pinMode(2,INPUT_PULLUP);\nbool pressed=digitalRead(2)==LOW;"
+  },
+  {
+    "id": 25,
+    "category": "Switch / Keypad",
+    "pattern": "Keypad แสดง 1 รัว ๆ",
+    "title": "Row/Column สลับหรือไม่มี Debounce",
+    "cause": "Keypad 4x4 มีลำดับขาต่างกันตามรุ่น",
+    "steps": "ทดสอบ Row/Column ทีละสาย, ทำ debounce 30–50ms และตรวจ Edge จากปล่อย→กด",
+    "sample": "if(current!=previous && current!='\\0'){Serial.println(current);}"
+  },
+  {
+    "id": 26,
+    "category": "Switch / Keypad",
+    "pattern": "Keypad ทำให้พินชนกับ 7-Segment",
+    "title": "ขา UNO R4 ไม่พอเมื่อใช้อุปกรณ์พร้อมกัน",
+    "cause": "ใช้ D2-D9 ให้ Keypad แล้วไปกำหนด 7-seg ที่พินเดิม",
+    "steps": "ใช้ MCP23017: GPA0–7 ให้ Keypad, GPB0–6 ให้ 7-Segment; ใช้ SDA/SCL และ Address 0x20",
+    "sample": "Adafruit_MCP23X17 mcp;\nif(mcp.begin_I2C(0x20)){\n  mcp.pinMode(0,OUTPUT);\n}"
+  },
+  {
+    "id": 27,
+    "category": "Analog / Temperature",
+    "pattern": "TMP36 ร้อนมากผิดปกติ",
+    "title": "ต่อ TMP36 ผิดขา/กลับด้าน",
+    "cause": "Vs/GND สลับ อาจทำให้อุปกรณ์เสียหาย",
+    "steps": "ถอดไฟทันที! ตรวจ Datasheet และขาจริงก่อนจ่ายไฟใหม่; ห้ามใช้โค้ดชดเชยอาการฮาร์ดแวร์ร้อน",
+    "sample": "// ขาจริงขึ้นอยู่กับแพ็กเกจ ตรวจ datasheet ของอุปกรณ์"
+  },
+  {
+    "id": 28,
+    "category": "Analog / Temperature",
+    "pattern": "TMP36 อุณหภูมิผิดมาก",
+    "title": "ADC resolution / reference ผิด",
+    "cause": "ใช้ raw 12-bit แต่หาร 1023 หรือสูตร TMP36 ไม่ตรง",
+    "steps": "ตั้ง analogReadResolution(12) แล้วใช้ Vref ที่วัดได้ /4095; °C=(Vout-0.5)*100",
+    "sample": "analogReadResolution(12);\nfloat v=analogRead(A2)*5.0f/4095.0f;\nfloat c=(v-0.5f)*100.0f;"
+  },
+  {
+    "id": 29,
+    "category": "Analog / Temperature",
+    "pattern": "LDR กลับด้าน สว่างแล้วยิ่งตัวเลขลด",
+    "title": "ตำแหน่ง LDR กับ R 10k สลับ",
+    "cause": "วงจรแบ่งแรงดันทำให้ลักษณะ ADC กลับกัน",
+    "steps": "ถ้าใช้ 5V→LDR→A0→R10k→GND สว่างมาก ADC เพิ่ม; เปลี่ยน if หรือสลับวงจรให้ตรงโจทย์",
+    "sample": "int light=analogRead(A0);\nbool dark=light<500;"
+  },
+  {
+    "id": 30,
+    "category": "Analog / Temperature",
+    "pattern": "Potentiometer อ่านค่าไม่เปลี่ยน",
+    "title": "ต่อขากลางไม่ถึง A0/A1 หรือไม่ได้ใช้ Analog",
+    "cause": "ต่อผิดขา/ADC Resolution ไม่ตรง",
+    "steps": "ขากลาง Pot → Analog pin; ขานอก 5V/GND; Serial.print(analogRead(A1)) เพื่อทดสอบ",
+    "sample": "analogReadResolution(10);\nSerial.println(analogRead(A1));"
+  },
+  {
+    "id": 31,
+    "category": "RGB / 7-Segment",
+    "pattern": "RGB แดงไม่ตรงหรือสีผสม",
+    "title": "ขา R/G/B สลับหรือ Common Anode/Cathode ผิด",
+    "cause": "Common Cathode ขารวม GND ติดเมื่อ HIGH; Common Anode กลับลอจิก",
+    "steps": "ทดสอบแต่ละสีแยกทีละพิน; RED = R HIGH, G LOW, B LOW สำหรับ Cathode; ใส่ R ของแต่ละสี",
+    "sample": "digitalWrite(9,HIGH);\ndigitalWrite(10,LOW);\ndigitalWrite(11,LOW);"
+  },
+  {
+    "id": 32,
+    "category": "RGB / 7-Segment",
+    "pattern": "7-Segment แสดงเลขผิด",
+    "title": "ลำดับ a–g หรือ COM ไม่ถูก",
+    "cause": "Array pins ไม่ตรงสาย หรือเป็น Common Anode",
+    "steps": "ตรวจขาแต่ละ Segment ด้วย LED Test ผ่าน R; ตรวจ COM; ใช้ตาราง 1=ON สำหรับ Cathode เท่านั้น",
+    "sample": "const byte seg[7]={2,3,4,5,6,7,8};\n// ต้องตรงตามสาย a,b,c,d,e,f,g"
+  },
+  {
+    "id": 33,
+    "category": "RGB / 7-Segment",
+    "pattern": "7-Segment ไม่ติดเมื่อใช้ MCP23017",
+    "title": "I2C Address หรือกระแส GPIO ไม่เหมาะ",
+    "cause": "MCP23017 ไม่ตอบ หรือใช้ 7seg กระแสสูง",
+    "steps": "สแกน 0x20; ใช้ R จำกัดกระแสแต่ละ Segment; ลดกระแสรวม; ถ้าต้องการสว่างสูงควรใช้ Driver IC",
+    "sample": "mcp.begin_I2C(0x20);\nmcp.digitalWrite(8,HIGH);"
+  },
+  {
+    "id": 34,
+    "category": "Web / GitHub Pages",
+    "pattern": "There isn't a GitHub Pages site here",
+    "title": "GitHub Pages ไม่เปิดหรือ URL ผิด",
+    "cause": "GitHub Pages ยังไม่ Deploy หรือขาด /LAB-Arduino-Phycom/ ใน URL",
+    "steps": "เข้า Repository Settings → Pages → Deploy from a branch: main /(root) แล้วตรวจ Actions; URL ต้องมีชื่อ Repository",
+    "sample": "https://kmitl68070131.github.io/LAB-Arduino-Phycom/"
+  },
+  {
+    "id": 35,
+    "category": "Web / GitHub Pages",
+    "pattern": "404 MQTT/LIBRARIES.md",
+    "title": "ลิงก์คู่มือไม่มีชื่อ Repository",
+    "cause": "ใช้ kmitl68070131.github.io/MQTT/LIBRARIES.md โดยขาดชื่อโปรเจกต์",
+    "steps": "เปิด Markdown โดยตรงบน GitHub เพื่ออ่านได้เสมอ; ลิงก์เว็บไซต์ต้องเริ่มด้วย /LAB-Arduino-Phycom/",
+    "sample": "https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/MQTT/LIBRARIES.md"
+  },
+  {
+    "id": 36,
+    "category": "Web / GitHub Pages",
+    "pattern": "เว็บเปิดได้แต่กด MQTT ส่งไม่ได้",
+    "title": "GitHub Pages เป็น Static Hosting ไม่ใช่ Broker TCP",
+    "cause": "เว็บ JavaScript ไม่สามารถเชื่อม MQTT TCP port 1883 ตรง ๆ",
+    "steps": "ต้องมี MQTT over WebSocket port ที่ Broker รองรับ หรือรัน Node.js Bridge เชื่อม TCP 1883; ตรวจ Bridge อยู่จริง",
+    "sample": "// Browser -> WebSocket Bridge -> TCP 1883 MQTT Broker"
+  },
+  {
+    "id": 37,
+    "category": "Web / GitHub Pages",
+    "pattern": "หน้าเว็บกรองโจทย์แล้วไม่พบข้อมูล",
+    "title": "catalog.json path ผิดหรือไฟล์หาย",
+    "cause": "fetch ใช้ ../ ผิดชั้น เมื่อย้ายหน้า HTML",
+    "steps": "เปิด Network Inspector ดู Request URL; ใช้ relative URL ตามโครงสร้างเว็บ; ตรวจว่าไฟล์ JSON Commit อยู่จริง",
+    "sample": "fetch('../catalog.json').then(r=>r.json());"
+  }
+]
