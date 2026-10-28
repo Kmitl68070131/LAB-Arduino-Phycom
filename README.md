@@ -1,5 +1,5 @@
-| [🏠 คู่มือ LAB](#menu) | [📚 GitHub พี่เต้ — PhysicalComputing-167](https://github.com/TaeTanakrit0089/PhysicalComputing-167) | [🧩 ประยุกต์ LAB](%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20LAB/) |
-|:---:|:---:|:---:|
+| [🏠 คู่มือ LAB](#menu) | [📚 GitHub พี่เต้ — PhysicalComputing-167](https://github.com/TaeTanakrit0089/PhysicalComputing-167) | [🤝 GitHub เพื่อน — MQTT Arduino R4](https://github.com/ObeOne-KMITL/lab_iot/blob/main/arduino_R4/mqtt.ino) | [🧩 ประยุกต์ LAB](%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20LAB/) |
+|:---:|:---:|:---:|:---:|
 
 # 🔌 LAB-Arduino-Phycom
 
