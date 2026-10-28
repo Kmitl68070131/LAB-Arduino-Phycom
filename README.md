@@ -1,27 +1,146 @@
-## 📚 ใหม่: อาร์เรย์และลิสต์กับเซนเซอร์ทุกชุด
-
-[เปิดเมนูอาร์เรย์และลิสต์ พร้อม LCD และเว็บ](อาร์เรย์และลิสต์/README.md) — 14 ตัวอย่างแยกอุปกรณ์ เก็บ 20 ค่าล่าสุดในอาร์เรย์วงแหวนและลิสต์เชื่อมโยง ดูตารางบนเว็บ เลือกลำดับแสดง LCD ขอประวัติและล้างข้อมูลผ่าน JSON ได้
-
-## 🔘 ปุ่ม 2 ขา + เมนู MQTT
-
-| เลือกดู | รายละเอียด |
-|---|---|
-| [🔘 ปุ่มกด 2 ขาขึ้นเว็บ](MQTT/ButtonEvents/README.md) | ต่อ D4–GND, กด/ปล่อย, จำนวนครั้ง, JSON, Serial และ LCD |
-| [📡 เมนูรับส่งข้อมูลกับเว็บผ่าน MQTT](MQTT/README.md) | เลือกตัวอย่างและวิธีเริ่มใช้งาน |
-| [📚 ติดตั้งไลบรารีและคู่มือใช้งาน MQTT](MQTT/LIBRARIES.md) | วิธีติดตั้ง, Broker, Topic, JSON, API, QoS, retain, will และแก้ปัญหา |
-
-## เพิ่มใหม่: MQTT JSON และสถิติเซนเซอร์
-
-- [📡 รับส่งข้อมูล JSON กับเว็บ พร้อม Serial และจอ LCD](MQTT/README.md)
-- [📊 กันเหลี่ยม — ค่าต่ำสุด สูงสุด เฉลี่ย มัธยฐาน และส่วนเบี่ยงเบนมาตรฐาน](กันเหลี่ยม/README.md)
-
-มีตัวอย่างแยก 13 ชุดอุปกรณ์/วงจรสำหรับ UNO R4 WiFi พร้อมวิธีต่อวงจร คอมเมนต์ และ Node.js web bridge ที่ `MQTT/web` ดูขั้นตอนใน README ของแต่ละส่วน
-
 # 🔌 LAB-Arduino-Phycom
 
 ![Arduino](https://img.shields.io/badge/Arduino-UNO%20R4%20WiFi-00878F?logo=arduino&logoColor=white) ![Language](https://img.shields.io/badge/Language-Thai-blue) ![MQTT](https://img.shields.io/badge/MQTT-IoT-7C3AED) ![Docs](https://img.shields.io/badge/Documentation-Cheat%20Sheet-16A34A)
 
 **คู่มือ Arduino UNO R4 WiFi สำหรับเรียน Physical Computing** — คำสั่งต่าง ๆ พร้อมหน้าที่ วิธีใช้ การต่อสาย และตัวอย่างโค้ดแยกตามอุปกรณ์
+
+<a id="menu"></a>
+
+## 🧭 เมนูลัด — เลือกหมวดที่ต้องการ
+
+[🌡 **เซนเซอร์และปุ่มกด**](#nav-sensors) | [🧪 **งาน Lab ในสไลด์**](#nav-slides) | [📡 **MQTT และเว็บ**](#nav-mqtt) | [📊 **สถิติ / Array / List**](#nav-data) | [📂 **ไฟล์ Lab และเอกสารสอบ**](#nav-files) | [📖 **คู่มือคำสั่ง**](#nav-reference)
+
+> เลือกหมวดด้านบนเพื่อไปยังตารางไฟล์ แล้วกด **วิธีต่อสาย**, **โค้ด Arduino** หรือ **เปิดโฟลเดอร์** ได้ทันที ไฟล์ `.ino` เปิดใน Arduino IDE; ไฟล์ `.txt` เปิดแล้วคัดลอกเป็น sketch แยกตามข้อ
+
+<a id="nav-sensors"></a>
+
+### 🌡 เซนเซอร์และปุ่มกด — เลือกตามอุปกรณ์
+
+ตัวอย่างในตารางนี้มี Wi-Fi, รับส่ง JSON ผ่าน MQTT, Serial และ LCD พร้อมคอมเมนต์; อัปโหลดทีละชุด
+
+| อุปกรณ์ / สิ่งที่ต้องการอ่าน | วิธีต่อสายและใช้งาน | โค้ด Arduino | เปิดโฟลเดอร์ |
+|---|---|---|---|
+| อุณหภูมิ TMP36 | [วิธีต่อสาย](MQTT/TMP36/README.md) | [เปิดโค้ด](MQTT/TMP36/TMP36.ino) | [ไฟล์ทั้งหมด](MQTT/TMP36/) |
+| อุณหภูมิ MCP9700 | [วิธีต่อสาย](MQTT/MCP9700/README.md) | [เปิดโค้ด](MQTT/MCP9700/MCP9700.ino) | [ไฟล์ทั้งหมด](MQTT/MCP9700/) |
+| อุณหภูมิ LM35 | [วิธีต่อสาย](MQTT/LM35/README.md) | [เปิดโค้ด](MQTT/LM35/LM35.ino) | [ไฟล์ทั้งหมด](MQTT/LM35/) |
+| เทอร์มิสเตอร์ TTC05103 + R330 | [วิธีต่อสาย](MQTT/TTC05103/README.md) | [เปิดโค้ด](MQTT/TTC05103/TTC05103.ino) | [ไฟล์ทั้งหมด](MQTT/TTC05103/) |
+| เทอร์มิสเตอร์ NTC + R10k | [วิธีต่อสาย](MQTT/NTC/README.md) | [เปิดโค้ด](MQTT/NTC/NTC.ino) | [ไฟล์ทั้งหมด](MQTT/NTC/) |
+| ตัวต้านทานปรับค่าได้ / ปุ่มหมุน | [วิธีต่อสาย](MQTT/Potentiometer/README.md) | [เปิดโค้ด](MQTT/Potentiometer/Potentiometer.ino) | [ไฟล์ทั้งหมด](MQTT/Potentiometer/) |
+| ระดับแสง LDR | [วิธีต่อสาย](MQTT/LDR/README.md) | [เปิดโค้ด](MQTT/LDR/LDR.ino) | [ไฟล์ทั้งหมด](MQTT/LDR/) |
+| ระยะห่างอัลตราโซนิก HC-SR04 | [วิธีต่อสาย](MQTT/Ultrasonic/README.md) | [เปิดโค้ด](MQTT/Ultrasonic/Ultrasonic.ino) | [ไฟล์ทั้งหมด](MQTT/Ultrasonic/) |
+| ตรวจจับการเคลื่อนไหว PIR | [วิธีต่อสาย](MQTT/PIR/README.md) | [เปิดโค้ด](MQTT/PIR/PIR.ino) | [ไฟล์ทั้งหมด](MQTT/PIR/) |
+| ปุ่มกด 2 ขา อ่านสถานะเป็นรอบ | [วิธีต่อสาย](MQTT/Button/README.md) | [เปิดโค้ด](MQTT/Button/Button.ino) | [ไฟล์ทั้งหมด](MQTT/Button/) |
+| ปุ่มกด 2 ขา ส่งกด–ปล่อยและจำนวนครั้ง | [วิธีต่อสาย](MQTT/ButtonEvents/README.md) | [เปิดโค้ด](MQTT/ButtonEvents/ButtonEvents.ino) | [ไฟล์ทั้งหมด](MQTT/ButtonEvents/) |
+| แป้นกดตัวเลข 4×4 | [วิธีต่อสาย](MQTT/Keypad/README.md) | [เปิดโค้ด](MQTT/Keypad/Keypad.ino) | [ไฟล์ทั้งหมด](MQTT/Keypad/) |
+| อุณหภูมิและความชื้น DHT11 | [วิธีต่อสาย](MQTT/DHT11/README.md) | [เปิดโค้ด](MQTT/DHT11/DHT11.ino) | [ไฟล์ทั้งหมด](MQTT/DHT11/) |
+| อุณหภูมิและความชื้น DHT22 | [วิธีต่อสาย](MQTT/DHT22/README.md) | [เปิดโค้ด](MQTT/DHT22/DHT22.ino) | [ไฟล์ทั้งหมด](MQTT/DHT22/) |
+
+[⬆ กลับเมนู](#menu)
+
+<a id="nav-slides"></a>
+
+### 🧪 งาน Lab ในสไลด์ — เลือกตามข้อ
+
+[📂 เปิดโฟลเดอร์งานทั้งหมด](GEN_Z/EXERCISES_FROM_SLIDES/) · [📖 วิธีทำและอุปกรณ์แต่ละข้อ](GEN_Z/EXERCISES_FROM_SLIDES/README.md) · [🖼 ดูแกลเลอรีตัวอย่าง](https://kmitl68070131.github.io/LAB-Arduino-Phycom/GEN_Z/WEB/example-gallery.html)
+
+| ข้อ | งาน / อุปกรณ์ | ไฟล์โค้ดจากสไลด์ |
+|---|---|---|
+| 01 | 7-Segment นับเลข 0–9 | [เปิดไฟล์ข้อ 01](GEN_Z/EXERCISES_FROM_SLIDES/01_7SEG_0to9_Arduino.txt) |
+| 02 | 7-Segment แสดงรหัสนักศึกษา | [เปิดไฟล์ข้อ 02](GEN_Z/EXERCISES_FROM_SLIDES/02_7SEG_STUDENT_ID_Arduino.txt) |
+| 03 | ปรับความสว่าง LED 4 ดวง | [เปิดไฟล์ข้อ 03](GEN_Z/EXERCISES_FROM_SLIDES/03_LED_FADING_4_Arduino.txt) |
+| 04 | Keypad กดเลขแสดง 7-Segment | [เปิดไฟล์ข้อ 04](GEN_Z/EXERCISES_FROM_SLIDES/04_KEYPAD_TO_7SEG_Arduino.txt) |
+| 05 | LCD วาดรูปหัวใจด้วยอักษรกำหนดเอง | [เปิดไฟล์ข้อ 05](GEN_Z/EXERCISES_FROM_SLIDES/05_LCD_HEART_Arduino.txt) |
+| 06 | TMP36 แสดงอุณหภูมิบน LCD | [เปิดไฟล์ข้อ 06](GEN_Z/EXERCISES_FROM_SLIDES/06_TMP36_LCD_Arduino.txt) |
+| 07 | Keypad ส่งปุ่มขึ้นเว็บผ่าน MQTT | [เปิดไฟล์ข้อ 07](GEN_Z/EXERCISES_FROM_SLIDES/07_MQTT_KEYPAD_TX_Arduino.txt) |
+| 08 | รับค่าปุ่มผ่าน MQTT เพื่อควบคุม LED | [เปิดไฟล์ข้อ 08](GEN_Z/EXERCISES_FROM_SLIDES/08_MQTT_KEYPAD_RX_Arduino.txt) |
+| 09 | ปุ่มหมุนส่งค่า Analog ผ่าน MQTT | [เปิดไฟล์ข้อ 09](GEN_Z/EXERCISES_FROM_SLIDES/09_MQTT_POT_TX_Arduino.txt) |
+| 10 | รับค่า MQTT ปรับความสว่าง LED | [เปิดไฟล์ข้อ 10](GEN_Z/EXERCISES_FROM_SLIDES/10_MQTT_LED_FADE_RX_Arduino.txt) |
+| 11 | ควบคุมสี RGB จากเว็บ | [เปิดไฟล์ข้อ 11](GEN_Z/EXERCISES_FROM_SLIDES/11_MQTT_RGB_WEB_Arduino.txt) |
+| 12 | Ultrasonic ส่งระยะห่างขึ้นเว็บ | [เปิดไฟล์ข้อ 12](GEN_Z/EXERCISES_FROM_SLIDES/12_ULTRASONIC_WEB_Arduino.txt) |
+
+[⬆ กลับเมนู](#menu)
+
+<a id="nav-mqtt"></a>
+
+### 📡 MQTT และเว็บ — เริ่มรับส่งข้อมูล
+
+| ต้องการทำอะไร | เปิดไฟล์หรือโฟลเดอร์ |
+|---|---|
+| เลือกตัวอย่าง MQTT แยกอุปกรณ์ | [เมนูและขั้นตอนเริ่มใช้งาน](MQTT/README.md) · [โฟลเดอร์ MQTT](MQTT/) |
+| ติดตั้งไลบรารี / Topic / JSON / QoS / แก้ปัญหา | [คู่มือไลบรารีและ MQTT](MQTT/LIBRARIES.md) |
+| กดปุ่มจริงให้สถานะและจำนวนครั้งขึ้นเว็บ | [วิธีทำปุ่ม 2 ขา](MQTT/ButtonEvents/README.md) · [โค้ด](MQTT/ButtonEvents/ButtonEvents.ino) |
+| เปิดเว็บส่งคำสั่งและดูข้อมูลสด | [โฟลเดอร์เว็บ](MQTT/web/) · [หน้าเว็บ](MQTT/web/index.html) · [Node bridge](MQTT/web/server.js) · [Dependencies](MQTT/web/package.json) |
+| อ่านตัวอย่างเว็บชุด Lab เดิม | [โฟลเดอร์เว็บ GEN_Z](GEN_Z/WEB/) · [คู่มือสูตรเซนเซอร์](GEN_Z/WEB/library-and-sensors.html) |
+
+เว็บข้อมูลสดใช้ `npm ci` แล้ว `npm start` ใน `MQTT/web` ก่อนเปิด http://127.0.0.1:3000; การเปิด source HTML บน GitHub อย่างเดียวไม่ได้รัน bridge
+
+[⬆ กลับเมนู](#menu)
+
+<a id="nav-data"></a>
+
+### 📊 สถิติ / อาร์เรย์ / ลิสต์ — เลือกเซนเซอร์
+
+[📖 คู่มือสถิติทุกเซนเซอร์](กันเหลี่ยม/README.md) · [📂 โฟลเดอร์สถิติ](กันเหลี่ยม/) · [📖 คู่มืออาร์เรย์และลิสต์](อาร์เรย์และลิสต์/README.md) · [📂 โฟลเดอร์อาร์เรย์และลิสต์](อาร์เรย์และลิสต์/)
+
+| อุปกรณ์ | ต่ำสุด / สูงสุด / เฉลี่ย / มัธยฐาน / ส่วนเบี่ยงเบนมาตรฐาน | เก็บประวัติ Array และ Linked List + LCD + เว็บ |
+|---|---|---|
+| อุณหภูมิ TMP36 | [เปิดตัวอย่าง](กันเหลี่ยม/TMP36/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/TMP36/README.md) |
+| อุณหภูมิ MCP9700 | [เปิดตัวอย่าง](กันเหลี่ยม/MCP9700/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/MCP9700/README.md) |
+| อุณหภูมิ LM35 | [เปิดตัวอย่าง](กันเหลี่ยม/LM35/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/LM35/README.md) |
+| เทอร์มิสเตอร์ TTC05103 + R330 | [เปิดตัวอย่าง](กันเหลี่ยม/TTC05103/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/TTC05103/README.md) |
+| เทอร์มิสเตอร์ NTC + R10k | [เปิดตัวอย่าง](กันเหลี่ยม/NTC/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/NTC/README.md) |
+| ตัวต้านทานปรับค่าได้ / ปุ่มหมุน | [เปิดตัวอย่าง](กันเหลี่ยม/Potentiometer/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/Potentiometer/README.md) |
+| ระดับแสง LDR | [เปิดตัวอย่าง](กันเหลี่ยม/LDR/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/LDR/README.md) |
+| ระยะห่างอัลตราโซนิก HC-SR04 | [เปิดตัวอย่าง](กันเหลี่ยม/Ultrasonic/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/Ultrasonic/README.md) |
+| ตรวจจับการเคลื่อนไหว PIR | [เปิดตัวอย่าง](กันเหลี่ยม/PIR/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/PIR/README.md) |
+| ปุ่มกด 2 ขา อ่านสถานะเป็นรอบ | [เปิดตัวอย่าง](กันเหลี่ยม/Button/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/Button/README.md) |
+| ปุ่มกด 2 ขา ส่งกด–ปล่อยและจำนวนครั้ง | [สถิติจากสถานะปุ่ม](กันเหลี่ยม/Button/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/ButtonEvents/README.md) |
+| แป้นกดตัวเลข 4×4 | [เปิดตัวอย่าง](กันเหลี่ยม/Keypad/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/Keypad/README.md) |
+| อุณหภูมิและความชื้น DHT11 | [เปิดตัวอย่าง](กันเหลี่ยม/DHT11/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/DHT11/README.md) |
+| อุณหภูมิและความชื้น DHT22 | [เปิดตัวอย่าง](กันเหลี่ยม/DHT22/README.md) | [เปิดตัวอย่าง](อาร์เรย์และลิสต์/DHT22/README.md) |
+
+[⬆ กลับเมนู](#menu)
+
+<a id="nav-files"></a>
+
+### 📂 ไฟล์ Lab และเอกสารสอบ
+
+| หมวด | เปิดโฟลเดอร์ / เอกสาร |
+|---|---|
+| ชุดตัวอย่าง GEN_Z | [โฟลเดอร์](GEN_Z/) · [README](GEN_Z/README.md) |
+| Lab / เอกสารเตรียมสอบต้นฉบับ | [โฟลเดอร์ Phycom lab EXAM](Phycom%20lab%20EXAM/) |
+| สไลด์ PDF สัปดาห์ 12–15 | [สัปดาห์ 12](Phycom%20lab%20EXAM/12.pdf) · [สัปดาห์ 13](Phycom%20lab%20EXAM/13.pdf) · [สัปดาห์ 14](Phycom%20lab%20EXAM/14.pdf) · [สัปดาห์ 15](Phycom%20lab%20EXAM/15.pdf) |
+| โค้ดรวมจาก Lab | [ALL.txt](Phycom%20lab%20EXAM/ALL.txt) |
+| สรุปคำสั่งภาษาไทย | [Cheat Sheet TXT](Phycom%20lab%20EXAM/Arduino_UNO_R4_Physical_Computing_Cheatsheet_TH.txt) |
+| ชุด Noah Ark — ตัวอย่าง Arduino ของ Kt | [โฟลเดอร์ Arduino](Phycom%20lab%20EXAM/Noah_Ark-main/Kt/arduino/) |
+| ชุด Noah Ark — ใบงานและตัวอย่าง TrustMeBro | [โฟลเดอร์](Phycom%20lab%20EXAM/Noah_Ark-main/TrustMeBro/) · [คู่มือพื้นฐาน](Phycom%20lab%20EXAM/Noah_Ark-main/TrustMeBro/00_Base.md) |
+| ชุดข้อสอบจำลอง Phycom MOCK Test | [โฟลเดอร์](Phycom%20MOCK%20Test%202-1-66/) · [README](Phycom%20MOCK%20Test%202-1-66/README.md) |
+
+<details>
+<summary>📄 เปิดไฟล์เซนเซอร์และอุปกรณ์ต้นฉบับรายตัว — คลิกขยาย</summary>
+
+| อุปกรณ์ / งาน | ไฟล์เดิม |
+|---|---|
+| อุณหภูมิ TMP36 | [TMP.txt](Phycom%20lab%20EXAM/TMP.txt) |
+| เทอร์มิสเตอร์ | [thermistor.txt](Phycom%20lab%20EXAM/thermistor.txt) |
+| ปุ่มหมุน Potentiometer | [potentiometer.txt](Phycom%20lab%20EXAM/potentiometer.txt) |
+| วัดระยะ Ultrasonic | [Ultrasonic.txt](Phycom%20lab%20EXAM/Ultrasonic.txt) |
+| Ultrasonic ร่วมกับปุ่มกด | [Ultrasonic + button.txt](Phycom%20lab%20EXAM/Ultrasonic%20%2B%20button.txt) |
+| Keypad ส่งค่าเว็บ | [keypad go to web.txt](Phycom%20lab%20EXAM/keypad%20go%20to%20web.txt) |
+| RGB LED | [RGB.txt](Phycom%20lab%20EXAM/RGB.txt) |
+| 7-Segment | [7-seg.txt](Phycom%20lab%20EXAM/7-seg.txt) |
+
+</details>
+
+[⬆ กลับเมนู](#menu)
+
+<a id="nav-reference"></a>
+
+### 📖 คู่มือคำสั่งและตัวอย่างพื้นฐาน
+
+อ่านเนื้อหาคู่มือเดิมต่อด้านล่างได้เลย หรือใช้สารบัญของ GitHub เลือกหัวข้อ เช่น Serial, LCD, Keypad, เซนเซอร์ และ MQTT
+
+---
 
 ## 1. เริ่มต้นใช้งานและสารบัญ
 
@@ -684,7 +803,7 @@ void loop() {
 #include <MQTTClient.h>
 
 const char WIFI_SSID[] = "EDOK";         // ชื่อ Wi-Fi
-const char WIFI_PASS[] = "1234567890";  // รหัส Wi-Fi
+const char WIFI_PASS[] = "YOUR_PASSWORD";  // รหัส Wi-Fi
 const char BROKER[] = "phycom.it.kmitl.ac.th";
 const char TOPIC[] = "68070131/button"; // Topic ที่เว็บรับ
 WiFiClient network;
