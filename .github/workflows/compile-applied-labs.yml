@@ -1,0 +1,38 @@
+name: ตรวจ Compile ตัวอย่างประยุกต์ LAB
+on:
+  push:
+    paths:
+      - 'ประยุกต์ LAB/**'
+      - '.github/workflows/compile-applied-labs.yml'
+  pull_request:
+    paths:
+      - 'ประยุกต์ LAB/**'
+      - '.github/workflows/compile-applied-labs.yml'
+  workflow_dispatch:
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ติดตั้ง Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+      - name: ติดตั้ง Core และ Libraries
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:renesas_uno
+          arduino-cli lib install "MQTT"
+          arduino-cli lib install "LiquidCrystal I2C"
+      - name: Compile ทุกไฟล์ INO (แยก Sketch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          while IFS= read -r -d '' file; do
+            folder="$(dirname "$file")"
+            echo "::group::Compiling $folder"
+            arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi "$folder"
+            echo "::endgroup::"
+            count=$((count+1))
+          done < <(find 'ประยุกต์ LAB' -type f -name '*.ino' -print0 | sort -z)
+          echo "Compiled $count sketches"
+          test "$count" -ge 36
