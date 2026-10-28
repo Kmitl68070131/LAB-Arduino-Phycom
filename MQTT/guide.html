@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>คู่มือ MQTT Arduino UNO R4 WiFi | PHYCOM</title>
+<style>
+:root{font-family:system-ui,"Segoe UI",sans-serif;color:#263b46;background:#f5f8f8}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:1040px;margin:auto;padding:24px 20px 65px}header{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}h1{font-size:clamp(24px,4vw,34px);margin:8px 0}h2{font-size:21px;margin:0 0 12px}p{line-height:1.75;color:#60737d}small,.muted{color:#687e86}a{color:#146c73;text-decoration:none}a:hover{text-decoration:underline}.menu{display:flex;gap:9px;flex-wrap:wrap;padding:14px 0 20px}.menu a{background:#fff;border:1px solid #d8e4e7;border-radius:9px;padding:10px 13px;font-size:13px}.panel{background:#fff;border:1px solid #dbe6e8;border-radius:14px;padding:23px;margin:17px 0}.pill{display:inline-block;background:#eaf4f4;border:1px solid #cfe3e1;border-radius:20px;padding:6px 12px;color:#1c696d;font-size:12px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;border-bottom:1px solid #e8eff0;padding:12px 8px;vertical-align:top}th{color:#48646b}code{font-family:ui-monospace,Consolas,monospace;font-size:.91em;background:#edf4f5;padding:2px 5px;border-radius:5px;overflow-wrap:anywhere}pre{overflow:auto;background:#132834;color:#e5f6f5;padding:17px;border-radius:11px;font:12.5px/1.6 Consolas,monospace}pre code{background:transparent;color:inherit;padding:0}ul,ol{line-height:1.9;color:#405862;padding-left:23px}.warning{background:#fff8ee;border-left:3px solid #be8035;border-radius:7px;padding:11px 15px}.links{display:flex;gap:11px;flex-wrap:wrap}.link{display:inline-block;padding:11px 14px;border-radius:9px;background:#196a72;color:#fff;font-weight:650;font-size:13px}.link:hover{color:#fff;text-decoration:none}.link.secondary{background:#eaf4f4;color:#14616c}
+@media(max-width:650px){.wrap{padding:16px 12px}.panel{padding:16px}table{font-size:12px}}
+</style></head>
+<body><div class="wrap">
+<header><div><span class="pill">IT KMITL • Physical Computing</span><h1>คู่มือ MQTT สำหรับ Arduino UNO R4 WiFi</h1><p>ต่อ Wi-Fi, Publish, Subscribe, อธิบาย Topic, ตัวอย่างโค้ด และแก้ปัญหาการเชื่อมต่อกับเว็บ</p></div></header>
+<nav class="menu" aria-label="เมนู"><a href="../index.html">หน้าแรก</a><a href="../ที่อาจจะออกมั้ง/web/">ค้นหาโจทย์</a><a href="../ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/">ค้นหาคำสั่ง</a><a href="https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/MQTT/LIBRARIES.md">คู่มือฉบับเต็มบน GitHub</a></nav>
+<div class="panel"><h2>เริ่มใช้งาน</h2><div class="links"><a class="link" href="https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/MQTT/LIBRARIES.md">เปิดคู่มือ MQTT ฉบับเต็มที่อ่านได้ทันที</a><a class="link secondary" href="README.md">ดูหมวด MQTT ใน Repository</a></div><p>หาก GitHub Pages ยังไม่เปิดใช้งาน ให้ใช้ปุ่มแรกซึ่งเปิด Markdown บน GitHub โดยตรง ไม่ต้องพึ่งระบบ Pages</p>
+<table><tr><th>รายการ</th><th>ค่า</th></tr><tr><td>Board</td><td>Arduino UNO R4 WiFi</td></tr><tr><td>Wi-Fi</td><td><code>EDOK</code> (กำหนดรหัสผ่านใน Sketch)</td></tr><tr><td>MQTT Broker</td><td><code>phycom.it.kmitl.ac.th</code></td></tr><tr><td>Port</td><td><code>1883</code> (MQTT over TCP)</td></tr><tr><td>Topic Prefix</td><td><code>68070131/</code></td></tr><tr><td>ไลบรารี</td><td><code>WiFiS3.h</code>, <code>MQTTClient.h</code> โดย 256dpi</td></tr></table></div>
+<div class="panel"><h2>Publish กับ Subscribe ต่างกันอย่างไร</h2>
+<table><tr><th>ทิศทาง</th><th>Topic ตัวอย่าง</th><th>การทำงาน</th></tr>
+<tr><td>Arduino → เว็บ</td><td><code>68070131/mqtt/data</code></td><td>บอร์ดอ่านค่าแล้ว <code>mqtt.publish()</code> ไปให้เว็บรับ</td></tr>
+<tr><td>เว็บ → Arduino</td><td><code>68070131/mqtt/set</code></td><td>บอร์ด <code>mqtt.subscribe()</code> แล้วรับคำสั่งใน Callback</td></tr>
+<tr><td>Arduino → เว็บ</td><td><code>68070131/mqtt/status</code></td><td>ส่ง <code>ONLINE</code> หรือสถานะตอบกลับ</td></tr></table>
+<p class="warning"><strong>สำคัญ:</strong> เปลี่ยนชื่อ Topic ตรงค่าคงที่ <code>TOPIC_DATA</code>, <code>TOPIC_SET</code>, <code>TOPIC_ACK</code> และต้องเปลี่ยนฝั่งเว็บให้ตรงกันทุกตัวอักษร</p></div>
+<div class="panel"><h2>โค้ดตัวอย่างครบ: รับคำสั่ง LED และส่งข้อมูลขึ้นเว็บ</h2><p>แสดงตำแหน่งแก้ Wi-Fi, Broker และ Topic พร้อมคอมเมนต์ทุกส่วน ตัวอย่างนี้ใช้ LED บนบอร์ด ไม่ต้องต่ออุปกรณ์ภายนอก</p>
+<pre><code>#include &lt;WiFiS3.h&gt;            // Wi-Fi ของ Arduino UNO R4 WiFi
+#include &lt;MQTTClient.h&gt;        // ไลบรารี MQTT by 256dpi
+
+const char SSID[] = &quot;EDOK&quot;;    // &lt;&lt;&lt; เปลี่ยนชื่อ Wi-Fi
+const char PASS[] = &quot;1234567890&quot;; // &lt;&lt;&lt; เปลี่ยนรหัส Wi-Fi
+const char HOST[] = &quot;phycom.it.kmitl.ac.th&quot;; // &lt;&lt;&lt; เปลี่ยน Broker
+const int PORT = 1883;         // &lt;&lt;&lt; เปลี่ยนพอร์ต MQTT TCP
+
+const char TOPIC_DATA[] = &quot;68070131/mqtt/data&quot;; // &lt;&lt;&lt; เปลี่ยน Topic ส่ง
+const char TOPIC_SET[] = &quot;68070131/mqtt/set&quot;;   // &lt;&lt;&lt; เปลี่ยน Topic รับ
+const char TOPIC_ACK[] = &quot;68070131/mqtt/status&quot;; // &lt;&lt;&lt; เปลี่ยน Topic ตอบกลับ
+
+WiFiClient network;            // ช่องทาง TCP ผ่าน Wi-Fi
+MQTTClient mqtt(512);          // บัฟเฟอร์ข้อความ MQTT
+unsigned long lastSent = 0;    // เวลา Publish ล่าสุด
+unsigned long lastTry = 0;     // เวลาลอง Connect ครั้งล่าสุด
+String received = &quot;&quot;;          // ข้อความที่รับจากเว็บ
+
+void onMessage(String &amp;topic, String &amp;payload) {
+  if (topic != TOPIC_SET) return; // ตรวจว่าเป็น Topic รับคำสั่ง
+  received = payload;             // เก็บค่าที่ได้รับ
+  Serial.println(&quot;RX: &quot; + received);
+}
+
+void setup() {
+  Serial.begin(115200);           // เปิด Serial Monitor
+  pinMode(LED_BUILTIN, OUTPUT);   // LED บนบอร์ดสำหรับทดสอบ
+  WiFi.begin(SSID, PASS);         // เริ่มต่อ Wi-Fi
+  mqtt.begin(HOST, PORT, network); // ตั้ง Broker และช่องทาง TCP
+  mqtt.onMessage(onMessage);      // ตั้ง Callback สำหรับ Subscribe
+}
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    if (millis() - lastTry &gt; 10000UL) {
+      lastTry = millis();
+      WiFi.begin(SSID, PASS);     // เชื่อม Wi-Fi ใหม่เมื่อหลุด
+    }
+    return;
+  }
+
+  if (!mqtt.connected()) {
+    if (millis() - lastTry &gt; 5000UL) {
+      lastTry = millis();
+      if (mqtt.connect(&quot;uno-r4-68070131-example&quot;)) {
+        mqtt.subscribe(TOPIC_SET); // &lt;&lt;&lt; Subscribe Topic หลัง Connect
+        mqtt.publish(TOPIC_ACK, &quot;ONLINE&quot;); // &lt;&lt;&lt; ส่งสถานะ
+      }
+    }
+    return;
+  }
+
+  mqtt.loop();                   // เรียกบ่อย ๆ เพื่อรับข้อความ MQTT
+  if (received == &quot;ON&quot;) digitalWrite(LED_BUILTIN, HIGH);
+  if (received == &quot;OFF&quot;) digitalWrite(LED_BUILTIN, LOW);
+
+  if (millis() - lastSent &gt;= 2000UL) {
+    lastSent = millis();
+    mqtt.publish(TOPIC_DATA, String(millis())); // &lt;&lt;&lt; Publish ขึ้นเว็บ
+  }
+}</code></pre>
+<p>คัดลอกโค้ดนี้ลง Arduino IDE เป็น Sketch ใหม่ แล้วเลือกบอร์ด UNO R4 WiFi ตรวจไลบรารีและเปิด Serial Monitor 115200 ต้องมี Wi-Fi และ Broker ที่เข้าถึงได้จึงจะเห็นข้อมูลบนเว็บ</p></div>
+<div class="panel"><h2>ข้อผิดพลาดที่พบบ่อย</h2><ul>
+<li><strong>Wi-Fi ไม่เชื่อม:</strong> ตรวจ SSID, Password, ความแรงสัญญาณ และว่าเครือข่ายรองรับบอร์ด</li>
+<li><strong>MQTT ไม่เชื่อม:</strong> ตรวจ Host, Port 1883, Firewall, Client ID ไม่ซ้ำ และการเข้าถึง Broker</li>
+<li><strong>Publish ได้ แต่เว็บไม่เห็น:</strong> ตรวจ Topic ให้ตรง, ดูว่าเว็บ Subscribe ถูกตัวหรือไม่ และเปิดตัวรับ MQTT จริง</li>
+<li><strong>Arduino ไม่รับคำสั่ง:</strong> ตรวจว่า <code>mqtt.loop()</code> ทำงานสม่ำเสมอ และ Subscribe ใหม่หลัง Reconnect</li>
+<li><strong>ตัวอย่างเว็บ GitHub Pages รับไม่ได้:</strong> Browser ไม่เปิด MQTT TCP 1883 โดยตรง ต้องใช้ MQTT over WebSocket หรือ Node.js Bridge ที่เปิดทำงานอยู่</li>
+<li><strong>LCD ไม่ขึ้น:</strong> ตรวจ SDA/SCL, VCC/GND, Address 0x27 หรือ 0x3F และปรับ Contrast</li></ul>
+<p class="warning">Broker พอร์ต 1883 ไม่ใช้ TLS และอาจเป็นบริการร่วมกัน อย่าส่งข้อมูลส่วนตัว รหัสผ่าน หรือคำสั่งสำคัญโดยไม่มีระบบยืนยันตัวตน</p></div>
+<div class="panel"><h2>เอกสารเพิ่มเติม</h2><div class="links"><a class="link" href="https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/MQTT/LIBRARIES.md">คู่มือ LIBRARIES.md ฉบับเต็ม</a><a class="link secondary" href="https://github.com/Kmitl68070131/LAB-Arduino-Phycom/tree/main/MQTT">โฟลเดอร์ MQTT และตัวอย่าง LAB</a><a class="link secondary" href="https://github.com/Kmitl68070131/LAB-Arduino-Phycom">GitHub โปรเจกต์</a></div></div></div></body></html>

@@ -1,5 +1,12 @@
 # 📡 รับส่งข้อมูลกับเว็บผ่าน MQTT — พร้อม Serial และจอ LCD
 
+## 🌐 คู่มือ MQTT เวอร์ชันเว็บไซต์
+
+- [คู่มือ HTML สำหรับอ่านบนเว็บ](guide.html) — ใช้เมื่อ GitHub Pages เปิดใช้งานแล้ว
+- [คู่มือฉบับเต็มบน GitHub](https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/MQTT/LIBRARIES.md) — ใช้ได้แม้ GitHub Pages ยังไม่เปิด
+- ถ้า URL ขึ้น `github.io/MQTT/LIBRARIES.md` ถือว่าขาด `/LAB-Arduino-Phycom/` และ Markdown ควรเปิดบน GitHub เพื่อแสดงผลสวยงาม
+
+
 [หน้าแรก](../README.md) · [ไปยังคู่มือสถิติเซนเซอร์](../กันเหลี่ยม/README.md)
 
 ทุกตัวอย่างเชื่อม Wi-Fi, publish JSON, subscribe คำสั่งจากเว็บ, แสดง Serial/LCD และ reconnect อัตโนมัติ อัปโหลด **ทีละ sketch** ไม่ต่อทุกชุดพร้อมกัน

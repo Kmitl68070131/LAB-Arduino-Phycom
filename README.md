@@ -1,5 +1,5 @@
-| [🏠 คู่มือ LAB](#menu) | [🔎 ค้นหาโจทย์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/web/) | [📖 ค้นหาคำสั่งและเซนเซอร์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/) | [📚 GitHub พี่เต้](https://github.com/TaeTanakrit0089/PhysicalComputing-167) | [🤝 GitHub เพื่อน](https://github.com/ObeOne-KMITL/lab_iot/blob/main/arduino_R4/mqtt.ino) | [🧩 ประยุกต์ LAB](%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20LAB/) |
-|:---:|:---:|:---:|:---:|:---:|:---:|
+| [🏠 คู่มือ LAB](#menu) | [📡 คู่มือ MQTT ฉบับเต็ม](https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/MQTT/LIBRARIES.md) | [🔎 ค้นหาโจทย์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/web/) | [📖 ค้นหาคำสั่งและเซนเซอร์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/) | [📚 GitHub พี่เต้](https://github.com/TaeTanakrit0089/PhysicalComputing-167) | [🤝 GitHub เพื่อน](https://github.com/ObeOne-KMITL/lab_iot/blob/main/arduino_R4/mqtt.ino) | [🧩 ประยุกต์ LAB](%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20LAB/) |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 
 # 🔌 LAB-Arduino-Phycom
 
@@ -104,7 +104,7 @@
 | ต้องการทำอะไร | เปิดไฟล์หรือโฟลเดอร์ |
 |---|---|
 | เลือกตัวอย่าง MQTT แยกอุปกรณ์ | [เมนูและขั้นตอนเริ่มใช้งาน](MQTT/README.md) · [โฟลเดอร์ MQTT](MQTT/) |
-| ติดตั้งไลบรารี / Topic / JSON / QoS / แก้ปัญหา | [คู่มือไลบรารีและ MQTT](MQTT/LIBRARIES.md) |
+| ติดตั้งไลบรารี / Topic / JSON / QoS / แก้ปัญหา | [คู่มือ MQTT ฉบับเต็ม](https://github.com/Kmitl68070131/LAB-Arduino-Phycom/blob/main/MQTT/LIBRARIES.md) · [เวอร์ชันเว็บไซต์](MQTT/guide.html) |
 | กดปุ่มจริงให้สถานะและจำนวนครั้งขึ้นเว็บ | [วิธีทำปุ่ม 2 ขา](MQTT/ButtonEvents/README.md) · [โค้ด](MQTT/ButtonEvents/ButtonEvents.ino) |
 | เปิดเว็บส่งคำสั่งและดูข้อมูลสด | [โฟลเดอร์เว็บ](MQTT/web/) · [หน้าเว็บ](MQTT/web/index.html) · [Node bridge](MQTT/web/server.js) · [Dependencies](MQTT/web/package.json) |
 | อ่านตัวอย่างเว็บชุด Lab เดิม | [โฟลเดอร์เว็บ GEN_Z](GEN_Z/WEB/) · [คู่มือสูตรเซนเซอร์](GEN_Z/WEB/library-and-sensors.html) |
