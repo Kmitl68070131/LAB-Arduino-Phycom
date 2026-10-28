@@ -1,0 +1,34 @@
+<!doctype html><html lang="th"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>MQTT JSON Lab</title>
+<style>body{font:16px system-ui;max-width:950px;margin:35px auto;padding:20px;background:#f3f6f8}textarea{width:100%;height:110px}button,select{padding:10px;margin:5px}pre{background:white;padding:20px;white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<h1>MQTT JSON ↔ Serial / LCD</h1><p>รันผ่าน Node bridge · รอ telemetry และ ACK จริงจากบอร์ด</p>
+<label>โหมด <select id="mode"><option value="mqtt">MQTT</option><option value="stats">กันเหลี่ยม (stats)</option></select></label>
+<label>อุปกรณ์ <select id="sensor"></select></label><p id="status">กำลังเชื่อม stream…</p>
+<textarea id="command">{"text":"Hello LCD","interval_ms":2500,"reset":false}</textarea><button id="send">ส่ง JSON ไปบอร์ด</button>
+<h2>ข้อมูลล่าสุด</h2><pre id="latest">รอข้อมูล</pre><h2>ACK / ผลส่ง</h2><pre id="ack">ยังไม่มี ACK</pre>
+<script>
+// อ้าง DOM ชัดเจน ไม่ใช้ implicit globals; ทุกข้อความภายนอกแสดงด้วย textContent
+const ui = Object.fromEntries(['mode','sensor','status','command','send','latest','ack'].map(id => [id,document.getElementById(id)])); // id=ชื่อ element; ui=ชุด DOM
+for (const name of ['TMP36','MCP9700','LM35','TTC05103','NTC','Potentiometer','LDR','Ultrasonic','PIR','Button','Keypad','DHT11','DHT22']) ui.sensor.add(new Option(name,name)); // name=อุปกรณ์
+const events = new EventSource('/events'); // SSE stream จาก bridge
+let lastData = 0; // เวลา telemetry ล่าสุด
+function clearView(){lastData=0;ui.latest.textContent='รอข้อมูล';ui.ack.textContent='ยังไม่มี ACK';}
+ui.mode.onchange=clearView;ui.sensor.onchange=clearView;
+events.onopen=()=>ui.status.textContent='Stream connected; รอข้อมูลบอร์ด';
+events.onerror=()=>ui.status.textContent='Stream disconnected; retrying';
+events.onmessage=event=>{ // event=ข้อความ SSE
+  const packet=JSON.parse(event.data); // topic และ payload จาก MQTT
+  const prefix=`68070131/${ui.mode.value}/${ui.sensor.value}/`; // เป้าหมายที่เลือก
+  if(!packet.topic.startsWith(prefix)) return;
+  let shown; try{shown=JSON.stringify(JSON.parse(packet.payload),null,2);}catch{shown=packet.payload;} // shown=ข้อความปลอดภัย
+  if(packet.topic.endsWith('/ack')) ui.ack.textContent=shown;
+  else {ui.latest.textContent=shown;lastData=Date.now();ui.status.textContent='ได้รับ telemetry จริงจากบอร์ด';}
+};
+setInterval(()=>{if(lastData && Date.now()-lastData>15000)ui.status.textContent='ข้อมูลเกิน 15 วินาที: ตรวจ interval/บอร์ด/broker';},3000);
+ui.send.onclick=async()=>{
+  try{
+    const command=JSON.parse(ui.command.value); // JSON ที่ผู้ใช้ป้อน
+    const result=await fetch('/command',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:ui.mode.value,sensor:ui.sensor.value,command})}); // HTTP response
+    ui.ack.textContent=`${result.status}: ${await result.text()}`;
+  }catch(error){ui.ack.textContent=error.message;} // error=JSON หรือ network error
+};
+</script></html>

@@ -1,0 +1,1 @@
+{"name":"phycom-json-bridge","private":true,"scripts":{"start":"node server.js","test":"node --test"},"dependencies":{"mqtt":"^5.10.0"}}

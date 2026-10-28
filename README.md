@@ -1,3 +1,10 @@
+## เพิ่มใหม่: MQTT JSON และสถิติเซนเซอร์
+
+- [MQTT — รับ/ส่ง JSON ผ่านเว็บ พร้อม Serial และ LCD](MQTT/README.md)
+- [กันเหลี่ยม — min / max / avg / median / std แยกทุกเซนเซอร์](กันเหลี่ยม/README.md)
+
+มีตัวอย่างแยก 13 ชุดอุปกรณ์/วงจรสำหรับ UNO R4 WiFi พร้อมวิธีต่อวงจร คอมเมนต์ และ Node.js web bridge ที่ `MQTT/web` ดูขั้นตอนใน README ของแต่ละส่วน
+
 # 🔌 LAB-Arduino-Phycom
 
 ![Arduino](https://img.shields.io/badge/Arduino-UNO%20R4%20WiFi-00878F?logo=arduino&logoColor=white) ![Language](https://img.shields.io/badge/Language-Thai-blue) ![MQTT](https://img.shields.io/badge/MQTT-IoT-7C3AED) ![Docs](https://img.shields.io/badge/Documentation-Cheat%20Sheet-16A34A)
