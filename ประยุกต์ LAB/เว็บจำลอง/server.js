@@ -12,7 +12,7 @@ let connected=false;
 const server=http.createServer((req,res)=>{
   let p=req.url==='/'?'/index.html':(req.url||'/');
   p=decodeURIComponent(p.split('?')[0]);
-  if(p!=='/index.html'){res.writeHead(404);res.end('Not found');return;}
+  if(/^\/assets\/วงจร_LAB(0[1-9]|1[0-2])\.svg$/.test(p)){fs.readFile(path.join(__dirname,'..',p.slice(1)),(err,b)=>{if(err){res.writeHead(404);res.end('Not found');return;}res.writeHead(200,{'Content-Type':'image/svg+xml'});res.end(b);});return;}if(p!=='/index.html'){res.writeHead(404);res.end('Not found');return;}
   fs.readFile(path.join(__dirname,'index.html'),(err,b)=>{if(err){res.writeHead(500);res.end('error');return;}res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(b);});
 });
 const wss=new WebSocketServer({server,path:'/ws'});
