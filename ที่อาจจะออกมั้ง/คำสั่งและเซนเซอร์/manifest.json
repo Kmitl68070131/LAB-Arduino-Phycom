@@ -1,0 +1,252 @@
+[
+  {
+    "id": "g01",
+    "name": "Digital GPIO",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "Switch",
+      "LED"
+    ],
+    "commandCount": 6
+  },
+  {
+    "id": "g02",
+    "name": "Analog / PWM",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "Potentiometer",
+      "TMP36",
+      "LDR",
+      "LED"
+    ],
+    "commandCount": 6
+  },
+  {
+    "id": "g03",
+    "name": "เวลา / Serial / ตัวแปร",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "LED",
+      "Switch"
+    ],
+    "commandCount": 9
+  },
+  {
+    "id": "g04",
+    "name": "Wi-Fi / MQTT",
+    "kind": "การเชื่อมต่อ",
+    "devices": [
+      "WiFi",
+      "MQTT",
+      "LCD"
+    ],
+    "commandCount": 12
+  },
+  {
+    "id": "g05",
+    "name": "จอ LCD I2C 16×2",
+    "kind": "จอแสดงผล",
+    "devices": [
+      "LCD",
+      "I2C"
+    ],
+    "commandCount": 8
+  },
+  {
+    "id": "g06",
+    "name": "Button / Switch",
+    "kind": "เซนเซอร์ดิจิทัล",
+    "devices": [
+      "Switch",
+      "Button",
+      "LCD"
+    ],
+    "commandCount": 5
+  },
+  {
+    "id": "g07",
+    "name": "Keypad 4×4",
+    "kind": "เซนเซอร์ดิจิทัล",
+    "devices": [
+      "Keypad",
+      "LCD"
+    ],
+    "commandCount": 5
+  },
+  {
+    "id": "g08",
+    "name": "HC-SR04 Ultrasonic",
+    "kind": "เซนเซอร์ระยะ",
+    "devices": [
+      "Ultrasonic",
+      "LCD"
+    ],
+    "commandCount": 5
+  },
+  {
+    "id": "g09",
+    "name": "TMP36",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "TMP36",
+      "LCD"
+    ],
+    "commandCount": 5
+  },
+  {
+    "id": "g10",
+    "name": "LM35",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "LM35",
+      "LCD"
+    ],
+    "commandCount": 4
+  },
+  {
+    "id": "g11",
+    "name": "MCP9700",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "MCP9700",
+      "LCD"
+    ],
+    "commandCount": 4
+  },
+  {
+    "id": "g12",
+    "name": "NTC Thermistor 10k",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "NTC",
+      "Thermistor",
+      "LCD"
+    ],
+    "commandCount": 4
+  },
+  {
+    "id": "g13",
+    "name": "TTC05103 Thermistor",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "TTC05103",
+      "Thermistor",
+      "LCD"
+    ],
+    "commandCount": 4
+  },
+  {
+    "id": "g14",
+    "name": "DHT11",
+    "kind": "เซนเซอร์อุณหภูมิและความชื้น",
+    "devices": [
+      "DHT11",
+      "LCD"
+    ],
+    "commandCount": 5
+  },
+  {
+    "id": "g15",
+    "name": "DHT22",
+    "kind": "เซนเซอร์อุณหภูมิและความชื้น",
+    "devices": [
+      "DHT22",
+      "LCD"
+    ],
+    "commandCount": 5
+  },
+  {
+    "id": "g16",
+    "name": "LDR",
+    "kind": "เซนเซอร์แสง",
+    "devices": [
+      "LDR",
+      "LCD",
+      "LED"
+    ],
+    "commandCount": 4
+  },
+  {
+    "id": "g17",
+    "name": "PIR HC-SR501",
+    "kind": "เซนเซอร์ตรวจจับการเคลื่อนไหว",
+    "devices": [
+      "PIR",
+      "LCD",
+      "LED"
+    ],
+    "commandCount": 4
+  },
+  {
+    "id": "g18",
+    "name": "Potentiometer",
+    "kind": "เซนเซอร์ Analog",
+    "devices": [
+      "Potentiometer",
+      "LED",
+      "LCD"
+    ],
+    "commandCount": 4
+  },
+  {
+    "id": "g19",
+    "name": "LED / PWM",
+    "kind": "เอาต์พุต",
+    "devices": [
+      "LED",
+      "LCD"
+    ],
+    "commandCount": 4
+  },
+  {
+    "id": "g20",
+    "name": "RGB LED",
+    "kind": "เอาต์พุต",
+    "devices": [
+      "RGB",
+      "LED"
+    ],
+    "commandCount": 5
+  },
+  {
+    "id": "g21",
+    "name": "7-Segment",
+    "kind": "เอาต์พุต",
+    "devices": [
+      "7-Segment",
+      "LCD"
+    ],
+    "commandCount": 5
+  },
+  {
+    "id": "g22",
+    "name": "UNO R4 LED Matrix 12×8",
+    "kind": "เอาต์พุต",
+    "devices": [
+      "LED Matrix",
+      "Arduino UNO R4"
+    ],
+    "commandCount": 5
+  },
+  {
+    "id": "g23",
+    "name": "I2C Scanner / Bus",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "I2C",
+      "LCD"
+    ],
+    "commandCount": 4
+  },
+  {
+    "id": "g24",
+    "name": "คณิตศาสตร์ / สถิติ / Array",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "Array",
+      "Statistics",
+      "Sensor"
+    ],
+    "commandCount": 5
+  }
+]

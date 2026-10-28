@@ -1,0 +1,1522 @@
+[
+  {
+    "id": "g01",
+    "name": "Digital GPIO",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "Switch",
+      "LED"
+    ],
+    "wire": [
+      "ขาสวิตช์ D2 → สวิตช์ → GND เมื่อใช้ INPUT_PULLUP",
+      "LED D9 → R 330Ω → ขั้วบวก LED; ขั้วลบ LED → GND"
+    ],
+    "goal": "อ่านสถานะ HIGH/LOW ของสวิตช์และกำหนดระดับไฟของ LED",
+    "setup": "กำหนดพินใน setup(); อ่าน/เขียนใน loop()",
+    "topic": "68070131/guide/digital",
+    "repoPath": "MQTT/Button/Button.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "pinMode(pin, INPUT)",
+        "meaning": "กำหนดพินเป็นอินพุตเพื่อรับระดับแรงดัน",
+        "instructions": "ใช้กับเซนเซอร์ดิจิทัลหรือวงจรที่มี Pull-up/Pull-down ภายนอก; ไม่กำหนดสถานะนิ่งเอง",
+        "example": "pinMode(2, INPUT);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "pinMode(pin, INPUT_PULLUP)",
+        "meaning": "เปิดตัวต้านทานดึงขึ้นภายใน MCU",
+        "instructions": "ต่อสวิตช์ระหว่างขากับ GND; ไม่กด HIGH กด LOW",
+        "example": "pinMode(2, INPUT_PULLUP);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "pinMode(pin, OUTPUT)",
+        "meaning": "กำหนดพินให้ขับแรงดันออก",
+        "instructions": "ทำก่อน digitalWrite และ analogWrite",
+        "example": "pinMode(9, OUTPUT);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "digitalRead(pin)",
+        "meaning": "อ่านสัญญาณ HIGH/LOW",
+        "instructions": "ค่า HIGH คือระดับลอจิก 1; กดปุ่ม Pull-up จะอ่าน LOW",
+        "example": "bool pressed = digitalRead(2) == LOW;",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "digitalWrite(pin, HIGH/LOW)",
+        "meaning": "ตั้งค่าขาดิจิทัลให้สูงหรือต่ำ",
+        "instructions": "ใช้เปิด LED เมื่อขาต่อผ่านตัวต้านทานไป LED ขั้วบวก",
+        "example": "digitalWrite(9, HIGH);\ndigitalWrite(9, LOW);",
+        "warning": ""
+      },
+      {
+        "id": "c6",
+        "syntax": "LED_BUILTIN",
+        "meaning": "ค่าคงที่แทนพิน LED ที่ติดตั้งบนบอร์ด",
+        "instructions": "ไม่ใช่ฟังก์ชัน ต้อง pinMode(LED_BUILTIN,OUTPUT) ก่อน",
+        "example": "pinMode(LED_BUILTIN, OUTPUT);\ndigitalWrite(LED_BUILTIN, HIGH);",
+        "warning": ""
+      }
+    ],
+    "trouble": "ปุ่ม 4 ขาต้องเช็กขาคู่ที่ต่อกันภายใน ไม่ควรต่อ 5V กับ GND ผ่านสวิตช์ตรง ๆ",
+    "math": ""
+  },
+  {
+    "id": "g02",
+    "name": "Analog / PWM",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "Potentiometer",
+      "TMP36",
+      "LDR",
+      "LED"
+    ],
+    "wire": [
+      "Potentiometer ขานอก 5V/GND ขากลาง A0",
+      "LED PWM: D9 → R 330Ω → LED → GND"
+    ],
+    "goal": "อ่าน ADC ของเซนเซอร์ Analog และเปลี่ยนความสว่าง LED ด้วย PWM",
+    "setup": "ตั้ง ADC 10 หรือ 12 bit ให้สอดคล้องกับสูตรคำนวณ",
+    "topic": "68070131/guide/analog",
+    "repoPath": "MQTT/Potentiometer/Potentiometer.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "analogRead(A0)",
+        "meaning": "อ่านค่า ADC ของพิน Analog",
+        "instructions": "โดยทั่วไป ADC 10-bit ให้ 0–1023; UNO R4 สามารถตั้ง 12-bit ได้",
+        "example": "int raw = analogRead(A0);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "analogReadResolution(12)",
+        "meaning": "ตั้งความละเอียดผลลัพธ์ ADC เป็น 12 บิต",
+        "instructions": "เมื่อใช้ 12-bit ช่วง raw เป็น 0–4095 และต้องแก้สูตร /4095",
+        "example": "analogReadResolution(12);\nint raw = analogRead(A0);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "analogWrite(pin, duty)",
+        "meaning": "สร้าง PWM บนพินที่รองรับ PWM",
+        "instructions": "ค่าควบคุมปกติ 0–255 (ความละเอียดเริ่มต้น 8-bit); ไม่ใช่แรงดัน Analog แท้",
+        "example": "pinMode(9, OUTPUT);\nanalogWrite(9, 128);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "analogWriteResolution(bits)",
+        "meaning": "กำหนดความละเอียด analogWrite บนบอร์ดที่รองรับ",
+        "instructions": "ถ้าเปลี่ยนเป็น 12-bit ต้องส่ง duty ช่วง 0–4095 แทน 0–255",
+        "example": "analogWriteResolution(12);\nanalogWrite(9, 2048);",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "map(value, 0, 1023, 0, 255)",
+        "meaning": "แปลงช่วง ADC เป็นค่า PWM",
+        "instructions": "map() ใช้คณิตศาสตร์จำนวนเต็ม ไม่ clamp อัตโนมัติ",
+        "example": "int pwm = map(analogRead(A0), 0, 1023, 0, 255);",
+        "warning": ""
+      },
+      {
+        "id": "c6",
+        "syntax": "constrain(x, low, high)",
+        "meaning": "บังคับค่าให้อยู่ในช่วง",
+        "instructions": "ใช้กับ ADC/PWM เพื่อไม่ให้ค่าที่ส่งออกเกินขอบเขต",
+        "example": "int pwm = constrain(value, 0, 255);",
+        "warning": ""
+      }
+    ],
+    "trouble": "ถ้าค่า TMP36 ผิดมากให้ตรวจ ADC resolution และแรงดันอ้างอิงที่ใช้คำนวณ",
+    "math": ""
+  },
+  {
+    "id": "g03",
+    "name": "เวลา / Serial / ตัวแปร",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "LED",
+      "Switch"
+    ],
+    "wire": [
+      "ใช้ LED Built-in ทดสอบได้โดยไม่ต้องต่อสาย"
+    ],
+    "goal": "เขียน loop แบบไม่ค้างและตรวจ Debug ผ่าน Serial Monitor",
+    "setup": "ตั้ง baud ให้ตรงกันทั้งใน Serial.begin และหน้าต่าง Serial Monitor",
+    "topic": "68070131/guide/core",
+    "repoPath": "GEN_Z/EXERCISES_FROM_SLIDES/03_LED_FADING_4_Arduino.txt",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "Serial.begin(115200)",
+        "meaning": "เริ่ม Serial สำหรับข้อความ debug",
+        "instructions": "เรียกใน setup() แล้วเลือก 115200 baud ใน Serial Monitor",
+        "example": "void setup() { Serial.begin(115200); }",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "Serial.print() / println()",
+        "meaning": "ส่งข้อความหรือค่าตัวแปรออก Serial",
+        "instructions": "println() ขึ้นบรรทัดใหม่ ส่วน print() ต่อในบรรทัดเดิม",
+        "example": "Serial.print(\"distance=\");\nSerial.println(25.5);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "millis()",
+        "meaning": "เวลาที่ผ่านไปตั้งแต่บอร์ดเริ่มทำงานเป็น ms",
+        "instructions": "ใช้เวลาที่ไม่บล็อก loop และอ่าน MQTT ได้ต่อเนื่อง",
+        "example": "static unsigned long last = 0;\nif (millis() - last >= 1000UL) {\n  last = millis();\n  Serial.println(\"1 second\");\n}",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "delay(ms)",
+        "meaning": "หยุดโปรแกรมตามจำนวน ms",
+        "instructions": "อย่าใช้ delay ยาว ๆ ระหว่างทำ MQTT เพราะอาจทำให้รับข้อความช้า",
+        "example": "delay(100);",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "delayMicroseconds(us)",
+        "meaning": "รอเวลาเป็นไมโครวินาที",
+        "instructions": "ใช้กับ TRIG ของ HC-SR04 เพื่อสร้างพัลส์สั้น",
+        "example": "digitalWrite(2, HIGH);\ndelayMicroseconds(10);\ndigitalWrite(2, LOW);",
+        "warning": ""
+      },
+      {
+        "id": "c6",
+        "syntax": "pulseIn(pin, HIGH, timeout)",
+        "meaning": "วัดความยาวพัลส์บนขาสัญญาณ หน่วย µs",
+        "instructions": "HC-SR04 มักวัด ECHO HIGH; timeout ให้ 0 เมื่อไม่มีพัลส์",
+        "example": "unsigned long us = pulseIn(3, HIGH, 30000UL);",
+        "warning": ""
+      },
+      {
+        "id": "c7",
+        "syntax": "unsigned long / bool / float",
+        "meaning": "ตัวแปรเวลา สถานะ และค่าทศนิยม",
+        "instructions": "ใช้ unsigned long กับ millis(); bool กับ pressed; float กับอุณหภูมิ",
+        "example": "unsigned long lastSent = 0;\nbool pressed = false;\nfloat temperature = 25.5;",
+        "warning": ""
+      },
+      {
+        "id": "c8",
+        "syntax": "array[] / for",
+        "meaning": "เก็บพินหรือค่าหลายตัวใน Array",
+        "instructions": "ใช้วนสั่ง RGB, LED, 7-Segment โดยไม่ต้องเขียนคำสั่งซ้ำ",
+        "example": "const byte pins[] = {9, 10, 11};\nfor (byte i = 0; i < 3; ++i) {\n  pinMode(pins[i], OUTPUT);\n}",
+        "warning": ""
+      },
+      {
+        "id": "c9",
+        "syntax": "String / .toInt() / .toFloat()",
+        "meaning": "สร้างข้อความและแปลงค่าจาก MQTT Payload",
+        "instructions": "ตรวจรูปแบบ Payload ก่อนแปลง เพราะข้อความผิดรูปแบบอาจได้ค่า 0",
+        "example": "String payload = \"30.5\";\nfloat temp = payload.toFloat();",
+        "warning": ""
+      }
+    ],
+    "trouble": "delay() และ Serial.print() ถี่มากอาจทำให้การรับส่ง MQTT สะดุด",
+    "math": ""
+  },
+  {
+    "id": "g04",
+    "name": "Wi-Fi / MQTT",
+    "kind": "การเชื่อมต่อ",
+    "devices": [
+      "WiFi",
+      "MQTT",
+      "LCD"
+    ],
+    "wire": [
+      "UNO R4 WiFi ใช้ Wi-Fi ในบอร์ด ไม่ต้องต่อขาเสริม",
+      "LCD I2C VCC→5V,GND→GND,SDA→SDA,SCL→SCL"
+    ],
+    "goal": "เชื่อม EDOK ส่งค่าขึ้นเว็บและรับคำสั่งผ่าน Broker",
+    "setup": "เลือก MQTT by 256dpi ที่ include MQTTClient.h; mqtt.loop() ต้องถูกเรียกเป็นประจำ",
+    "topic": "68070131/guide/mqtt",
+    "repoPath": "MQTT/Ultrasonic/Ultrasonic.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "#include <WiFiS3.h>",
+        "meaning": "เรียกไลบรารี Wi-Fi ของ UNO R4 WiFi",
+        "instructions": "ควรเลือก Board Package ของ Arduino UNO R4 WiFi",
+        "example": " #include <WiFiS3.h>",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "#include <MQTTClient.h>",
+        "meaning": "เรียก MQTTClient ของ 256dpi",
+        "instructions": "ใช้ไม่เหมือน PubSubClient; ต้องติดตั้ง MQTT โดย 256dpi",
+        "example": " #include <MQTTClient.h>",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "WiFi.begin(ssid, pass)",
+        "meaning": "เริ่มเชื่อมต่อ Wi-Fi",
+        "instructions": "ใช้ชื่อและรหัสเครือข่ายให้ถูก และตรวจ WL_CONNECTED",
+        "example": "WiFi.begin(\"EDOK\", WIFI_PASSWORD);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "WiFi.status() == WL_CONNECTED",
+        "meaning": "ตรวจว่า Wi-Fi เชื่อมสำเร็จ",
+        "instructions": "อย่าเรียก publish ก่อน Network พร้อม",
+        "example": "if (WiFi.status() == WL_CONNECTED) {\n  Serial.println(WiFi.localIP());\n}",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "mqtt.begin(host, 1883, network)",
+        "meaning": "ผูก MQTT กับ Broker และ TCP Client",
+        "instructions": "พอร์ต 1883 เป็น TCP ไม่ใช่ WebSocket สำหรับเว็บ Browser",
+        "example": "WiFiClient network;\nMQTTClient mqtt(512);\nmqtt.begin(\"phycom.it.kmitl.ac.th\", 1883, network);",
+        "warning": ""
+      },
+      {
+        "id": "c6",
+        "syntax": "mqtt.connect(clientId)",
+        "meaning": "เชื่อมต่อ Broker ด้วย Client ID",
+        "instructions": "Client ID ต้องไม่ซ้ำระหว่างบอร์ด，否则 MQTT จะตัดการเชื่อมต่ออันเก่า",
+        "example": "if (mqtt.connect(\"r4-68070131-a\")) {\n  Serial.println(\"MQTT connected\");\n}",
+        "warning": ""
+      },
+      {
+        "id": "c7",
+        "syntax": "mqtt.subscribe(topic)",
+        "meaning": "สมัครรับข้อความ Topic",
+        "instructions": "ใช้ใน setup หลัง connect และอีกครั้งหลัง reconnect",
+        "example": "mqtt.subscribe(\"68070131/guide/command\");",
+        "warning": ""
+      },
+      {
+        "id": "c8",
+        "syntax": "mqtt.publish(topic, payload)",
+        "meaning": "ส่งข้อความให้ผู้ Subscribe",
+        "instructions": "ส่ง String ได้และควรตรวจค่าคืนเป็น bool",
+        "example": "bool ok = mqtt.publish(\"68070131/guide/data\", String(25.5));",
+        "warning": ""
+      },
+      {
+        "id": "c9",
+        "syntax": "mqtt.onMessage(callback)",
+        "meaning": "กำหนดฟังก์ชันรับข้อความจาก Broker",
+        "instructions": "Callback รูปแบบ void callback(String &topic, String &payload); อย่า Publish ภายใน Callback",
+        "example": "void onMessage(String &topic, String &payload) {\n  Serial.println(topic + \" = \" + payload);\n}\n// ใน setup:\nmqtt.onMessage(onMessage);",
+        "warning": ""
+      },
+      {
+        "id": "c10",
+        "syntax": "mqtt.loop()",
+        "meaning": "ประมวลผลแพ็กเก็ต MQTT และการ Keepalive",
+        "instructions": "เรียกบ่อยใน loop() โดยไม่มี delay ยาว ๆ",
+        "example": "void loop() {\n  mqtt.loop();\n}",
+        "warning": ""
+      },
+      {
+        "id": "c11",
+        "syntax": "mqtt.connected()",
+        "meaning": "ตรวจสถานะเซสชัน MQTT",
+        "instructions": "เมื่อหลุดต้อง reconnect และ subscribe ใหม่",
+        "example": "if (!mqtt.connected()) {\n  Serial.println(\"Reconnect required\");\n}",
+        "warning": ""
+      },
+      {
+        "id": "c12",
+        "syntax": "mqtt.setWill() / setKeepAlive()",
+        "meaning": "ตั้ง Last Will และช่วง Keepalive",
+        "instructions": "ตั้ง Will ก่อน connect และใช้ Topic Status แยก",
+        "example": "mqtt.setWill(\"68070131/guide/status\", \"OFFLINE\", false, 0);\nmqtt.setKeepAlive(20);",
+        "warning": ""
+      }
+    ],
+    "trouble": "GitHub Pages ไม่สามารถต่อ MQTT TCP port 1883 ตรง ๆ ต้องมี MQTT WebSocket ที่ Broker รองรับหรือใช้ Node.js Bridge; Broker 1883 ไม่เข้ารหัส",
+    "math": ""
+  },
+  {
+    "id": "g05",
+    "name": "จอ LCD I2C 16×2",
+    "kind": "จอแสดงผล",
+    "devices": [
+      "LCD",
+      "I2C"
+    ],
+    "wire": [
+      "LCD VCC→5V, GND→GND, SDA→SDA, SCL→SCL บน UNO R4 WiFi",
+      "I2C Address มัก 0x27 หรือ 0x3F ต้องตรวจจริง"
+    ],
+    "goal": "แสดงอุณหภูมิ ระยะ คำสั่งจากเว็บ และข้อความสองแถว",
+    "setup": "ติดตั้ง LiquidCrystal I2C; ล้างตัวอักษรเก่าด้วยการเติมช่องว่าง",
+    "topic": "68070131/guide/lcd",
+    "repoPath": "GEN_Z/EXERCISES_FROM_SLIDES/06_TMP36_LCD_Arduino.txt",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "Wire.begin()",
+        "meaning": "เริ่ม I2C Bus สำหรับ LCD",
+        "instructions": "ต้องเรียกก่อน lcd.init() ใน setup",
+        "example": "Wire.begin();",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "LiquidCrystal_I2C lcd(0x27,16,2)",
+        "meaning": "สร้างออบเจ็กต์จอพร้อม Address, คอลัมน์, แถว",
+        "instructions": "ถ้า Address ไม่ตรงจะไม่ขึ้น ต้องตรวจ I2C Scanner",
+        "example": "LiquidCrystal_I2C lcd(0x27, 16, 2);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "lcd.init()",
+        "meaning": "เริ่มต้นจอ LCD",
+        "instructions": "ใช้กับไลบรารี LiquidCrystal_I2C รุ่นที่มี init()",
+        "example": "lcd.init();",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "lcd.backlight() / noBacklight()",
+        "meaning": "เปิดหรือปิดไฟพื้นหลัง LCD",
+        "instructions": "ไม่ใช่การปิดการแสดงผลข้อมูลใน DDRAM",
+        "example": "lcd.backlight();\n// lcd.noBacklight();",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "lcd.setCursor(column,row)",
+        "meaning": "ย้ายตำแหน่งเริ่มพิมพ์",
+        "instructions": "LCD 16x2 มี row=0 หรือ 1, column 0–15",
+        "example": "lcd.setCursor(0, 1);",
+        "warning": ""
+      },
+      {
+        "id": "c6",
+        "syntax": "lcd.print(value)",
+        "meaning": "พิมพ์ข้อความหรือตัวเลขบนจอ",
+        "instructions": "ให้เติมช่องว่างเมื่อค่ารอบใหม่สั้นลง",
+        "example": "lcd.setCursor(0,0);\nlcd.print(\"TEMP 25.5 C    \");",
+        "warning": ""
+      },
+      {
+        "id": "c7",
+        "syntax": "lcd.clear() / lcd.home()",
+        "meaning": "ล้างจอและกลับจุดเริ่ม",
+        "instructions": "clear() ทุก loop อาจกะพริบ ควรพิมพ์ทับเฉพาะแถว",
+        "example": "lcd.clear();\nlcd.home();",
+        "warning": ""
+      },
+      {
+        "id": "c8",
+        "syntax": "lcd.createChar(index, bitmap)",
+        "meaning": "สร้างตัวอักษรพิเศษ 5×8 pixels",
+        "instructions": "มีช่องตัวอักษร custom จำกัด (0–7) และต้อง write เป็น byte",
+        "example": "byte heart[8] = {0,10,31,31,14,4,0,0};\nlcd.createChar(0, heart);\nlcd.write((uint8_t)0);",
+        "warning": ""
+      }
+    ],
+    "trouble": "LCD ว่าง: ตรวจ SDA/SCL, I2C Address, Contrast ที่หลังจอ, VCC และ GND",
+    "math": ""
+  },
+  {
+    "id": "g06",
+    "name": "Button / Switch",
+    "kind": "เซนเซอร์ดิจิทัล",
+    "devices": [
+      "Switch",
+      "Button",
+      "LCD"
+    ],
+    "wire": [
+      "Pull-up ภายใน: D2→สวิตช์→GND",
+      "Pull-up ภายนอก: 5V→R10k→D2→สวิตช์→GND",
+      "Pull-down ภายนอก: 5V→สวิตช์→D2→R10k→GND"
+    ],
+    "goal": "รู้ว่าปุ่มกดหรือปล่อย นับครั้งกดโดยไม่เด้ง และรายงาน MQTT",
+    "setup": "สวิตช์ NO มี pull-up ให้สัญญาณนิ่งเมื่อไม่กด",
+    "topic": "68070131/guide/button",
+    "repoPath": "MQTT/ButtonEvents/ButtonEvents.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "pinMode(D2, INPUT_PULLUP)",
+        "meaning": "กำหนดปุ่มแบบ Pull-up ในตัว",
+        "instructions": "กด LOW ปล่อย HIGH ห้ามตีความกลับกัน",
+        "example": "pinMode(2, INPUT_PULLUP);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "digitalRead(pin) == LOW",
+        "meaning": "ตรวจการกดปุ่มแบบ Pull-up",
+        "instructions": "เงื่อนไขจะเป็น true เฉพาะตอนกด",
+        "example": "bool pressed = digitalRead(2) == LOW;",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "INPUT + Pull-down 10kΩ",
+        "meaning": "ต่อ Pull-down ภายนอก",
+        "instructions": "ขาไม่กดจะ LOW เมื่อกดสวิตช์ไป 5V จะ HIGH",
+        "example": "pinMode(2, INPUT);\nbool pressed = digitalRead(2) == HIGH;",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "millis() Debounce",
+        "meaning": "กรองสวิตช์เด้งหลายครั้ง",
+        "instructions": "เมื่อ raw เปลี่ยน ให้นับเวลาประมาณ 30–50 ms ก่อนยืนยันการกด",
+        "example": "if (raw != lastRaw) changedAt = millis();\nif (millis() - changedAt >= 35UL) stable = raw;",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "edge detection",
+        "meaning": "นับเฉพาะจังหวะเริ่มกด 1 ครั้ง",
+        "instructions": "ถ้ากดค้าง ไม่ควรเพิ่ม count ทุก loop",
+        "example": "if (pressed && !previousPressed) count++;\npreviousPressed = pressed;",
+        "warning": ""
+      }
+    ],
+    "trouble": "สวิตช์ 4 ขามักมี 2 ขาที่ต่อถึงกันอยู่แล้ว ควรใช้มัลติมิเตอร์ตรวจ",
+    "math": ""
+  },
+  {
+    "id": "g07",
+    "name": "Keypad 4×4",
+    "kind": "เซนเซอร์ดิจิทัล",
+    "devices": [
+      "Keypad",
+      "LCD"
+    ],
+    "wire": [
+      "R1–R4→D9,D8,D7,D6; C1–C4→D5,D4,D3,D2",
+      "ต้องตรวจสาย Row/Column ของ Keypad รุ่นจริง"
+    ],
+    "goal": "อ่านปุ่ม 0–9, A–D, *, # และส่งผ่าน MQTT",
+    "setup": "ตัวอย่างใช้ Keypad library; ยังมีแบบ scan matrix ด้วย digitalRead()",
+    "topic": "68070131/guide/keypad",
+    "repoPath": "MQTT/Keypad/Keypad.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "#include <Keypad.h>",
+        "meaning": "เปิดไลบรารี Keypad",
+        "instructions": "ติดตั้ง Keypad by Mark Stanley / Alexander Brevig ใน Library Manager",
+        "example": "#include <Keypad.h>",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "makeKeymap(keys)",
+        "meaning": "กำหนดตัวอักษรตามตำแหน่งแถว/คอลัมน์",
+        "instructions": "ต้องมีตาราง char keys[4][4] ตามตำแหน่งแผงปุ่ม",
+        "example": "char keys[4][4]={{'1','2','3','A'},{'4','5','6','B'},{'7','8','9','C'},{'*','0','#','D'}};",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "Keypad(makeKeymap(), rows, cols,4,4)",
+        "meaning": "สร้างตัวอ่าน Keypad 4×4",
+        "instructions": "แมป row/col ให้ถูกต้อง ไม่เช่นนั้นกดปุ่มแล้วขึ้นผิด",
+        "example": "byte rows[4]={9,8,7,6};\nbyte cols[4]={5,4,3,2};\nKeypad keypad=Keypad(makeKeymap(keys),rows,cols,4,4);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "keypad.getKey()",
+        "meaning": "อ่านปุ่มที่เพิ่งถูกกด",
+        "instructions": "คืน NO_KEY เมื่อไม่พบปุ่มใหม่ ไม่ต้องใช้ delay",
+        "example": "char key=keypad.getKey();\nif(key!=NO_KEY)Serial.println(key);",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "keypad.setDebounceTime(ms)",
+        "meaning": "ตั้งเวลาลดการเด้งของปุ่ม",
+        "instructions": "เหมาะกับปุ่มกดจริงที่เด้ง; ใช้เวลามิลลิวินาที",
+        "example": "keypad.setDebounceTime(30);",
+        "warning": ""
+      }
+    ],
+    "trouble": "กดแล้วขึ้น 1 รัว ๆ: ตรวจสายแถว-คอลัมน์, สาย GND, debounce และการอ่านซ้ำ",
+    "math": ""
+  },
+  {
+    "id": "g08",
+    "name": "HC-SR04 Ultrasonic",
+    "kind": "เซนเซอร์ระยะ",
+    "devices": [
+      "Ultrasonic",
+      "LCD"
+    ],
+    "wire": [
+      "VCC→5V, GND→GND",
+      "TRIG→D2, ECHO→D3"
+    ],
+    "goal": "ส่งคลื่นเสียงและวัดเวลาสะท้อนเพื่อคำนวณระยะทางเซนติเมตร",
+    "setup": "ตั้ง TRIG เป็น OUTPUT และ ECHO เป็น INPUT",
+    "topic": "68070131/guide/ultrasonic",
+    "repoPath": "MQTT/Ultrasonic/Ultrasonic.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "pinMode(TRIG,OUTPUT)",
+        "meaning": "เตรียมพินกระตุ้นคลื่นเสียง",
+        "instructions": "ตั้งใน setup แล้วเก็บ ECHO เป็น INPUT",
+        "example": "pinMode(2, OUTPUT);\npinMode(3, INPUT);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "Trigger pulse 10µs",
+        "meaning": "ส่งพัลส์ TRIG ให้เซนเซอร์ยิงคลื่น",
+        "instructions": "สั่ง LOW 2µs HIGH 10µs LOW เพื่อเริ่มวัด",
+        "example": "digitalWrite(2, LOW);delayMicroseconds(2);\ndigitalWrite(2, HIGH);delayMicroseconds(10);\ndigitalWrite(2, LOW);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "pulseIn(ECHO,HIGH,30000UL)",
+        "meaning": "วัดเวลาที่ ECHO เป็น HIGH",
+        "instructions": "กำหนด timeout ป้องกันค้างเมื่อไม่มี Echo",
+        "example": "unsigned long us=pulseIn(3,HIGH,30000UL);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "duration * 0.0343 / 2",
+        "meaning": "แปลงเวลาไมโครวินาทีเป็นระยะ cm",
+        "instructions": "หาร 2 เพราะคลื่นวิ่งไปและกลับ; 0 = Timeout ไม่ใช่ระยะ 0 cm",
+        "example": "float cm = us ? us*0.0343f/2.0f : -1.0f;",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "distance < threshold",
+        "meaning": "ตัดสินใจเตือนเมื่อวัตถุอยู่ใกล้",
+        "instructions": "เช็ก cm>=0 ก่อนเสมอเพื่อไม่ให้ Timeout กลายเป็นมีวัตถุ",
+        "example": "bool near = cm >= 0 && cm < 20.0f;",
+        "warning": ""
+      }
+    ],
+    "trouble": "หากอ่าน -1 หรือ NO_ECHO ตรวจไฟ 5V, GND, TRIG/ECHO และย้ายวัตถุให้อยู่ในระยะที่ตรวจได้",
+    "math": "ระยะเซนติเมตร = duration_us × 0.0343 / 2"
+  },
+  {
+    "id": "g09",
+    "name": "TMP36",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "TMP36",
+      "LCD"
+    ],
+    "wire": [
+      "TMP36 Vs→5V,Vout→A3,GND→GND",
+      "ตรวจลำดับขาตาม Datasheet รุ่นจริงก่อนจ่ายไฟ ป้องกันเซนเซอร์ร้อน"
+    ],
+    "goal": "แปลงแรงดัน Vout เป็นอุณหภูมิ Celsius",
+    "setup": "บน UNO R4 อ่าน 12-bit แล้วแปลงแรงดันตาม Vref ที่ใช้จริง",
+    "topic": "68070131/temp",
+    "repoPath": "MQTT/TMP36/TMP36.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "analogReadResolution(12)",
+        "meaning": "ตั้ง ADC 12 บิต",
+        "instructions": "ค่าดิบ 0–4095 ต้องใช้ตัวหาร 4095",
+        "example": "analogReadResolution(12);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "analogRead(A3)",
+        "meaning": "อ่านค่า ADC จากขา Output TMP36",
+        "instructions": "อย่าใช้ digitalRead กับ TMP36 ที่ให้แรงดัน analog",
+        "example": "int raw=analogRead(A3);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "raw * Vref / 4095.0",
+        "meaning": "แปลงค่า ADC เป็นแรงดัน Volt",
+        "instructions": "ตัวอย่างใช้ Vref=5.0V; วัดและปรับตามระบบจริง",
+        "example": "float volts=raw*5.0f/4095.0f;",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "(volts - 0.5) * 100",
+        "meaning": "แปลงแรงดัน TMP36 เป็น °C",
+        "instructions": "TMP36 มี offset 0.5 V ที่ 0°C และ 10mV/°C",
+        "example": "float c=(volts-0.5f)*100.0f;",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "String(c, 2)",
+        "meaning": "ส่งค่า Celsius ทศนิยม 2 ตำแหน่งผ่าน MQTT",
+        "instructions": "ใช้ Topic ที่โจทย์กำหนด เช่น 68070131/temp",
+        "example": "mqtt.publish(\"68070131/temp\", String(c,2));",
+        "warning": ""
+      }
+    ],
+    "trouble": "ถ้า TMP36 ร้อนผิดปกติให้ถอดไฟทันทีและตรวจ pinout; ADC 10-bit / 12-bit ใช้ตัวหารคนละค่า",
+    "math": "°C = (Vout−0.500 V) × 100"
+  },
+  {
+    "id": "g10",
+    "name": "LM35",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "LM35",
+      "LCD"
+    ],
+    "wire": [
+      "LM35 Vs→5V, Vout→A0, GND→GND ตรวจ pinout รุ่นจริง"
+    ],
+    "goal": "วัดอุณหภูมิจากแรงดัน Vout ที่เปลี่ยน 10mV/°C",
+    "setup": "สูตรต่างจาก TMP36: LM35 ไม่มี offset 0.5V",
+    "topic": "68070131/guide/lm35",
+    "repoPath": "MQTT/LM35/LM35.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "analogRead(A0)",
+        "meaning": "อ่านเอาต์พุตแรงดันของ LM35",
+        "instructions": "ตั้ง analogReadResolution(12) ใน setup",
+        "example": "int raw=analogRead(A0);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "raw * 5.0 / 4095",
+        "meaning": "แปลง ADC 12-bit เป็นโวลต์",
+        "instructions": "ปรับ 5.0 ให้ตรง ADC reference ที่วัดได้",
+        "example": "float volts=raw*5.0f/4095.0f;",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "volts * 100",
+        "meaning": "แปลงแรงดัน LM35 เป็นเซลเซียส",
+        "instructions": "LM35 = 10mV/°C จึงคูณ 100",
+        "example": "float c=volts*100.0f;",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "mqtt.publish() ส่งอุณหภูมิ",
+        "meaning": "ส่งค่าไปเว็บหรือรับผ่าน Subscribe",
+        "instructions": "ต้องเชื่อม Broker และ mqtt.loop() ให้ทำงาน",
+        "example": "mqtt.publish(\"68070131/guide/lm35\", String(c,2));",
+        "warning": ""
+      }
+    ],
+    "trouble": "หากค่าคลาดเคลื่อนมาก ตรวจ Vref, การต่อ Vout และการแยก GND",
+    "math": "°C = Vout × 100"
+  },
+  {
+    "id": "g11",
+    "name": "MCP9700",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "MCP9700",
+      "LCD"
+    ],
+    "wire": [
+      "MCP9700 VDD→5V,VOUT→A0,GND→GND ตรวจ datasheet"
+    ],
+    "goal": "อ่านแรงดันเซนเซอร์ที่มี offset 0.5V และความไว 10mV/°C",
+    "setup": "ใช้สูตรแบบ MCP9700 รุ่นที่มี 500mV ณ 0°C",
+    "topic": "68070131/guide/mcp9700",
+    "repoPath": "MQTT/MCP9700/MCP9700.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "analogRead(A0)",
+        "meaning": "อ่านแรงดัน MCP9700",
+        "instructions": "ใช้ ADC 12-bit สำหรับความละเอียดมากขึ้น",
+        "example": "analogReadResolution(12);\nint raw=analogRead(A0);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "Vout = raw * 5 / 4095",
+        "meaning": "แปลง ADC เป็นโวลต์",
+        "instructions": "หากแรงดันอ้างอิงจริงไม่ใช่ 5.0V ให้ปรับ",
+        "example": "float v=raw*5.0f/4095.0f;",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "MCP9700 = (V−0.5)*100",
+        "meaning": "คำนวณอุณหภูมิ Celsius",
+        "instructions": "ใช้ Offset 500mV และ 10mV/°C; ตรวจรุ่นจริง",
+        "example": "float c=(v-0.5f)*100.0f;",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "lcd.print(temp, 1)",
+        "meaning": "แสดงค่าบนจอ LCD",
+        "instructions": "ล้างแถวก่อนหรือเติมช่องว่างให้ครบ 16 ตัว",
+        "example": "lcd.setCursor(0,1);\nlcd.print(c,1);",
+        "warning": ""
+      }
+    ],
+    "trouble": "MCP9700 กับ MCP9701 มี sensitivity ต่างกัน ตรวจรุ่นและ datasheet",
+    "math": "°C = (Vout−0.5V) × 100 เฉพาะ MCP9700"
+  },
+  {
+    "id": "g12",
+    "name": "NTC Thermistor 10k",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "NTC",
+      "Thermistor",
+      "LCD"
+    ],
+    "wire": [
+      "5V→NTC 10kΩ→A0→R10kΩ→GND (ตำแหน่ง R มีผลต่อสูตร)"
+    ],
+    "goal": "วัดอุณหภูมิจากการเปลี่ยนความต้านทานแบบ NTC",
+    "setup": "กำหนดค่าความต้านทาน R25 และ Beta ให้ตรงกับชิ้นส่วน",
+    "topic": "68070131/guide/ntc",
+    "repoPath": "MQTT/NTC/NTC.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "analogReadResolution(12)",
+        "meaning": "ตั้งความละเอียด ADC",
+        "instructions": "เมื่อ 12-bit ให้ raw อยู่ในช่วง 0–4095",
+        "example": "analogReadResolution(12);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "Rntc = Rfixed*(4095/raw − 1)",
+        "meaning": "แปลงค่าดิบเป็นความต้านทาน NTC",
+        "instructions": "สูตรนี้สำหรับวงจร 5V→NTC→A0→Rfixed→GND เท่านั้น; ห้าม raw=0",
+        "example": "float rNTC=10000.0f*(4095.0f/raw-1.0f);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "Beta equation",
+        "meaning": "แปลงความต้านทานเป็น Kelvin",
+        "instructions": "ต้องใช้ R25 (10k), Beta (เช่น 3950) และ 25°C = 298.15K",
+        "example": "float k=1.0f/(1.0f/298.15f + log(rNTC/10000.0f)/3950.0f);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "tempC = kelvin − 273.15",
+        "meaning": "แปลง Kelvin เป็น Celsius",
+        "instructions": "ต้องตรวจ ADC ไม่มี 0 หรือ 4095 ก่อนคำนวณ",
+        "example": "float c=k-273.15f;",
+        "warning": ""
+      }
+    ],
+    "trouble": "เมื่อสลับ NTC/Rfixed ต้องเปลี่ยนสูตร Rntc ให้ถูก; อย่าใช้ Beta เดียวกันกับทุกเซนเซอร์",
+    "math": "T_K = 1 / (1/T25 + ln(R/R25)/B)"
+  },
+  {
+    "id": "g13",
+    "name": "TTC05103 Thermistor",
+    "kind": "เซนเซอร์อุณหภูมิ",
+    "devices": [
+      "TTC05103",
+      "Thermistor",
+      "LCD"
+    ],
+    "wire": [
+      "ตัวอย่างวงจร 5V→R330Ω→A0→TTC05103→GND",
+      "ตรวจค่าตัวต้านทานและค่า Beta/R25 จาก datasheet"
+    ],
+    "goal": "อ่าน Thermistor รหัส TTC05103 ด้วยตัวต้านทานตัวแบ่งแรงดัน 330Ω",
+    "setup": "อย่าใช้สูตร NTC 10k กับ R330 โดยตรง",
+    "topic": "68070131/guide/ttc05103",
+    "repoPath": "MQTT/TTC05103/TTC05103.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "analogRead(A0)",
+        "meaning": "วัดค่า ADC ของวงจร NTC",
+        "instructions": "ใช้ resolution 12-bit และสาย A0 จากจุดแบ่งแรงดัน",
+        "example": "int raw=analogRead(A0);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "Rntc = 330*raw/(4095−raw)",
+        "meaning": "คำนวณ Rntc เมื่อ NTC อยู่ด้านล่าง",
+        "instructions": "ใช้ได้กับ 5V→R330→A0→NTC→GND",
+        "example": "float r=330.0f*raw/(4095.0f-raw);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "Beta 4050 formula",
+        "meaning": "แปลงความต้านทานเป็นอุณหภูมิ",
+        "instructions": "ใช้ R25=10k และ Beta=4050 เป็นค่าตัวอย่างต้องตรวจรุ่นจริง",
+        "example": "float kelvin=1.0f/(1.0f/298.15f + log(r/10000.0f)/4050.0f);\nfloat c=kelvin-273.15f;",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "ป้องกันหารด้วยศูนย์",
+        "meaning": "ตรวจค่าที่เป็นไปไม่ได้ก่อนคำนวณ",
+        "instructions": "Raw 0 หรือ 4095 อาจทำให้สูตรมี Infinity/NaN",
+        "example": "if(raw<=0 || raw>=4095) {\n  Serial.println(\"INVALID SENSOR\");\n}",
+        "warning": ""
+      }
+    ],
+    "trouble": "R330 มีค่าต่ำเมื่อเทียบ NTC 10k ความละเอียดในบางช่วงอาจไม่ดี ควรปรับวงจรตามสเปกจริง",
+    "math": "Rntc = Rfixed × raw/(max−raw) (NTC อยู่ล่าง)"
+  },
+  {
+    "id": "g14",
+    "name": "DHT11",
+    "kind": "เซนเซอร์อุณหภูมิและความชื้น",
+    "devices": [
+      "DHT11",
+      "LCD"
+    ],
+    "wire": [
+      "DHT11 VCC→5V,GND→GND,DATA→D2",
+      "ถ้าเป็นโมดูลเปล่าให้ R pull-up ประมาณ 10kΩ DATA→VCC; โมดูล 3 ขาบางรุ่นมี R อยู่แล้ว"
+    ],
+    "goal": "อ่านอุณหภูมิและความชื้นสัมพัทธ์ผ่านโปรโตคอล DHT",
+    "setup": "ใช้ DHT by Adafruit และ Adafruit Unified Sensor; ไม่อ่านถี่กว่า ~2 วินาที",
+    "topic": "68070131/guide/dht11",
+    "repoPath": "MQTT/DHT11/DHT11.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "#include <DHT.h>",
+        "meaning": "เปิดไลบรารี DHT ของ Adafruit",
+        "instructions": "ต้องติดตั้ง DHT sensor library และ Adafruit Unified Sensor",
+        "example": "#include <DHT.h>",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "DHT dht(pin,DHT11)",
+        "meaning": "สร้างตัวอ่านเซนเซอร์ DHT11",
+        "instructions": "ระบุ DHT11 ไม่ใช่ DHT22",
+        "example": "DHT dht(2,DHT11);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "dht.begin()",
+        "meaning": "เริ่มต้นเซนเซอร์",
+        "instructions": "เรียกใน setup() เพียงครั้งเดียว",
+        "example": "dht.begin();",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "dht.readTemperature()",
+        "meaning": "อ่านอุณหภูมิ °C",
+        "instructions": "อ่านห่างกันอย่างน้อย ~2 วินาทีและตรวจ NaN",
+        "example": "float c=dht.readTemperature();",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "dht.readHumidity()",
+        "meaning": "อ่านความชื้นสัมพัทธ์ RH%",
+        "instructions": "ตรวจ isnan() ก่อนส่งค่าออก",
+        "example": "float humidity=dht.readHumidity();\nif(isnan(humidity))Serial.println(\"DHT ERROR\");",
+        "warning": ""
+      }
+    ],
+    "trouble": "ค่า NaN: ตรวจ DATA/GND/5V, ค่า Pull-up, เลือก DHT รุ่นให้ตรงและช่วงการอ่าน",
+    "math": ""
+  },
+  {
+    "id": "g15",
+    "name": "DHT22",
+    "kind": "เซนเซอร์อุณหภูมิและความชื้น",
+    "devices": [
+      "DHT22",
+      "LCD"
+    ],
+    "wire": [
+      "DHT22 VCC→5V,GND→GND,DATA→D2",
+      "DHT22 แบบเปล่ามักต้อง R pull-up 4.7k–10kΩ DATA→VCC"
+    ],
+    "goal": "อ่าน Celsius และ RH% ของ DHT22 ซึ่งต่างช่วงวัด/ความละเอียดจาก DHT11",
+    "setup": "อ่านห่างกันอย่างน้อย ~2 วินาที ห้าม poll ถี่แบบปุ่ม",
+    "topic": "68070131/guide/dht22",
+    "repoPath": "MQTT/DHT22/DHT22.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "DHT dht(2,DHT22)",
+        "meaning": "กำหนดชนิด DHT22",
+        "instructions": "ใช้ Adafruit DHT Sensor Library",
+        "example": "DHT dht(2,DHT22);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "dht.begin()",
+        "meaning": "เริ่มตัวอ่าน DHT22",
+        "instructions": "เรียกครั้งเดียวใน setup()",
+        "example": "dht.begin();",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "dht.readTemperature()",
+        "meaning": "อ่านอุณหภูมิเป็น °C",
+        "instructions": "เมื่ออ่านไม่สำเร็จจะได้ NaN",
+        "example": "float t=dht.readTemperature();",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "dht.readHumidity()",
+        "meaning": "อ่าน RH%",
+        "instructions": "ส่ง Topic ความชื้นแยกหรือทำ JSON ตามโจทย์",
+        "example": "float h=dht.readHumidity();",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "isnan(t) / isnan(h)",
+        "meaning": "ตรวจอ่านผิดพลาด",
+        "instructions": "อย่าส่งค่าผิดเป็น 0 เพราะ 0°C และ 0%RH มีความหมายจริง",
+        "example": "if(isnan(t)||isnan(h))return;",
+        "warning": ""
+      }
+    ],
+    "trouble": "DHT11 กับ DHT22 ใช้ define ต่างกันและมีช่วงวัดต่างกัน อย่านำโค้ดอ่านเร็วเกินไป",
+    "math": ""
+  },
+  {
+    "id": "g16",
+    "name": "LDR",
+    "kind": "เซนเซอร์แสง",
+    "devices": [
+      "LDR",
+      "LCD",
+      "LED"
+    ],
+    "wire": [
+      "5V→LDR→A0→R10kΩ→GND",
+      "ADC จะสูงขึ้นเมื่อแสงมากในวงจรนี้"
+    ],
+    "goal": "วัดระดับแสงสัมพัทธ์เพื่อเปิด LED เมื่อมืด",
+    "setup": "LDR ดิบไม่ใช่ lux; ใช้ค่าจุดตัดที่ทดสอบกับแสงจริง",
+    "topic": "68070131/guide/ldr",
+    "repoPath": "MQTT/LDR/LDR.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "analogRead(A0)",
+        "meaning": "อ่านระดับแสงเป็นค่า ADC",
+        "instructions": "ใช้วงจรแบ่งแรงดันและเลือก resolution ให้ตรง",
+        "example": "int light=analogRead(A0);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "light < threshold",
+        "meaning": "ตรวจว่าแสงมืดกว่าค่าตัด",
+        "instructions": "เมื่อ LDR อยู่ด้านบน ค่า ADC ลดเมื่อมืด",
+        "example": "bool dark=light<500;",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "digitalWrite(LED, dark)",
+        "meaning": "เปิดไฟเมื่อมืด",
+        "instructions": "พิน LED ต้องเป็น OUTPUT และมี R อนุกรม",
+        "example": "digitalWrite(9,dark?HIGH:LOW);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "map(light, 0, 1023, 0, 100)",
+        "meaning": "แปลงค่า ADC เป็นเปอร์เซ็นต์เพื่อแสดงผล",
+        "instructions": "เปอร์เซ็นต์สัมพัทธ์ ไม่ใช่หน่วย lux",
+        "example": "int percent=map(light,0,1023,0,100);",
+        "warning": ""
+      }
+    ],
+    "trouble": "ถ้าแสงมากแล้ว ADC ลด ให้ตรวจว่าต่อ LDR กับ R10k สลับตำแหน่งกัน",
+    "math": "ADC ไม่ใช่ lux; ต้อง Calibrate หากต้องการหน่วย lux"
+  },
+  {
+    "id": "g17",
+    "name": "PIR HC-SR501",
+    "kind": "เซนเซอร์ตรวจจับการเคลื่อนไหว",
+    "devices": [
+      "PIR",
+      "LCD",
+      "LED"
+    ],
+    "wire": [
+      "PIR VCC→5V,GND→GND,OUT→D4 (ดูแรงดันโมดูลจริง)"
+    ],
+    "goal": "ตรวจจับการเปลี่ยนอินฟราเรดจากคนเคลื่อนไหว ไม่ใช่ตรวจความนิ่งแบบระยะ",
+    "setup": "รอ Warm-up 30–60 วินาทีหรือกำหนดตามโมดูล; บางรุ่นมี Delay/Trig adjust",
+    "topic": "68070131/guide/pir",
+    "repoPath": "MQTT/PIR/PIR.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "pinMode(PIR_PIN, INPUT)",
+        "meaning": "รับสัญญาณดิจิทัลจาก PIR OUT",
+        "instructions": "ไม่จำเป็นต้องเปิด INPUT_PULLUP หากโมดูลขับ HIGH/LOW อยู่แล้ว",
+        "example": "pinMode(4,INPUT);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "digitalRead(PIR_PIN)",
+        "meaning": "อ่าน PIR HIGH/LOW",
+        "instructions": "HIGH แปลว่าตรวจพบการเคลื่อนไหวตามการตั้งค่าโมดูล",
+        "example": "bool motion=digitalRead(4)==HIGH;",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "warm-up ด้วย millis()",
+        "meaning": "รอเซนเซอร์เข้าที่หลังเปิดเครื่อง",
+        "instructions": "ตัวอย่างจะไม่รายงานช่วง 30 วินาทีแรก",
+        "example": "if(millis()<30000UL)return;",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "send edge event",
+        "meaning": "Publish เมื่อสถานะเปลี่ยน",
+        "instructions": "หลีกเลี่ยงส่งข้อความซ้ำทุก loop",
+        "example": "if(motion!=previous){\n  previous=motion;\n  mqtt.publish(\"68070131/guide/pir\",motion?\"MOTION\":\"NO_MOTION\");\n}",
+        "warning": ""
+      }
+    ],
+    "trouble": "PIR ตรวจการเคลื่อนไหว ไม่รับประกันว่าจะรู้ว่ามีคนนั่งนิ่งอยู่",
+    "math": ""
+  },
+  {
+    "id": "g18",
+    "name": "Potentiometer",
+    "kind": "เซนเซอร์ Analog",
+    "devices": [
+      "Potentiometer",
+      "LED",
+      "LCD"
+    ],
+    "wire": [
+      "ขานอกซ้าย→5V, ขากลาง→A0, ขานอกขวา→GND"
+    ],
+    "goal": "ปุ่มหมุนปรับค่าต่อเนื่องเพื่อกำหนด PWM หรือส่งระดับ Analog ขึ้นเว็บ",
+    "setup": "อ่าน Analog แล้ว map ไป PWM",
+    "topic": "68070131/light",
+    "repoPath": "MQTT/Potentiometer/Potentiometer.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "analogRead(A0)",
+        "meaning": "อ่านตำแหน่งปุ่มหมุนเป็น ADC",
+        "instructions": "ตัวอย่าง 10-bit 0–1023",
+        "example": "int value=analogRead(A0);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "map(value,0,1023,0,255)",
+        "meaning": "แปลงค่าหมุนเป็น PWM",
+        "instructions": "เมื่อปรับ analogReadResolution(12) ต้องเปลี่ยน 1023 เป็น 4095",
+        "example": "int pwm=map(value,0,1023,0,255);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "analogWrite(D9,pwm)",
+        "meaning": "ปรับความสว่าง LED ตาม Pot",
+        "instructions": "ต้องใช้พิน PWM และตัวต้านทานจำกัดกระแส",
+        "example": "analogWrite(9,pwm);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "mqtt.publish(TOPIC,String(value))",
+        "meaning": "ส่งค่า ADC เป็นข้อความขึ้นเว็บ",
+        "instructions": "ตาม Mock light ให้ส่ง 0–1023 ไม่ใช่ 0–100",
+        "example": "mqtt.publish(\"68070131/light\",String(value));",
+        "warning": ""
+      }
+    ],
+    "trouble": "ใช้ขากลางของ Potentiometer สำหรับค่า Analog; สลับขานอกแค่กลับทิศการหมุน",
+    "math": ""
+  },
+  {
+    "id": "g19",
+    "name": "LED / PWM",
+    "kind": "เอาต์พุต",
+    "devices": [
+      "LED",
+      "LCD"
+    ],
+    "wire": [
+      "ขา D9→R 220–330Ω→ขา LED บวก; ขา LED ลบ→GND"
+    ],
+    "goal": "เปิด ปิด กระพริบ และปรับความสว่าง LED ผ่านเว็บ MQTT",
+    "setup": "D9 เป็นพินตัวอย่างสำหรับ PWM; หากใช้ Built-in LED ให้ใช้ LED_BUILTIN",
+    "topic": "68070131/guide/led",
+    "repoPath": "GEN_Z/EXERCISES_FROM_SLIDES/03_LED_FADING_4_Arduino.txt",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "digitalWrite(pin, HIGH)",
+        "meaning": "เปิด LED แบบ Common Cathode ที่ต่อไป GND",
+        "instructions": "ใช้กับ OUTPUT และตัวต้านทานก่อน LED",
+        "example": "digitalWrite(9,HIGH);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "digitalWrite(pin, LOW)",
+        "meaning": "ปิด LED",
+        "instructions": "ถ้า LED ต่อกับ 5V จะกลับลอจิก",
+        "example": "digitalWrite(9,LOW);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "analogWrite(pin, 0..255)",
+        "meaning": "ปรับ Duty Cycle ของ PWM",
+        "instructions": "0 = ดับ, 255 = เปิดเต็มในลอจิกปกติ",
+        "example": "analogWrite(9,128);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "millis() ทำ LED Blink",
+        "meaning": "กะพริบแบบไม่บล็อก loop",
+        "instructions": "ใช้เวลาแทน delay ยาว ๆ เพื่อรักษา MQTT",
+        "example": "if(millis()-lastBlink>=500){\n lastBlink=millis();state=!state;\n digitalWrite(9,state);\n}",
+        "warning": ""
+      }
+    ],
+    "trouble": "ห้ามต่อ LED โดยไม่มีตัวต้านทานจำกัดกระแส",
+    "math": ""
+  },
+  {
+    "id": "g20",
+    "name": "RGB LED",
+    "kind": "เอาต์พุต",
+    "devices": [
+      "RGB",
+      "LED"
+    ],
+    "wire": [
+      "Common Cathode: ขารวม→GND; R→330Ω→D9 G→330Ω→D10 B→330Ω→D11",
+      "Common Anode: ขารวม→5V; HIGH ดับ LOW ติด (กลับลอจิก)"
+    ],
+    "goal": "ควบคุมแดง เขียว น้ำเงินและผสมสีตามคำสั่ง MQTT",
+    "setup": "ชนิดขารวมต้องตรวจให้ถูกก่อนเขียน HIGH/LOW",
+    "topic": "68070131/venus",
+    "repoPath": "GEN_Z/EXERCISES_FROM_SLIDES/11_MQTT_RGB_WEB_Arduino.txt",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "pinMode(R/G/B, OUTPUT)",
+        "meaning": "กำหนดพินสีทั้ง 3 เป็นเอาต์พุต",
+        "instructions": "ทำใน setup ก่อนใช้งาน",
+        "example": "pinMode(9,OUTPUT);pinMode(10,OUTPUT);pinMode(11,OUTPUT);",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "Common Cathode สีแดง",
+        "meaning": "เปิดเฉพาะขาสีแดง HIGH",
+        "instructions": "ต้อง LOW ที่ G/B ไม่เช่นนั้นสีผสม",
+        "example": "digitalWrite(9,HIGH);\ndigitalWrite(10,LOW);\ndigitalWrite(11,LOW);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "Common Anode สีแดง",
+        "meaning": "เปิดเฉพาะขาสีแดง LOW",
+        "instructions": "ขารวมต่อ 5V และกลับลอจิก",
+        "example": "digitalWrite(9,LOW);\ndigitalWrite(10,HIGH);\ndigitalWrite(11,HIGH);",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "analogWrite(R/G/B, PWM)",
+        "meaning": "ผสมสีด้วย PWM 0–255",
+        "instructions": "ถ้าบอร์ด/พินไม่รองรับ PWM ตามต้องการ ควรเลือกขา PWM ที่ถูกต้อง",
+        "example": "analogWrite(9,255);\nanalogWrite(10,0);\nanalogWrite(11,128);",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "if/else ตามช่วงค่า",
+        "meaning": "เปลี่ยนสีตามอุณหภูมิจาก MQTT",
+        "instructions": "Mock venus: 10–25 เขียว;26–35 น้ำเงิน;36–50 แดง",
+        "example": "if(t>=10 && t<=25) showGreen();\nelse if(t>=26 && t<=35) showBlue();\nelse if(t>=36 && t<=50) showRed();",
+        "warning": ""
+      }
+    ],
+    "trouble": "ถ้าสั่งแดงแล้วเป็นสีอื่น ตรวจการเรียงขาจริง R/G/B และชนิด Common Cathode/Anode",
+    "math": ""
+  },
+  {
+    "id": "g21",
+    "name": "7-Segment",
+    "kind": "เอาต์พุต",
+    "devices": [
+      "7-Segment",
+      "LCD"
+    ],
+    "wire": [
+      "Common Cathode COM→GND; a–g ผ่าน R220–330Ω แยกแต่ละเส้น→D2–D8"
+    ],
+    "goal": "แสดงเลข 0–9 ตามตาราง segment และรับเลขจาก MQTT",
+    "setup": "ใช้ตัวเลข 1 หลัก; 2 หลักจริงต้องมี Digit Enable + Multiplex",
+    "topic": "68070131/prob_stat",
+    "repoPath": "GEN_Z/EXERCISES_FROM_SLIDES/01_7SEG_0to9_Arduino.txt",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "const byte segmentPins[]",
+        "meaning": "Array กำหนดพิน a,b,c,d,e,f,g",
+        "instructions": "ห้ามสลับลำดับ segment ไม่เช่นนั้นเลขแสดงผิด",
+        "example": "const byte seg[7]={2,3,4,5,6,7,8};",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "const byte digits[10][7]",
+        "meaning": "ตารางติดดับ segment ตามเลข 0–9",
+        "instructions": "1 หมายถึงติดบน Common Cathode",
+        "example": "const byte digits[10][7]={\n {1,1,1,1,1,1,0},\n {0,1,1,0,0,0,0}\n};",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "for + digitalWrite",
+        "meaning": "วนแสดง 7 segment ตามข้อมูลในตาราง",
+        "instructions": "ต้องกำหนดพิน OUTPUT ก่อน และต้องมีครบ 10 แถวเมื่อใช้ 0–9",
+        "example": "for(byte i=0;i<7;i++){\n digitalWrite(seg[i],digits[0][i]?HIGH:LOW);\n}",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "payload[0] - '0'",
+        "meaning": "แปลงตัวอักษรเลขที่รับมาเป็นจำนวน",
+        "instructions": "ตรวจว่าข้อความยาว 1 และอยู่ '0'..'9' ก่อนแปลง",
+        "example": "if(payload.length()==1 && payload[0]>='0' && payload[0]<='9'){\n int n=payload[0]-'0';\n}",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "Common Anode กลับลอจิก",
+        "meaning": "แสดงเลขด้วยขารวมต่อ 5V",
+        "instructions": "ถ้าตาราง 1=ON ต้องเขียน LOW เมื่อ ON",
+        "example": "digitalWrite(seg[i],digits[n][i]?LOW:HIGH);",
+        "warning": ""
+      }
+    ],
+    "trouble": "เลขไม่ตรงมักเกิดจากลำดับขา a–g หรือชนิด COM ผิด; R ต้องมีแยกแต่ละ segment",
+    "math": ""
+  },
+  {
+    "id": "g22",
+    "name": "UNO R4 LED Matrix 12×8",
+    "kind": "เอาต์พุต",
+    "devices": [
+      "LED Matrix",
+      "Arduino UNO R4"
+    ],
+    "wire": [
+      "LED Matrix ติดตั้งในบอร์ด UNO R4 WiFi อยู่แล้ว ไม่ต้องต่อสาย"
+    ],
+    "goal": "แสดงรูปภาพพิกเซล 12×8 และผลลัพธ์จาก MQTT",
+    "setup": "ติดตั้ง/ใช้ Arduino_LED_Matrix มากับบอร์ดที่รองรับ ตรวจเวอร์ชัน Board Package",
+    "topic": "68070131/guide/matrix",
+    "repoPath": "GEN_Z/WEB/exercises.html",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "#include <Arduino_LED_Matrix.h>",
+        "meaning": "เรียกไลบรารี LED Matrix ใน UNO R4",
+        "instructions": "บอร์ด UNO R4 WiFi มี Matrix 12×8",
+        "example": "#include <Arduino_LED_Matrix.h>",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "ArduinoLEDMatrix matrix",
+        "meaning": "สร้างออบเจ็กต์ควบคุม Matrix",
+        "instructions": "ประกาศนอก setup()/loop()",
+        "example": "ArduinoLEDMatrix matrix;",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "matrix.begin()",
+        "meaning": "เริ่มการทำงานของ Matrix",
+        "instructions": "เรียกใน setup()",
+        "example": "matrix.begin();",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "matrix.renderBitmap(frame,8,12)",
+        "meaning": "เรนเดอร์ภาพพิกเซล 8 แถว × 12 คอลัมน์",
+        "instructions": "frame ต้องเป็น bitmap array ขนาด/ชนิดที่ไลบรารีรองรับ",
+        "example": "byte frame[8][12]={0};\nframe[3][5]=1;\nmatrix.renderBitmap(frame,8,12);",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "matrix.clear()",
+        "meaning": "ล้างไฟ LED Matrix",
+        "instructions": "ใช้เมื่อรับคำสั่ง CLEAR จากเว็บ",
+        "example": "matrix.clear();",
+        "warning": ""
+      }
+    ],
+    "trouble": "หน้าที่ API ของ LED Matrix อาจแตกต่างตามรุ่น Library/Board Core ให้ตรวจตัวอย่างเวอร์ชันที่ติดตั้ง",
+    "math": ""
+  },
+  {
+    "id": "g23",
+    "name": "I2C Scanner / Bus",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "I2C",
+      "LCD"
+    ],
+    "wire": [
+      "SDA→SDA, SCL→SCL, VCC→5V, GND→GND"
+    ],
+    "goal": "หาที่อยู่ I2C ของ LCD เมื่อจอไม่ขึ้น",
+    "setup": "เปิด Serial Monitor 115200 และสแกน 0x08 ถึง 0x77",
+    "topic": "68070131/guide/i2c",
+    "repoPath": "GEN_Z/EXERCISES_FROM_SLIDES/05_LCD_HEART_Arduino.txt",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "Wire.begin()",
+        "meaning": "เริ่ม I2C Bus",
+        "instructions": "ต้องเริ่มก่อนสแกน address",
+        "example": "Wire.begin();",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "Wire.beginTransmission(addr)",
+        "meaning": "เริ่มการตรวจอุปกรณ์ I2C Address",
+        "instructions": "ใช้ใน for loop 0x08 ถึง 0x77",
+        "example": "Wire.beginTransmission(0x27);",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "Wire.endTransmission()",
+        "meaning": "ส่งคำสั่งจบและรับสถานะ ACK",
+        "instructions": "ค่า 0 โดยทั่วไปหมายถึงพบอุปกรณ์",
+        "example": "byte error=Wire.endTransmission();\nif(error==0)Serial.println(\"Found 0x27\");",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "lcd address 0x27/0x3F",
+        "meaning": "ตั้ง Address ในตัวสร้าง LCD",
+        "instructions": "ใช้ค่า Address ที่ Scanner พบจริง ไม่เดาตามจอของคนอื่น",
+        "example": "LiquidCrystal_I2C lcd(0x27,16,2);",
+        "warning": ""
+      }
+    ],
+    "trouble": "ถ้าสแกนไม่พบอุปกรณ์เลย ตรวจ SDA/SCL ไม่สลับ, VCC/GND และสายหลวม",
+    "math": ""
+  },
+  {
+    "id": "g24",
+    "name": "คณิตศาสตร์ / สถิติ / Array",
+    "kind": "คำสั่งพื้นฐาน",
+    "devices": [
+      "Array",
+      "Statistics",
+      "Sensor"
+    ],
+    "wire": [
+      "ใช้ร่วมกับเซนเซอร์ใดก็ได้ใน Repo โดยไม่ต้องต่อสายใหม่"
+    ],
+    "goal": "จัดเก็บตัวอย่างหลายค่าแล้วคำนวณเฉลี่ย ต่ำสุด สูงสุด และค่าเบี่ยงเบน",
+    "setup": "ใช้ Fixed-size Array เพื่อลดการใช้ Memory",
+    "topic": "68070131/guide/stats",
+    "repoPath": "อาร์เรย์และลิสต์/TMP36/TMP36.ino",
+    "commands": [
+      {
+        "id": "c1",
+        "syntax": "float samples[10]",
+        "meaning": "สร้าง Array เก็บข้อมูลเซนเซอร์",
+        "instructions": "อ่านค่าใหม่ใส่ตำแหน่งเดิมแบบวนรอบ",
+        "example": "float samples[10]={0};",
+        "warning": ""
+      },
+      {
+        "id": "c2",
+        "syntax": "index = (index + 1) % 10",
+        "meaning": "วนตำแหน่ง Array โดยไม่เกินขอบ",
+        "instructions": "ใช้ทำ Ring Buffer เก็บตัวอย่างล่าสุด 10 ค่า",
+        "example": "samples[index]=newValue;\nindex=(index+1)%10;",
+        "warning": ""
+      },
+      {
+        "id": "c3",
+        "syntax": "for / sum / average",
+        "meaning": "หาค่าเฉลี่ยจากอาร์เรย์",
+        "instructions": "หารด้วยจำนวนที่อ่านจริง ไม่ใช่ความจุเต็มเมื่อข้อมูลยังไม่ครบ",
+        "example": "float sum=0;\nfor(byte i=0;i<count;i++)sum+=samples[i];\nfloat avg=count?sum/count:0;",
+        "warning": ""
+      },
+      {
+        "id": "c4",
+        "syntax": "min() / max()",
+        "meaning": "เทียบค่าต่ำสุดหรือสูงสุด",
+        "instructions": "ใช้กับการเลือกเกณฑ์หรือ Peak",
+        "example": "float low=min(a,b);\nfloat high=max(a,b);",
+        "warning": ""
+      },
+      {
+        "id": "c5",
+        "syntax": "sqrt() / pow() / log()",
+        "meaning": "ฟังก์ชันคณิตศาสตร์",
+        "instructions": "sqrt ใช้ StdDev, pow ใช้กำลัง, log ใช้สูตร NTC",
+        "example": "float stddev=sqrt(variance);\nfloat beta=log(R/R25);",
+        "warning": ""
+      }
+    ],
+    "trouble": "อย่าเฉลี่ยค่าที่เป็น NaN หรือ sensor timeout โดยไม่ตรวจ validity",
+    "math": ""
+  }
+]

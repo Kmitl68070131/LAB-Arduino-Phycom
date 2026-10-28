@@ -1,5 +1,5 @@
-| [🏠 คู่มือ LAB](#menu) | [📚 GitHub พี่เต้ — PhysicalComputing-167](https://github.com/TaeTanakrit0089/PhysicalComputing-167) | [🤝 GitHub เพื่อน — MQTT Arduino R4](https://github.com/ObeOne-KMITL/lab_iot/blob/main/arduino_R4/mqtt.ino) | [🧩 ประยุกต์ LAB](%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20LAB/) |
-|:---:|:---:|:---:|:---:|
+| [🏠 คู่มือ LAB](#menu) | [🔎 ค้นหาโจทย์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/web/) | [📖 ค้นหาคำสั่งและเซนเซอร์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/) | [📚 GitHub พี่เต้](https://github.com/TaeTanakrit0089/PhysicalComputing-167) | [🤝 GitHub เพื่อน](https://github.com/ObeOne-KMITL/lab_iot/blob/main/arduino_R4/mqtt.ino) | [🧩 ประยุกต์ LAB](%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20LAB/) |
+|:---:|:---:|:---:|:---:|:---:|:---:|
 
 # 🔌 LAB-Arduino-Phycom
 
@@ -8,6 +8,12 @@
 **คู่มือ Arduino UNO R4 WiFi สำหรับเรียน Physical Computing** — คำสั่งต่าง ๆ พร้อมหน้าที่ วิธีใช้ การต่อสาย และตัวอย่างโค้ดแยกตามอุปกรณ์
 
 <a id="menu"></a>
+
+## 📖 ค้นหาคำสั่ง Arduino และคู่มือเซนเซอร์อย่างละเอียด
+
+[🌐 **เปิดเว็บค้นหาคำสั่งและเซนเซอร์**](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/) · [📂 ดูฐานคำสั่ง](ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/) · [📑 คู่มือการใช้งาน](ที่อาจจะออกมั้ง/คำสั่งและเซนเซอร์/README.md)
+
+พิมพ์ชื่อคำสั่ง เช่น `analogRead`, `pulseIn`, `mqtt.publish`, `lcd.setCursor` หรือเลือกเซนเซอร์แบบ Checkbox เพื่อดูคำอธิบายภาษาไทย **คำสั่งนี้ใช้ทำอะไร ใช้ยังไง ต้องต่อสายไหน ตัวแปรอะไร โค้ดตัวอย่าง และปัญหาที่ควรระวัง** พร้อมลิงก์ไปยัง Sketch เต็มที่มีอยู่ใน Repository
 
 ## 🔎 ค้นหาโจทย์ LAB / Mock และเลือกเซนเซอร์แบบติ๊กได้
 
