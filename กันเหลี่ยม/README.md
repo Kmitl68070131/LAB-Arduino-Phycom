@@ -79,3 +79,7 @@ NTC ในชุดนี้กำหนดวงจร NTC→5V, R10k→GND, B3
 [WiFiS3](https://docs.arduino.cc/tutorials/uno-r4-wifi/wifi-examples/) · [ADC](https://docs.arduino.cc/tutorials/uno-r4-wifi/adc-resolution/) · [MQTTClient](https://github.com/256dpi/arduino-mqtt) · [ArduinoJson 7](https://arduinojson.org/v7/)
 
 โหมดสถิติ: LCD หมุนหน้า min/max/avg/median/std ทีละรอบอ่าน ส่วน Serial/เว็บแสดงสถิติครบใน JSON เดียวกัน
+
+## 📚 ประยุกต์อาร์เรย์และลิสต์
+
+[เปิดตัวอย่าง array/list ของทุกอุปกรณ์](../อาร์เรย์และลิสต์/README.md) เก็บประวัติ 20 ค่า เลือกดู LCD และควบคุมผ่านเว็บ

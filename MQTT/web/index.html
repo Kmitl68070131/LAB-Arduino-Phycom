@@ -1,21 +1,48 @@
 <!doctype html><html lang="th"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>รับส่งข้อมูลเซนเซอร์และปุ่มกดผ่านเว็บ</title>
 <style>body{font:16px system-ui;max-width:950px;margin:35px auto;padding:20px;background:#f3f6f8}textarea{width:100%;height:110px}button,select{padding:10px;margin:5px}pre{background:white;padding:20px;white-space:pre-wrap;overflow-wrap:anywhere}</style>
 <h1>รับส่งข้อมูลกับเว็บ พร้อม Serial และจอ LCD</h1><p>เปิดผ่านตัวกลางเชื่อมเว็บกับ MQTT · รอข้อมูลและผลตอบรับจริงจากบอร์ด</p>
-<label>โหมด <select id="mode"><option value="mqtt">รับส่งข้อมูลเซนเซอร์และปุ่มกด (MQTT)</option><option value="stats">กันเหลี่ยม — คำนวณสถิติเซนเซอร์</option></select></label>
+<label>โหมด <select id="mode"><option value="mqtt">รับส่งข้อมูลเซนเซอร์และปุ่มกด (MQTT)</option><option value="stats">กันเหลี่ยม — คำนวณสถิติเซนเซอร์</option><option value="collections">อาร์เรย์และลิสต์ — เก็บประวัติเซนเซอร์</option></select></label>
 <label>อุปกรณ์ <select id="sensor"></select></label><p id="status">กำลังเชื่อม stream…</p>
 <textarea id="command">{"text":"Hello LCD","interval_ms":2500,"reset":false}</textarea><button id="send">ส่ง JSON ไปบอร์ด</button>
+<section id="collectionsPanel" hidden><h2>อาร์เรย์และลิสต์: เลือกข้อมูลให้แสดงบน LCD</h2>
+<label>โครงสร้าง <select id="structure"><option value="array">อาร์เรย์วงแหวน</option><option value="list">ลิสต์เชื่อมโยง</option></select></label>
+<label>ลำดับจากเก่าสุด (0–19) <input id="historyIndex" type="number" min="0" max="19" value="0"></label>
+<button id="viewHistory">ดูรายการบน LCD</button><button id="requestHistory">ขอประวัติ</button><button id="clearHistory">ล้างประวัติ</button>
+<p>เก็บ 20 ค่าล่าสุดต่อช่องใน RAM · กดล้างแล้วค่ารอบใหม่จะเริ่มเก็บต่อ · ตารางเรียงจากเก่าสุด</p>
+<table><thead><tr><th>ช่องข้อมูล</th><th>ลำดับ</th><th>ค่าในอาร์เรย์</th><th>ค่าในลิสต์</th></tr></thead><tbody id="historyRows"></tbody></table></section>
 <h2>สถานะปุ่ม 2 ขา</h2><p id="buttonState">เลือก “ปุ่มกด 2 ขา ส่งกด–ปล่อยและจำนวนครั้งขึ้นเว็บ” แล้วกดปุ่มจริงบนบอร์ด</p><h2>ข้อมูลล่าสุด</h2><pre id="latest">รอข้อมูล</pre><h2>ผลส่งคำสั่งและการตอบรับจากบอร์ด</h2><pre id="ack">ยังไม่มี ACK</pre>
 <script>
 // อ้าง DOM ชัดเจน ไม่ใช้ implicit globals; ทุกข้อความภายนอกแสดงด้วย textContent
-const ui = Object.fromEntries(['mode','sensor','status','command','send','latest','ack','buttonState'].map(id => [id,document.getElementById(id)])); // id=ชื่อ element; ui=ชุด DOM
+const ui = Object.fromEntries(['mode','sensor','status','command','send','latest','ack','buttonState','collectionsPanel','structure','historyIndex','viewHistory','requestHistory','clearHistory','historyRows'].map(id => [id,document.getElementById(id)])); // id=ชื่อ element; ui=ชุด DOM
 const sensorNames = {"TMP36": "เซนเซอร์วัดอุณหภูมิ TMP36", "MCP9700": "เซนเซอร์วัดอุณหภูมิ MCP9700", "LM35": "เซนเซอร์วัดอุณหภูมิ LM35", "TTC05103": "เทอร์มิสเตอร์ TTC05103 วงจรตัวต้านทาน 330 โอห์ม", "NTC": "เทอร์มิสเตอร์ NTC วงจรตัวต้านทาน 10 กิโลโอห์ม", "Potentiometer": "ตัวต้านทานปรับค่าได้ (ปุ่มหมุน)", "LDR": "เซนเซอร์วัดระดับแสง LDR", "Ultrasonic": "เซนเซอร์วัดระยะอัลตราโซนิก", "PIR": "เซนเซอร์ตรวจจับการเคลื่อนไหว PIR", "ButtonEvents": "ปุ่มกด 2 ขา ส่งกด–ปล่อยและจำนวนครั้งขึ้นเว็บ", "Button": "ปุ่มกด 2 ขา อ่านสถานะเป็นรอบ", "Keypad": "แป้นกดตัวเลข 4×4", "DHT11": "เซนเซอร์วัดอุณหภูมิและความชื้น DHT11", "DHT22": "เซนเซอร์วัดอุณหภูมิและความชื้น DHT22"}; // ชื่อไทยสำหรับแสดงผล; key คือรหัสเดิมที่ใช้ใน topic
 for (const name of ['TMP36','MCP9700','LM35','TTC05103','NTC','Potentiometer','LDR','Ultrasonic','PIR','ButtonEvents','Button','Keypad','DHT11','DHT22']) ui.sensor.add(new Option(sensorNames[name],name)); // name=อุปกรณ์
 const events = new EventSource('/events'); // SSE stream จาก bridge
+const histories = new Map(); // ประวัติแต่ละช่องที่เว็บได้รับล่าสุด
 let lastData = 0; // เวลา telemetry ล่าสุด
-function clearView(){lastData=0;ui.latest.textContent='รอข้อมูล';ui.ack.textContent='ยังไม่มี ACK';ui.buttonState.textContent='รอข้อมูลปุ่ม';}
+function clearView(){histories.clear();ui.historyRows.replaceChildren();ui.collectionsPanel.hidden=ui.mode.value!=='collections';lastData=0;ui.latest.textContent='รอข้อมูล';ui.ack.textContent='ยังไม่มี ACK';ui.buttonState.textContent='รอข้อมูลปุ่ม';}
 ui.mode.onchange=clearView;ui.sensor.onchange=clearView;
 events.onopen=()=>ui.status.textContent='Stream connected; รอข้อมูลบอร์ด';
 events.onerror=()=>ui.status.textContent='Stream disconnected; retrying';
+function drawHistory(channel, history){ // channel=ชื่อช่อง; history=ข้อมูล array/list จากบอร์ด
+  histories.set(channel,history);ui.historyRows.replaceChildren();
+  for(const [name, data] of histories){ // name=ชื่อช่อง; data=ประวัติช่องนั้น
+    if(!Array.isArray(data.array)||!Array.isArray(data.list))continue;
+    for(let index=0;index<data.array.length;index++){
+      const row=document.createElement('tr'); // แถวใหม่ ไม่ใช้ innerHTML จาก MQTT
+      for(const value of [name,index,data.array[index],data.list[index]]){
+        const cell=document.createElement('td');cell.textContent=String(value);row.append(cell);
+      }
+      ui.historyRows.append(row);
+    }
+  }
+}
+function collectionCommand(command){ // command=คำสั่งจากปุ่มควบคุมประวัติ
+  if(ui.mode.value!=='collections')return;
+  ui.command.value=JSON.stringify(command);ui.send.click();
+}
+ui.viewHistory.onclick=()=>collectionCommand({structure:ui.structure.value,history_index:Number(ui.historyIndex.value),request_history:true});
+ui.requestHistory.onclick=()=>collectionCommand({request_history:true});
+ui.clearHistory.onclick=()=>collectionCommand({clear_history:true,request_history:true,text:'History cleared'});
 events.onmessage=event=>{ // event=ข้อความ SSE
   const packet=JSON.parse(event.data); // topic และ payload จาก MQTT
   const prefix=`68070131/${ui.mode.value}/${ui.sensor.value}/`; // เป้าหมายที่เลือก
@@ -23,6 +50,13 @@ events.onmessage=event=>{ // event=ข้อความ SSE
   let shown; try{shown=JSON.stringify(JSON.parse(packet.payload),null,2);}catch{shown=packet.payload;} // shown=ข้อความปลอดภัย
   if(packet.topic.endsWith('/ack')) ui.ack.textContent=shown;
   else {
+    if(ui.mode.value==='collections'){
+      try{const data=JSON.parse(packet.payload);
+        if(data.history)drawHistory(data.channel,data.history);
+        if(data.primary)drawHistory(ui.sensor.value,data.primary);
+        if(data.humidity)drawHistory('humidity',data.humidity);
+      }catch{}
+    }
     if(ui.sensor.value==='ButtonEvents'){
       try{ const data=JSON.parse(packet.payload); ui.buttonState.textContent=`${data.pressed ? '🟢 กำลังกด' : '⚪ ปล่อยปุ่ม'} | จำนวนกด ${data.press_count} | ${data.event}`; }catch{}
     }

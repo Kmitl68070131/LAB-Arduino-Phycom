@@ -5,7 +5,7 @@ const mqtt = require('mqtt');
 const sensors = new Set(['TMP36','MCP9700','LM35','TTC05103','NTC','Potentiometer','LDR','Ultrasonic','PIR','ButtonEvents','Button','Keypad','DHT11','DHT22']); // อุปกรณ์ที่อนุญาต
 const clients = new Set(); // SSE responses ที่ยังเปิด
 const broker = mqtt.connect(process.env.MQTT_URL || 'mqtt://phycom.it.kmitl.ac.th:1883'); // broker connection
-broker.on('connect', () => broker.subscribe(['68070131/mqtt/+/telemetry','68070131/mqtt/+/ack','68070131/stats/+/telemetry','68070131/stats/+/ack']));
+broker.on('connect', () => broker.subscribe(['68070131/mqtt/+/telemetry','68070131/mqtt/+/ack','68070131/stats/+/telemetry','68070131/stats/+/ack','68070131/collections/+/telemetry','68070131/collections/+/ack','68070131/collections/+/history']));
 broker.on('error', error => console.error('MQTT:', error.message)); // error=สาเหตุเชื่อมต่อล้มเหลว
 broker.on('message', (topic, payload) => { // topic=หัวข้อ; payload=MQTT buffer
   const packet = JSON.stringify({topic, payload:payload.toString()}); // SSE event
@@ -27,7 +27,7 @@ const server = http.createServer((request, response) => { // request=HTTP ขา
     request.on('end', () => {
       try {
         const {mode, sensor, command} = JSON.parse(body); // โหมด, อุปกรณ์, JSON คำสั่ง
-        if (!['mqtt','stats'].includes(mode) || !sensors.has(sensor) || !command || Array.isArray(command) || typeof command !== 'object') throw Error('Invalid target/command');
+        if (!['mqtt','stats','collections'].includes(mode) || !sensors.has(sensor) || !command || Array.isArray(command) || typeof command !== 'object') throw Error('Invalid target/command');
         const encoded = JSON.stringify(command); // JSON ที่ส่งไปบอร์ด
         if (Buffer.byteLength(encoded) > 512) throw Error('Command >512 bytes');
         if (!broker.connected) { response.writeHead(503); return response.end('Broker offline'); }
