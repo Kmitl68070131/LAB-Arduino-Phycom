@@ -9,6 +9,12 @@
 
 <a id="menu"></a>
 
+## 🌡️ MCP9700AE — LCD + MQTT และเว็บค้นหาโจทย์
+
+[เปิดโค้ดและวิธีต่อสาย](test/14_mcp9700ae/README.md) · [เปิดเว็บค้นหาโจทย์](https://kmitl68070131.github.io/LAB-Arduino-Phycom/ที่อาจจะออกมั้ง/web/)
+
+เซนเซอร์ MCP9700AE ต่อ VOUT → A0, LCD I2C SDA/SCL, รับ–ส่ง MQTT ผ่าน `68070131/test/mcp9700ae/` พร้อมคอมเมนต์สูตรและจุดแก้ Topic
+
 ## 🛠️ ค้นหา Error และวิธีแก้ไข
 
 [🌐 เปิดเว็บแก้ Error](https://kmitl68070131.github.io/LAB-Arduino-Phycom/แก้ข้อผิดพลาด/) · [📁 โฟลเดอร์แก้ข้อผิดพลาด](แก้ข้อผิดพลาด/) · [🔎 I2C Scanner](แก้ข้อผิดพลาด/I2C_Scanner/I2C_Scanner.ino)

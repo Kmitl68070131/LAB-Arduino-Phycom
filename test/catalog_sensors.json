@@ -1,0 +1,182 @@
+[
+  {
+    "number": 1,
+    "slug": "ultrasonic",
+    "name": "Ultrasonic HC-SR04",
+    "group": "sensor",
+    "unit": "cm",
+    "wiring": [
+      "VCC → 5V, GND → GND",
+      "TRIG → D2, ECHO → D3"
+    ],
+    "expected": "วัตถุห่าง ~20 cm แสดงระยะใกล้ 20 cm และค่าเปลี่ยนเมื่อขยับ",
+    "code": "test/01_ultrasonic/01_ultrasonic.ino",
+    "topic": "68070131/test/ultrasonic/data"
+  },
+  {
+    "number": 2,
+    "slug": "tmp36",
+    "name": "TMP36 (Celsius)",
+    "group": "sensor",
+    "unit": "C",
+    "wiring": [
+      "Vs → 5V, Vout → A3, GND → GND",
+      "ตรวจ pinout ตามแพ็กเกจและ Datasheet จริงก่อนจ่ายไฟ"
+    ],
+    "expected": "อุณหภูมิห้องควรอยู่ในช่วงที่สมเหตุสมผล จับเซนเซอร์ระวังความร้อนแล้วค่าเปลี่ยน",
+    "code": "test/02_tmp36/02_tmp36.ino",
+    "topic": "68070131/test/tmp36/data"
+  },
+  {
+    "number": 3,
+    "slug": "lm35",
+    "name": "LM35 (Celsius)",
+    "group": "sensor",
+    "unit": "C",
+    "wiring": [
+      "Vs → 5V, Vout → A0, GND → GND ตรวจ pinout ตามรุ่น"
+    ],
+    "expected": "ค่าใกล้อุณหภูมิห้อง โดยไม่ติดลบหลายสิบองศาจากสูตร TMP36",
+    "code": "test/03_lm35/03_lm35.ino",
+    "topic": "68070131/test/lm35/data"
+  },
+  {
+    "number": 4,
+    "slug": "mcp9700",
+    "name": "MCP9700 (Celsius)",
+    "group": "sensor",
+    "unit": "C",
+    "wiring": [
+      "VDD → 5V, VOUT → A0, GND → GND ตรวจ Datasheet รุ่นจริง"
+    ],
+    "expected": "ค่าใกล้อุณหภูมิห้องเมื่อแรงดันอ้างอิงตรง",
+    "code": "test/04_mcp9700/04_mcp9700.ino",
+    "topic": "68070131/test/mcp9700/data"
+  },
+  {
+    "number": 5,
+    "slug": "ntc",
+    "name": "NTC 10k B3950",
+    "group": "sensor",
+    "unit": "C",
+    "wiring": [
+      "5V → NTC 10k → A0 → R 10k → GND",
+      "R25=10kΩ, Beta 3950 เป็นค่าเริ่มต้น ต้องตรวจรุ่นจริง"
+    ],
+    "expected": "อุณหภูมิค่อย ๆ ลดหรือเพิ่มเมื่อเปลี่ยนอุณหภูมิที่ NTC",
+    "code": "test/05_ntc/05_ntc.ino",
+    "topic": "68070131/test/ntc/data"
+  },
+  {
+    "number": 6,
+    "slug": "ttc05103",
+    "name": "TTC05103 (Thermistor)",
+    "group": "sensor",
+    "unit": "C",
+    "wiring": [
+      "5V → R 330Ω → A0 → TTC05103 → GND",
+      "ตัวอย่าง R25=10kΩ, Beta 4050 ต้องเทียบ Datasheet ชิ้นจริง"
+    ],
+    "expected": "ค่าอุณหภูมิสมเหตุสมผล ไม่เป็น NaN/INF; ตรวจ R และ Beta หากคลาดเคลื่อน",
+    "code": "test/06_ttc05103/06_ttc05103.ino",
+    "topic": "68070131/test/ttc05103/data"
+  },
+  {
+    "number": 7,
+    "slug": "dht11",
+    "name": "DHT11 Temp + Humidity",
+    "group": "sensor",
+    "unit": "C,%RH",
+    "wiring": [
+      "VCC → 5V, GND → GND, DATA → D2",
+      "โมดูลเปล่าต้องมี R pull-up DATA→VCC ประมาณ 10kΩ; โมดูลสำเร็จอาจมีอยู่แล้ว"
+    ],
+    "expected": "อุณหภูมิ/ความชื้นเปลี่ยนตามสภาพจริง โดยส่ง `อุณหภูมิ,ความชื้น` เช่น 29.0,62.0",
+    "code": "test/07_dht11/07_dht11.ino",
+    "topic": "68070131/test/dht11/data"
+  },
+  {
+    "number": 8,
+    "slug": "dht22",
+    "name": "DHT22 Temp + Humidity",
+    "group": "sensor",
+    "unit": "C,%RH",
+    "wiring": [
+      "VCC → 5V, GND → GND, DATA → D2",
+      "DHT22 แบบตัวเปล่ามักต้อง R pull-up 4.7–10kΩ จาก DATA ถึง VCC"
+    ],
+    "expected": "ค่า T และ RH% เปลี่ยนเมื่ออุณหภูมิหรือความชื้นเปลี่ยน",
+    "code": "test/08_dht22/08_dht22.ino",
+    "topic": "68070131/test/dht22/data"
+  },
+  {
+    "number": 9,
+    "slug": "ldr",
+    "name": "LDR Photoresistor",
+    "group": "sensor",
+    "unit": "adc0-1023",
+    "wiring": [
+      "5V → LDR → A0 → R10kΩ → GND",
+      "ในวงจรนี้แสงมากให้ค่า ADC สูงขึ้น"
+    ],
+    "expected": "เอามือบัง LDR ค่า ADC ลดลง",
+    "code": "test/09_ldr/09_ldr.ino",
+    "topic": "68070131/test/ldr/data"
+  },
+  {
+    "number": 10,
+    "slug": "pir",
+    "name": "PIR HC-SR501",
+    "group": "sensor",
+    "unit": "state",
+    "wiring": [
+      "VCC → 5V, GND → GND, OUT → D2",
+      "ตรวจแรงดัน OUT ตามบอร์ด PIR และรอ Warm-up"
+    ],
+    "expected": "ช่วงเริ่มต้น WARMUP แล้วเมื่อขยับมือใกล้เซนเซอร์แสดง MOTION",
+    "code": "test/10_pir/10_pir.ino",
+    "topic": "68070131/test/pir/data"
+  },
+  {
+    "number": 11,
+    "slug": "potentiometer",
+    "name": "Potentiometer 10k",
+    "group": "sensor",
+    "unit": "adc0-1023",
+    "wiring": [
+      "ขานอกสองข้าง → 5V และ GND",
+      "ขากลาง (wiper) → A0"
+    ],
+    "expected": "หมุนจนสุดได้ค่าใกล้ 0–1023 และตรงกลางใกล้ 512",
+    "code": "test/11_potentiometer/11_potentiometer.ino",
+    "topic": "68070131/test/potentiometer/data"
+  },
+  {
+    "number": 12,
+    "slug": "switch_pullup",
+    "name": "Push Button INPUT_PULLUP",
+    "group": "sensor",
+    "unit": "state",
+    "wiring": [
+      "D2 → สวิตช์ NO → GND",
+      "ไม่ต้องใช้ R ภายนอก; กด = LOW, ปล่อย = HIGH"
+    ],
+    "expected": "กดปุ่มแสดง PRESSED แล้วปล่อยแสดง RELEASED",
+    "code": "test/12_switch_pullup/12_switch_pullup.ino",
+    "topic": "68070131/test/switch_pullup/data"
+  },
+  {
+    "number": 13,
+    "slug": "switch_pulldown",
+    "name": "Push Button External PULLDOWN",
+    "group": "sensor",
+    "unit": "state",
+    "wiring": [
+      "5V → สวิตช์ NO → D2",
+      "D2 → R10kΩ → GND; กด = HIGH, ปล่อย = LOW"
+    ],
+    "expected": "ปล่อยปุ่มอ่าน LOW และกดอ่าน HIGH",
+    "code": "test/13_switch_pulldown/13_switch_pulldown.ino",
+    "topic": "68070131/test/switch_pulldown/data"
+  }
+]

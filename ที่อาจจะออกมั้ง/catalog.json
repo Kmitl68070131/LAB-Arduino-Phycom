@@ -316,5 +316,23 @@
     "subscribe": "68070131/guess/18/set",
     "ack": "68070131/guess/18/ack",
     "example": "LIMIT:35"
+  },
+  {
+    "id": 19,
+    "title": "Test 19 — MCP9700AE อุณหภูมิ + LCD I2C + MQTT Both",
+    "category": "PRACTICE",
+    "devices": [
+      "MCP9700AE",
+      "LCD",
+      "MQTT"
+    ],
+    "description": "เซนเซอร์ MCP9700AE ต่อ VOUT A0 แสดง Celsius บน LCD และส่ง JSON ขึ้นเว็บ พร้อมรับ PING, READ, LIMIT:30, LCD:HELLO",
+    "code": "test/14_mcp9700ae/MCP9700AE/MCP9700AE.ino",
+    "guide": "test/14_mcp9700ae/README.md",
+    "diagram": "test/14_mcp9700ae/diagram.svg",
+    "publish": "68070131/test/mcp9700ae/data",
+    "subscribe": "68070131/test/mcp9700ae/set",
+    "ack": "68070131/test/mcp9700ae/status",
+    "example": "PING"
   }
 ]
