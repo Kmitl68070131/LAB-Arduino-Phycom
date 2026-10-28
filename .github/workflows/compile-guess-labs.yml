@@ -1,0 +1,38 @@
+name: Compile โจทย์คาดการณ์ Arduino UNO R4 WiFi
+on:
+  push:
+    paths:
+      - 'ที่อาจจะออกมั้ง/**'
+      - '.github/workflows/compile-guess-labs.yml'
+  pull_request:
+    paths:
+      - 'ที่อาจจะออกมั้ง/**'
+      - '.github/workflows/compile-guess-labs.yml'
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-arduino-cli@v2
+      - name: ติดตั้ง Core และ Libraries
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:renesas_uno
+          arduino-cli lib install "MQTT"
+          arduino-cli lib install "LiquidCrystal I2C"
+      - name: Compile ทุก Sketch
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=0
+          while IFS= read -r -d '' file; do
+            arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi "$(dirname "$file")"
+            count=$((count+1))
+          done < <(find 'ที่อาจจะออกมั้ง' -name '*.ino' -type f -print0 | sort -z)
+          echo "Checked $count sketches"
+          test "$count" -eq 18
+      - name: ตรวจเว็บและรายการโจทย์
+        run: |
+          cd 'ที่อาจจะออกมั้ง/web'
+          npm test

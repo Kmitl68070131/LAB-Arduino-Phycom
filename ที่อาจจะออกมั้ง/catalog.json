@@ -1,0 +1,320 @@
+[
+  {
+    "id": 1,
+    "title": "Mock 01 — TMP36 ส่งอุณหภูมิขึ้นเว็บ",
+    "category": "MOCK",
+    "devices": [
+      "TMP36",
+      "LCD"
+    ],
+    "description": "26.5°C → Publish ข้อความ 26.5",
+    "code": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/01_Mock_TMP36/Mock_TMP36.ino",
+    "guide": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/01_Mock_TMP36/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/01.svg",
+    "publish": "68070131/temp",
+    "subscribe": "68070131/guess/01/set",
+    "ack": "68070131/guess/01/ack",
+    "example": "LIMIT:30"
+  },
+  {
+    "id": 2,
+    "title": "Mock 02 — Potentiometer ส่ง Analog 0–1023",
+    "category": "MOCK",
+    "devices": [
+      "Potentiometer",
+      "LCD"
+    ],
+    "description": "หมุนปุ่มได้ค่า 720 → Publish 720",
+    "code": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/02_Mock_Potentiometer/Mock_Potentiometer.ino",
+    "guide": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/02_Mock_Potentiometer/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/02.svg",
+    "publish": "68070131/light",
+    "subscribe": "68070131/guess/02/set",
+    "ack": "68070131/guess/02/ack",
+    "example": "PING"
+  },
+  {
+    "id": 3,
+    "title": "Mock 03 — Ultrasonic ตรวจอาหาร On/Off",
+    "category": "MOCK",
+    "devices": [
+      "Ultrasonic",
+      "LCD",
+      "LED"
+    ],
+    "description": "ระยะ 15 cm → On, 30 cm → Off",
+    "code": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/03_Mock_Food/Mock_Food.ino",
+    "guide": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/03_Mock_Food/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/03.svg",
+    "publish": "68070131/food",
+    "subscribe": "68070131/guess/03/set",
+    "ack": "68070131/guess/03/ack",
+    "example": "LIMIT:20"
+  },
+  {
+    "id": 4,
+    "title": "Mock 04 — Ultrasonic + Button ควบคุมประตู",
+    "category": "MOCK",
+    "devices": [
+      "Ultrasonic",
+      "Switch",
+      "LCD",
+      "LED"
+    ],
+    "description": "ระยะ 25 cm และกดปุ่ม → On; กรณีอื่น Off",
+    "code": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/04_Mock_Door/Mock_Door.ino",
+    "guide": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/04_Mock_Door/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/04.svg",
+    "publish": "68070131/door",
+    "subscribe": "68070131/guess/04/set",
+    "ack": "68070131/guess/04/ack",
+    "example": "LIMIT:20"
+  },
+  {
+    "id": 5,
+    "title": "Mock 05 — รับอุณหภูมิแล้วเปลี่ยนสี RGB",
+    "category": "MOCK",
+    "devices": [
+      "RGB",
+      "LCD"
+    ],
+    "description": "19→เขียว, 31→น้ำเงิน, 46→แดง, 55→ดับ",
+    "code": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/05_Mock_Venus_RGB/Mock_Venus_RGB.ino",
+    "guide": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/05_Mock_Venus_RGB/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/05.svg",
+    "publish": "68070131/guess/05/data",
+    "subscribe": "68070131/venus",
+    "ack": "68070131/guess/05/ack",
+    "example": "31"
+  },
+  {
+    "id": 6,
+    "title": "Mock 06 — รับเลข 0–9 แสดง 7-Segment",
+    "category": "MOCK",
+    "devices": [
+      "7-Segment",
+      "LCD"
+    ],
+    "description": "เว็บส่ง 7 → 7-Segment และ LCD แสดงเลข 7",
+    "code": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/06_Mock_7Segment/Mock_7Segment.ino",
+    "guide": "ที่อาจจะออกมั้ง/01_MOCK_6ข้อ/06_Mock_7Segment/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/06.svg",
+    "publish": "68070131/guess/06/data",
+    "subscribe": "68070131/prob_stat",
+    "ack": "68070131/guess/06/ack",
+    "example": "7"
+  },
+  {
+    "id": 7,
+    "title": "TMP36 + LED เตือนอุณหภูมิสูง ตั้งเกณฑ์ผ่านเว็บ",
+    "category": "PRACTICE",
+    "devices": [
+      "TMP36",
+      "LED",
+      "LCD"
+    ],
+    "description": "ส่ง LIMIT:30 → ตั้งเกณฑ์ 30°C, อุณหภูมิ ≥ 30 LED ติด",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/07_TMP36_Alert/TMP36_Alert.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/07_TMP36_Alert/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/07.svg",
+    "publish": "68070131/guess/07/data",
+    "subscribe": "68070131/guess/07/set",
+    "ack": "68070131/guess/07/ack",
+    "example": "LIMIT:30"
+  },
+  {
+    "id": 8,
+    "title": "Ultrasonic + LED เตือนใกล้ ตั้งระยะผ่านเว็บ",
+    "category": "PRACTICE",
+    "devices": [
+      "Ultrasonic",
+      "LED",
+      "LCD"
+    ],
+    "description": "ส่ง LIMIT:25 → วัตถุ 15 cm LED ติด",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/08_Ultrasonic_Alert/Ultrasonic_Alert.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/08_Ultrasonic_Alert/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/08.svg",
+    "publish": "68070131/guess/08/data",
+    "subscribe": "68070131/guess/08/set",
+    "ack": "68070131/guess/08/ack",
+    "example": "LIMIT:25"
+  },
+  {
+    "id": 9,
+    "title": "Keypad 4×4 ส่งปุ่มขึ้นเว็บและแสดง LCD",
+    "category": "PRACTICE",
+    "devices": [
+      "Keypad",
+      "LCD"
+    ],
+    "description": "กด A → ส่ง A บน MQTT และ LCD ขึ้น KEY A",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/09_Keypad_LCD/Keypad_LCD.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/09_Keypad_LCD/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/09.svg",
+    "publish": "68070131/guess/09/data",
+    "subscribe": "68070131/guess/09/set",
+    "ack": "68070131/guess/09/ack",
+    "example": "LCD:HELLO"
+  },
+  {
+    "id": 10,
+    "title": "Keypad กดเลขแสดง 7-Segment พร้อมส่งเว็บ",
+    "category": "PRACTICE",
+    "devices": [
+      "Keypad",
+      "7-Segment",
+      "LCD"
+    ],
+    "description": "กดเลข 7 → แสดง 7 บน 7-Segment และส่ง 7 ไปเว็บ",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/10_Keypad_7Segment/Keypad_7Segment.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/10_Keypad_7Segment/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/10.svg",
+    "publish": "68070131/guess/10/data",
+    "subscribe": "68070131/guess/10/set",
+    "ack": "68070131/guess/10/ack",
+    "example": "5"
+  },
+  {
+    "id": 11,
+    "title": "Potentiometer + LED PWM + เว็บตั้งค่า",
+    "category": "PRACTICE",
+    "devices": [
+      "Potentiometer",
+      "LED",
+      "LCD"
+    ],
+    "description": "ตั้ง PWM:200 → LED D9 สว่าง ~78%",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/11_Potentiometer_PWM/Potentiometer_PWM.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/11_Potentiometer_PWM/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/11.svg",
+    "publish": "68070131/guess/11/data",
+    "subscribe": "68070131/guess/11/set",
+    "ack": "68070131/guess/11/ack",
+    "example": "PWM:200"
+  },
+  {
+    "id": 12,
+    "title": "RGB รับคำสั่งสี RED GREEN BLUE จากเว็บ",
+    "category": "PRACTICE",
+    "devices": [
+      "RGB",
+      "LCD"
+    ],
+    "description": "ส่ง RED → D9 HIGH และ D10/D11 LOW",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/12_RGB_Web/RGB_Web.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/12_RGB_Web/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/12.svg",
+    "publish": "68070131/guess/12/data",
+    "subscribe": "68070131/guess/12/set",
+    "ack": "68070131/guess/12/ack",
+    "example": "RED"
+  },
+  {
+    "id": 13,
+    "title": "LDR แสงมืดเปิด LED และรายงาน ADC",
+    "category": "PRACTICE",
+    "devices": [
+      "LDR",
+      "LED",
+      "LCD"
+    ],
+    "description": "ADC < 500 → LED ติด",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/13_LDR_AutoLED/LDR_AutoLED.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/13_LDR_AutoLED/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/13.svg",
+    "publish": "68070131/guess/13/data",
+    "subscribe": "68070131/guess/13/set",
+    "ack": "68070131/guess/13/ack",
+    "example": "LIMIT:500"
+  },
+  {
+    "id": 14,
+    "title": "Switch INPUT_PULLUP นับจำนวนกดด้วย millis",
+    "category": "PRACTICE",
+    "devices": [
+      "Switch",
+      "LED",
+      "LCD"
+    ],
+    "description": "กด 3 ครั้ง count=3; เว็บส่ง RESET count=0",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/14_Switch_Debounce/Switch_Debounce.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/14_Switch_Debounce/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/14.svg",
+    "publish": "68070131/guess/14/data",
+    "subscribe": "68070131/guess/14/set",
+    "ack": "68070131/guess/14/ack",
+    "example": "RESET"
+  },
+  {
+    "id": 15,
+    "title": "Ultrasonic 2 ตัวตรวจที่นั่งและแสดง LCD",
+    "category": "PRACTICE",
+    "devices": [
+      "Ultrasonic",
+      "LCD"
+    ],
+    "description": "S1=40 cm/S2=120 cm → BUSY/FREE",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/15_Dual_Ultrasonic/Dual_Ultrasonic.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/15_Dual_Ultrasonic/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/15.svg",
+    "publish": "68070131/guess/15/data",
+    "subscribe": "68070131/guess/15/set",
+    "ack": "68070131/guess/15/ack",
+    "example": "LIMIT:80"
+  },
+  {
+    "id": 16,
+    "title": "Keypad ป้อนรหัส 1234# และแจ้งผลเว็บ",
+    "category": "PRACTICE",
+    "devices": [
+      "Keypad",
+      "LED",
+      "LCD"
+    ],
+    "description": "กด 1234# → ACCESS_OK; รหัสผิด → ACCESS_DENIED",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/16_Keypad_Password/Keypad_Password.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/16_Keypad_Password/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/16.svg",
+    "publish": "68070131/guess/16/data",
+    "subscribe": "68070131/guess/16/set",
+    "ack": "68070131/guess/16/ack",
+    "example": "RESET"
+  },
+  {
+    "id": 17,
+    "title": "PIR ตรวจจับการเคลื่อนไหวส่งสถานะ",
+    "category": "PRACTICE",
+    "devices": [
+      "PIR",
+      "LED",
+      "LCD"
+    ],
+    "description": "PIR OUT HIGH → MOTION และ LED D13 ติด",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/17_PIR_Motion/PIR_Motion.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/17_PIR_Motion/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/17.svg",
+    "publish": "68070131/guess/17/data",
+    "subscribe": "68070131/guess/17/set",
+    "ack": "68070131/guess/17/ack",
+    "example": "PING"
+  },
+  {
+    "id": 18,
+    "title": "NTC Thermistor คำนวณอุณหภูมิและส่งเว็บ",
+    "category": "PRACTICE",
+    "devices": [
+      "NTC",
+      "LCD",
+      "LED"
+    ],
+    "description": "วงจร NTC 10k + R10k คำนวณอุณหภูมิ °C",
+    "code": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/18_NTC_Thermistor/NTC_Thermistor.ino",
+    "guide": "ที่อาจจะออกมั้ง/02_โจทย์ประยุกต์_12ข้อ/18_NTC_Thermistor/README.md",
+    "diagram": "ที่อาจจะออกมั้ง/diagrams/18.svg",
+    "publish": "68070131/guess/18/data",
+    "subscribe": "68070131/guess/18/set",
+    "ack": "68070131/guess/18/ack",
+    "example": "LIMIT:35"
+  }
+]
