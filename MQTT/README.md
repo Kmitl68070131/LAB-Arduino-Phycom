@@ -1,6 +1,6 @@
-# 📡 MQTT — UNO R4 WiFi + JSON + LCD
+# 📡 รับส่งข้อมูลกับเว็บผ่าน MQTT — พร้อม Serial และจอ LCD
 
-[หน้าแรก](../README.md) · [อีกส่วน](../กันเหลี่ยม/README.md)
+[หน้าแรก](../README.md) · [ไปยังคู่มือสถิติเซนเซอร์](../กันเหลี่ยม/README.md)
 
 ทุกตัวอย่างเชื่อม Wi-Fi, publish JSON, subscribe คำสั่งจากเว็บ, แสดง Serial/LCD และ reconnect อัตโนมัติ อัปโหลด **ทีละ sketch** ไม่ต่อทุกชุดพร้อมกัน
 
@@ -40,20 +40,20 @@
 
 | อุปกรณ์ | หน่วย | ต่อสายเซนเซอร์ (ทุกชุด GND ร่วม) |
 |---|---|---|
-| [TMP36](TMP36/README.md) | C | Vout → A0; Vs → 5V; GND → GND (ตรวจ pinout รุ่นจริง) |
-| [MCP9700](MCP9700/README.md) | C | Vout → A0; VDD → 5V; GND → GND (ตรวจ pinout รุ่นจริง) |
-| [LM35](LM35/README.md) | C | Vout → A0; Vs → 5V; GND → GND (ตรวจ pinout รุ่นจริง) |
-| [TTC05103](TTC05103/README.md) | C | 5V → R330Ω → A0 → TTC05103 → GND; B4050/R25=10k ตามไฟล์เดิม |
-| [NTC](NTC/README.md) | C | 5V → NTC 10k B3950 → A0 → R 10k → GND |
-| [Potentiometer](Potentiometer/README.md) | ADC | ขานอก → 5V/GND; ขากลาง → A0 |
-| [LDR](LDR/README.md) | ADC | 5V → LDR → A0 → R 10k → GND; ค่าสูงเมื่อสว่าง ไม่ใช่ lux |
-| [Ultrasonic](Ultrasonic/README.md) | cm | HC-SR04 VCC → 5V; GND → GND; TRIG → D2; ECHO → D3 |
-| [PIR](PIR/README.md) | state | VCC → 5V; GND → GND; OUT → D4; รอ warm-up ตามรุ่น |
-| [🔘 ButtonEvents](ButtonEvents/README.md) | state + จำนวนกด | ปุ่ม NO 2 ขา ระหว่าง D4 และ GND; debounce 30ms ส่งขอบกด/ปล่อย |
-| [Button](Button/README.md) | state | ปุ่มระหว่าง D4 กับ GND ใช้ INPUT_PULLUP; อ่าน 1 = กด |
-| [Keypad](Keypad/README.md) | code | 4x4 R1–R4 → D9,D8,D7,D6; C1–C4 → D5,D4,D3,D2 |
-| [DHT11](DHT11/README.md) | C | VCC → 5V; GND → GND; DATA → D2; pull-up 10k DATA ไป VCC |
-| [DHT22](DHT22/README.md) | C | VCC → 5V; GND → GND; DATA → D2; pull-up 10k DATA ไป VCC |
+| [เซนเซอร์วัดอุณหภูมิ TMP36](TMP36/README.md) | C | Vout → A0; Vs → 5V; GND → GND (ตรวจ pinout รุ่นจริง) |
+| [เซนเซอร์วัดอุณหภูมิ MCP9700](MCP9700/README.md) | C | Vout → A0; VDD → 5V; GND → GND (ตรวจ pinout รุ่นจริง) |
+| [เซนเซอร์วัดอุณหภูมิ LM35](LM35/README.md) | C | Vout → A0; Vs → 5V; GND → GND (ตรวจ pinout รุ่นจริง) |
+| [เทอร์มิสเตอร์ TTC05103 วงจรตัวต้านทาน 330 โอห์ม](TTC05103/README.md) | C | 5V → R330Ω → A0 → TTC05103 → GND; B4050/R25=10k ตามไฟล์เดิม |
+| [เทอร์มิสเตอร์ NTC วงจรตัวต้านทาน 10 กิโลโอห์ม](NTC/README.md) | C | 5V → NTC 10k B3950 → A0 → R 10k → GND |
+| [ตัวต้านทานปรับค่าได้ (ปุ่มหมุน)](Potentiometer/README.md) | ADC | ขานอก → 5V/GND; ขากลาง → A0 |
+| [เซนเซอร์วัดระดับแสง LDR](LDR/README.md) | ADC | 5V → LDR → A0 → R 10k → GND; ค่าสูงเมื่อสว่าง ไม่ใช่ lux |
+| [เซนเซอร์วัดระยะอัลตราโซนิก](Ultrasonic/README.md) | cm | HC-SR04 VCC → 5V; GND → GND; TRIG → D2; ECHO → D3 |
+| [เซนเซอร์ตรวจจับการเคลื่อนไหว PIR](PIR/README.md) | state | VCC → 5V; GND → GND; OUT → D4; รอ warm-up ตามรุ่น |
+| [ปุ่มกด 2 ขา ส่งกด–ปล่อยและจำนวนครั้งขึ้นเว็บ](ButtonEvents/README.md) | state + จำนวนกด | ปุ่ม NO 2 ขา ระหว่าง D4 และ GND; debounce 30ms ส่งขอบกด/ปล่อย |
+| [ปุ่มกด 2 ขา อ่านสถานะเป็นรอบ](Button/README.md) | state | ปุ่มระหว่าง D4 กับ GND ใช้ INPUT_PULLUP; อ่าน 1 = กด |
+| [แป้นกดตัวเลข 4×4](Keypad/README.md) | code | 4x4 R1–R4 → D9,D8,D7,D6; C1–C4 → D5,D4,D3,D2 |
+| [เซนเซอร์วัดอุณหภูมิและความชื้น DHT11](DHT11/README.md) | C | VCC → 5V; GND → GND; DATA → D2; pull-up 10k DATA ไป VCC |
+| [เซนเซอร์วัดอุณหภูมิและความชื้น DHT22](DHT22/README.md) | C | VCC → 5V; GND → GND; DATA → D2; pull-up 10k DATA ไป VCC |
 
 ## เตรียม Arduino
 1. Arduino IDE → Boards Manager ติดตั้ง **Arduino UNO R4 Boards** เลือก **UNO R4 WiFi** และ Port

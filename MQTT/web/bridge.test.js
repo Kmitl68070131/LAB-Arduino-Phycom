@@ -8,7 +8,7 @@ test('serves UI and rejects malformed/offline commands',async()=>{
   await new Promise((resolve,reject)=>{child.stdout.once('data',resolve);child.once('error',reject);setTimeout(()=>reject(Error('Startup timeout')),5000).unref();});
   const url='http://127.0.0.1:32187';
   const html=await (await fetch(url)).text();
-  assert.match(html,/MQTT JSON/);assert.match(html,/ButtonEvents/);assert.match(html,/buttonState/);
+  assert.match(html,/รับส่งข้อมูลกับเว็บ/);assert.match(html,/ปุ่มกด 2 ขา ส่งกด–ปล่อย/);assert.match(html,/ButtonEvents/);assert.match(html,/buttonState/);
   const post=body=>fetch(url+'/command',{method:'POST',body});
   assert.equal((await post('{broken')).status,400);
   assert.equal((await post(JSON.stringify({mode:'stats',sensor:'unknown',command:{}}))).status,400);

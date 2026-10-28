@@ -3,13 +3,13 @@
 | เลือกดู | รายละเอียด |
 |---|---|
 | [🔘 ปุ่มกด 2 ขาขึ้นเว็บ](MQTT/ButtonEvents/README.md) | ต่อ D4–GND, กด/ปล่อย, จำนวนครั้ง, JSON, Serial และ LCD |
-| [📡 เมนู MQTT](MQTT/README.md) | เลือกตัวอย่างและวิธีเริ่มใช้งาน |
-| [📚 Library + คู่มือ MQTT](MQTT/LIBRARIES.md) | วิธีติดตั้ง, Broker, Topic, JSON, API, QoS, retain, will และแก้ปัญหา |
+| [📡 เมนูรับส่งข้อมูลกับเว็บผ่าน MQTT](MQTT/README.md) | เลือกตัวอย่างและวิธีเริ่มใช้งาน |
+| [📚 ติดตั้งไลบรารีและคู่มือใช้งาน MQTT](MQTT/LIBRARIES.md) | วิธีติดตั้ง, Broker, Topic, JSON, API, QoS, retain, will และแก้ปัญหา |
 
 ## เพิ่มใหม่: MQTT JSON และสถิติเซนเซอร์
 
-- [MQTT — รับ/ส่ง JSON ผ่านเว็บ พร้อม Serial และ LCD](MQTT/README.md)
-- [กันเหลี่ยม — min / max / avg / median / std แยกทุกเซนเซอร์](กันเหลี่ยม/README.md)
+- [📡 รับส่งข้อมูล JSON กับเว็บ พร้อม Serial และจอ LCD](MQTT/README.md)
+- [📊 กันเหลี่ยม — ค่าต่ำสุด สูงสุด เฉลี่ย มัธยฐาน และส่วนเบี่ยงเบนมาตรฐาน](กันเหลี่ยม/README.md)
 
 มีตัวอย่างแยก 13 ชุดอุปกรณ์/วงจรสำหรับ UNO R4 WiFi พร้อมวิธีต่อวงจร คอมเมนต์ และ Node.js web bridge ที่ `MQTT/web` ดูขั้นตอนใน README ของแต่ละส่วน
 
